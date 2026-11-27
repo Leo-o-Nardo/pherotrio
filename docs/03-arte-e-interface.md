@@ -37,6 +37,10 @@
 
 Cinco regras. Elas valem para qualquer arte nova.
 
+> **Revisão (2026-11-26, D100):** o objetivo é um jogo **bonito e bem feito**. O minimalismo é referência, não regra.
+> - As regras 1 e 5 viram guias: cedem quando um detalhe deixa o jogo mais bonito sem atrapalhar a leitura.
+> - As regras 2, 3 e 4 continuam firmes, porque protegem a leitura.
+
 > **Revisão (2026-11-25, D61):**
 > - o usuário testou o protótipo visual com formigas de patas e mundo ilustrado e **não aprovou**;
 > - o jogo volta ao estilo **minimalista**, e as formigas continuam sem patas (D34);
@@ -60,8 +64,9 @@ Contraste calculado pela fórmula da WCAG 2.x, em 2026-11-25, contra os dois fun
 
 | Nome | Hex | Uso |
 |---|---|---|
-| Solo | `#15110E` | Terra não escavada, fundo geral |
-| Escavado | `#2B231D` | Interior de túneis e câmaras |
+| Solo | `#8E765C` → `#695441` | Terra não escavada: camadas claras e quentes que escurecem pouco com a profundidade (D110) |
+| Fundo da interface | `#15110E` | Fundo atrás de painéis e menus |
+| Túnel / escavado | `#30261F` | Interior de túneis e câmaras, agora mais escuro que o solo (D110) |
 | Painel | `#211B17` | Painéis, barras e menus |
 | Borda | `#5A4B3F` | Contorno de câmara, divisórias (decorativo, 1,8:1; nunca carrega informação) |
 | Céu | `#1C2530` | Faixa da superfície (D08) |
@@ -118,74 +123,92 @@ Teste feito em 2026-11-25 com simulação de Machado et al. (2009), severidade m
 ### 3.1 Grade, escala e níveis de detalhe (D55)
 
 - **Tela de referência:** celular em retrato, 360 × 800 dp, que é o menor caso comum de Android. Tudo é desenhado para ela e escala para cima.
-- **Mapa:** grade de células quadradas, por exemplo 15 × 30 numa fase média (D32).
-- **Zoom:** de **12 a 64 dp por célula**.
-  - Zoom inicial: 24 dp, com que os 15 de largura ocupam os 360 dp da tela.
-  - Zoom afastado no máximo: o mapa de 15 × 30 inteiro cabe na tela (180 × 360 dp).
+- **Mapa:** grade de células quadradas, cerca de 80 × 80 por arco (D94), que se abre do centro para os lados (D95).
+- **Zoom:** até **64 dp por célula**.
+  - Zoom inicial: 24 dp, com que 15 células ocupam os 360 dp da tela.
+  - **Zoom afastado no máximo: o mapa inteiro cabe na tela** (D92). Para 80 × 80, isso dá cerca de 4,5 dp por célula: um mapa esquemático para ver e escolher aonde ir.
 
 | Nível | Zoom | Formigas | Recursos | Estruturas | Túneis |
 |---|---|---|---|---|---|
 | **Perto** | 36 a 64 dp/cél | 3 círculos (D34) e o recurso carregado em cima | Forma completa | Ícone da receita, vagas, barra de progresso, números | Espessura, cor, setas de sentido, pontos de fila |
 | **Médio** | 18 a 35 dp/cél | 3 círculos simplificados, recurso como ponto da família | Forma sem contorno duplo | Ícone e anel de progresso | Espessura, cor, setas |
-| **Longe** | 12 a 17 dp/cél | Ponto de 2 dp: Texto se vazia, cor da família se carregando, vermelho se inimiga | Não aparece | Bloco na cor da categoria | Só cor de estado |
+| **Longe** | 12 a 17 dp/cél | Ponto de 2 dp: Texto se vazia, cor da família se carregando, vermelho se inimiga | Não aparece | Bloco na cor da categoria | Interior claro e pulso na borda (D91) |
+| **Visão geral** | Abaixo de 12 dp/cél, até o mapa inteiro (D92) | Não aparecem | Não aparecem | Forma cheia com borda da categoria | Linha de pelo menos 3 dp e pulso na borda mais grosso; regiões fechadas escurecidas |
 
 - **Alertas não escalam com o zoom.** O ícone de alerta tem sempre 24 dp na tela, em qualquer nível. Isso resolve o risco de "fila invisível no zoom distante" (D52).
+- **Ícones de interface sólidos (D110):** preenchidos, de cantos redondos e com recortes, em 24 dp.
 - **Transição entre níveis:** troca direta, com uma margem de 2 dp/cél para não piscar no limite. Sem animação de transição.
 
 ### 3.2 Solo, túneis e nós
 
-- **Solo:** cor Solo lisa. A rocha (que não pode ser escavada, se a fase tiver) é Borda, com hachura diagonal de 45°.
+- **Solo:** terra clara em camadas onduladas, com pedrinhas e pouco granulado; o túnel escuro se destaca sobre ela (D89, D110).
+- **Percalços (D96, visual provisório até a c2):**
+  - **rocha:** Borda com hachura diagonal de 45°;
+  - **argila dura:** manchas de Mineral escuro, pontilhadas;
+  - **areia solta:** pontilhado fino e claro;
+  - **água:** bolsão de contorno liso em verde-lodo (#41604F, ondas #5F8670), para não competir com a cor de defesa (D109);
+  - **toca de predador:** buraco escuro com anel vermelho tracejado do alcance;
+  - **fora da visão (D98):** só um "?" discreto.
 - **Túnel:**
   - **Interior:** cor Escavado.
   - **Contorno de estado:** linha central na cor de ocupação (D53), com 30% da largura.
-  - **Largura pelo nível:** proporcional à célula. No zoom inicial de 24 dp: 6, 9, 12 e 15 dp do nível 1 ao 4.
+  - **Largura pelo nível (D99):** proporcional à célula. No zoom inicial de 24 dp: 6, 8, 10 e 12 dp do nível 1 ao 4. Na tela, nunca fica mais fino que 2 dp (perto e médio), 2,5 dp (longe) ou 3 dp (visão geral).
 - **Setas de sentido:** chevrons de Texto 2 a cada 2 células. Mão dupla mostra ⇄ no meio do segmento.
-- **Fila:** pontos empilhados fora da boca do túnel, até 10 visíveis, depois "+N".
+- **Fila:** formigas paradas dentro do túnel, do lado de fora da porta, até 10 visíveis, depois "+N" (D114).
 - **Nó:** círculo Escavado com diâmetro de 1,2 vez a largura do túnel mais largo que chega nele. Com toque longo, o nó mostra os túneis ligados.
-- **Obra planejada:** contorno tracejado em Texto 2, com o custo em pt ao lado. O interior fica vazio até a escavação começar.
+- **Obra planejada:** contorno tracejado em Texto 2 (traço de 5 dp, vão de 8 dp; D109), com o custo em pt ao lado. O interior fica vazio até a escavação começar.
 
-### 3.3 Câmaras e estruturas
+### 3.3 Câmaras e estruturas (D101 a D105)
 
-- **Formato:** retângulo de cantos arredondados (raio de 25% da célula) ocupando as células da estrutura.
-- **Cor:**
-  - interior Escavado;
-  - **borda de 2 dp na cor da categoria:**
-    - produção usa a família do produto (uma câmara ácida tem borda nas cores açúcar + animal, em metades como o ácido);
-    - base (câmara real, berçário, depósito, lixeira, câmara nupcial) usa Texto 2;
-    - defesa usa a cor Defesa;
-    - ataque usa a cor Ataque.
-- **Conteúdo (zoom perto):**
-  - no centro, o **ícone do produto** (forma do recurso, 40% da menor dimensão);
-  - em cima, os **ingredientes pequenos com a quantidade em estoque**, como "▲2 ●1";
-  - embaixo, as **vagas de Cuidar**, como pips, cheios ou vazios (ex.: ●●○);
-  - um **anel de progresso** ao redor do ícone, que enche durante a receita.
-- **Ícone da câmara real:** coroa simplificada, ou seja, três triângulos.
-- **Ícone do berçário:** ovo, uma elipse vertical, com a forma da dieta escolhida dentro.
+- **Tamanho (D105):** o desenho ocupa exatamente as células da estrutura.
+  - pequena, 2 × 1: extratoras e defesa ou ataque com lugar fixo;
+  - média, 3 × 1: as 11 de produção e a lixeira;
+  - grande, 3 × 2: câmara real, berçário, depósito e câmara nupcial.
+- **Formato (D101):** cúpula com teto arredondado e chão reto, sempre na horizontal.
+  - O túnel entra pela lateral ou pelo teto, nunca pelo chão.
+  - **Encaixe (D114):** o túnel chega reto na porta, no nível do chão nas portas de lado e de cima nas de teto. A cor do túnel entra na câmara em degradê, e um batente de terra batida marca a porta: lintel e soleira nas portas de lado, dois postes na de teto. As formigas passam por cima da abertura.
+  - O teto tem uma leve variação própria por câmara, de no máximo 10% da altura.
+  - Câmaras de base são mais altas; as de defesa, mais baixas.
+- **Cor (D103):**
+  - interior na cor dos túneis (`#43362B`), com 10 a 15% da cor da família do produto. Defesa usa a cor Defesa, ataque usa a cor Ataque, e a base fica sem tinta;
+  - combinados (N2 e N3) com a tinta em metades, como o recurso (D48);
+  - **sem borda.** A borda só aparece em alerta, com o pulso dos túneis (D91): amarelo suave para atenção e vermelho suave para ataque.
+- **Conteúdo (D102):**
+  - **produção:** ingredientes empilhados no chão do lado de onde chegam, cuidadoras trabalhando no meio e produto pronto no outro canto. Um ícone pequeno do produto aparece no teto só quando a câmara está vazia;
+  - **base:** a rainha e os ovos na câmara real, as larvas no berçário, pilhas por família no depósito, as aladas na câmara nupcial e o monte de refugo na lixeira;
+  - **pilhas:** até 5 itens. Acima disso, o número aparece no zoom perto.
+  - **carregadoras:** entram pela porta, deixam o item na pilha de ingredientes (ou pegam na de produto) e saem pela mesma porta. A formiga nunca some ao entrar.
+- **Por zoom:** perto e médio mostram tudo; longe mostra as pilhas como pontos coloridos; a visão geral mostra só a forma tingida.
 - **Extratora:**
   - fica dentro do anel da fonte (D20);
   - a fonte é um círculo tracejado na cor da família;
   - o anel mostra a reserva restante como arco: um bolsão de raízes com 300 de 600 de seiva mostra meio arco.
-- **Nível 2:** a borda fica dupla.
+- **Nível 2:** o chão ganha uma faixa mais clara de piso reforçado (proposta, D103).
 
-**Estados da estrutura (sempre forma + cor):**
+**Estados da estrutura (D104, sempre forma + cor):**
 
 | Estado | Sinal |
 |---|---|
-| Produzindo | Anel de progresso enchendo |
-| Falta ingrediente | Ícone do ingrediente que falta, cinza, com um "!" pequeno, em cima da câmara |
-| Falta cuidadora | Pips vazios piscando devagar (1 Hz) |
-| Saída cheia (ninguém buscou) | Produtos empilhados fora da câmara e borda tracejada |
-| Pausada pelo jogador | Ícone ‖ no lugar do produto, interior 50% mais escuro |
-| Sob ataque | Borda vermelha piscando a 1 Hz e barra de vida aparente |
+| Produzindo | Linha fina no chão enchendo da esquerda para a direita, na cor do produto; cuidadoras trabalhando |
+| Falta ingrediente | Selo pequeno acima da câmara com a forma do ingrediente que falta, em cinza, e pulso amarelo na borda |
+| Falta cuidadora | Silhueta tracejada de formiga na vaga vazia e pulso amarelo na borda |
+| Saída cheia (ninguém buscou) | Pilha de produto no máximo e pulso amarelo na borda |
+| Pausada pelo jogador | Interior 50% mais escuro e ícone ‖ no teto |
+| Sob ataque | Pulso vermelho na borda e barra de vida acima da câmara |
+
+- **Números** (estoque, vagas, tempo) só no zoom perto. O resto fica no painel, ao tocar na câmara.
+- **Ofício no fundo (D110):** cada câmara tem cenário do próprio trabalho atrás do conteúdo, em tons apagados: fungo e fios no jardim, gotas na destilaria, tachos na câmara ácida, prateleiras na olaria, almofada e nichos na câmara real, estacas e escudos na defesa, flâmulas no posto de guerra, nichos no depósito.
 
 ### 3.4 Recursos
 
 A forma e a família de cada recurso seguem a tabela do `07` §11, com uma mudança: a família animal agora é rosa (§2.2).
 
+No zoom perto (item com 9 px ou mais na tela), cada recurso vira um **objeto ilustrado dentro da silhueta da forma**: folha com nervura, gota com brilho, favo de néctar, tijolo de barro, torrão de argila, bola de fungo, placa de quitina e assim por diante. No zoom médio volta à forma simples; no longe, ponto colorido (D110).
+
 | Contexto | Tamanho | Detalhe |
 |---|---|---|
 | Carregado por formiga (perto) | 10 dp | Forma cheia, sem contorno duplo |
-| Ícone em câmara | 40% da câmara | Forma completa |
+| Na pilha da câmara (D102) | 0,27 célula (cerca de 6,5 dp no zoom inicial e 10 dp a partir de 36 dp por célula) | Forma cheia; no zoom longe vira ponto colorido. Pode ficar pequeno no zoom médio, porque o jogador aproxima para ver (D107) |
 | Painel e árvore | 24 dp | Forma completa, contorno duplo no N3 |
 | Barra de estoque (HUD) | 16 dp | Forma completa |
 
@@ -200,7 +223,7 @@ A forma e a família de cada recurso seguem a tabela do `07` §11, com uma mudan
 
 ### 3.5 Formigas e castas
 
-Todas as castas usam três círculos: cabeça, tórax e abdômen (D34). Elas são as formigas do jogador, na cor Texto.
+Todas as castas usam três elipses com cintura: cabeça, tórax e abdômen (D34, D90), carregando o item pela boca (D109). No zoom perto ganham seis pernas finas, que mexem quando a formiga anda, e antenas finas abertas em V; no médio e no longe não têm pernas nem antenas (D113). O corpo é creme (Texto), **levemente tingido pela função**, com 25% de cor (D112): coleta (operária e cortadeira) fica creme, obra (cavadora) em barro, linha de frente (soldado e tanque) em azul, apoio (atiradora e curandeira) em verde-água, ataque (explosiva e saqueadora) em violeta e reprodução (alada e rainha) em dourado. A silhueta de cada casta é marcada (ver o catálogo visual); a tabela abaixo é a referência original.
 
 O que muda entre elas é **proporção e um detalhe**, para que se distingam pela silhueta.
 
@@ -216,7 +239,7 @@ O que muda entre elas é **proporção e um detalhe**, para que se distingam pel
 | Explosiva | P · P · G | Abdômen inchado com borda tracejada |
 | Saqueadora | P · P · P alongados | Corpo em elipses, mais baixo e comprido |
 | Alada | P · M · M | Duas asas em elipse com 40% de opacidade |
-| Rainha | M · M · muito G | Abdômen três vezes maior, imóvel |
+| Rainha | M · M · muito G | Abdômen três vezes maior; só respira e põe ovos (D115) |
 
 - **Tamanho:** no zoom inicial, a operária tem 8 dp de comprimento e o tanque 11 dp.
 - **Seleção e papel:** a formiga não mostra o papel no corpo. O papel aparece pelo que ela faz e pelo painel de operárias (§6.5).
@@ -224,7 +247,7 @@ O que muda entre elas é **proporção e um detalhe**, para que se distingam pel
 
 ### 3.6 Inimigos
 
-Inimigos são **vermelho de perigo, com contorno escuro de 1 dp**. Cada um tem uma silhueta própria, diferente de todas as castas do jogador.
+Inimigos são **vermelho de perigo, sem contorno** (D109). Cada um tem uma silhueta própria, diferente de todas as castas do jogador.
 
 | Inimigo | Silhueta | Traço (D46) |
 |---|---|---|
@@ -239,10 +262,11 @@ Inimigos são **vermelho de perigo, com contorno escuro de 1 dp**. Cada um tem u
 
 ### 3.7 Superfície
 
-- **Faixa fixa no topo do mapa**, com cerca de 3 células de altura e cor Céu.
-- **Plantas:** silhuetas verticais na cor Vegetal, com folhas em losango.
+- **Faixa fixa no topo do mapa**, com cerca de 3 células de altura e céu em degradê (D110).
+- **Chão vivo (D110):** linha ondulada com faixa de húmus, grama baixa, pedrinhas, folhas caídas, flores pequenas e morros e mato em silhueta ao fundo.
+- **Plantas:** capim, trevo, samambaia, folha larga, dente-de-leão e arbusto de folhinhas, todas com a mesma função e desenho diferente (D110, D111).
   - O tamanho da planta mostra a produção da estação (D23): no inverno fica só o caule.
-- **Olheiro:** um buraco na linha do chão, com um arco Escavado.
+- **Cortadouro:** um buraco na linha do chão, com um arco Escavado.
 - **Estação:** a cor Céu muda levemente, com no máximo 8% de diferença de luminosidade entre as estações. O nome da estação aparece sempre no topo da tela. A cor nunca é o único sinal.
 
 ## 4. Tipografia (D58)
@@ -269,11 +293,22 @@ Inimigos são **vermelho de perigo, com contorno escuro de 1 dp**. Cada um tem u
 |---|---|
 | Painel abrindo ou fechando | 200 ms, desacelerando no fim |
 | Botão pressionado | Escala 0,96 por 80 ms |
-| Formiga andando | Movimento linear, sem animação de pernas (não tem pernas) |
-| Estrutura produzindo | Só o anel de progresso se mexe; nada pulsa |
+| Formiga andando | Movimento linear. No zoom perto as pernas mexem em passo de tripé; paradas quando ela trabalha numa câmara (D113) |
+| Estrutura produzindo | Nada pulsa. Ao terminar um item, ele pula como moedinha acima da câmara e a barra fica cheia e acesa por 0,8 s (D113) |
+| Formigas na câmara (D115, zooms perto e médio) | Cada formiga do posto faz a receita inteira: leva o produto à pilha de saída, busca o ingrediente e trabalha no posto, onde o ingrediente encolhe e o produto cresce (farelos só no perto). As carregadoras entram pela porta, passam na frente das pilhas, deixam o ingrediente e levam o produto. Câmara parada: as formigas esperam na pilha vazia, viradas para a porta, ou na saída cheia, segurando o produto. Meia-volta no chão: a formiga vira de lado, não gira pela vertical |
+| Câmaras da base (D115) | Rainha respira, põe o ovo na ponta do abdômen e recebe fungo de uma operária. Cuidadoras levam fungo a cada larva, que se mexe ao comer. No depósito, a carregadora desce pela parede da cúpula. No posto de guarda, um soldado vai olhar a porta e volta |
 | Alerta | Pisca a no máximo **1 Hz**; nunca mais de 3 flashes por segundo (WCAG 2.3.1) |
 | Recurso entregue | O recurso some no ícone da câmara com escala 1 → 0 em 150 ms |
-| Inimigo morto | Vira o ícone de presa no chão (troca direta) |
+| Luta corpo a corpo (D116) | Golpe a cada 0,6 s: o lutador avança e recua, com um risquinho claro no contato. Quem apanha fica branco por 0,09 s e é empurrado para trás |
+| Vida em combate (D116) | A barrinha só aparece enquanto a formiga leva dano ou está com menos de 100% de vida: vermelha nos inimigos, verde nas suas. Na faixa de baixo do túnel, a barrinha fica embaixo da formiga |
+| Formiga morta (D116) | Tomba de lado, perde a cor e, em menos de 1 s, o inimigo vira presa no chão. As suas formigas tombam e somem |
+| Efeitos das castas (D116) | Ácido: gota em arco com brilho, um fio fino que desenha o arco e some 0,3 s depois do impacto, respingo no alvo e bolhinhas por 2 s no alvo lento. Cura: anel verde pulsando devagar na curandeira e cruzinhas subindo de quem é curado. Explosão: a explosiva incha, explode num anel com estilhaços e deixa por 4 s uma teia de cola: cinco fios finos cor de terra, do teto ao chão, com gotinhas brilhando, que arrebentam no fim |
+| Câmara atacada (D116) | Os inimigos entram e mordem o posto e a pilha de entrada, soltando lascas. As formigas de dentro se encolhem no fundo, tremendo |
+| Escavação de túnel (D117) | A ponta fica irregular e a cavadora joga farelos claros para trás. Duas operárias vão vazias até a ponta e voltam com uma bolinha de argila |
+| Obra de câmara (D117) | A câmara abre da porta para o fundo, com a frente irregular e duas cavadoras nela. O contorno tracejado enche como barra e o custo que falta fica no meio. No fim, o conteúdo aparece aos poucos sobre a câmara escura |
+| Nascimento (D117) | A larva cresce, se encolhe e estoura num anel da cor da casta. A formiga sai pulando, como a moedinha dos itens, e anda até a porta |
+| Onda chegando (D117) | Uma linha vermelha tracejada liga a ponta do túnel rival à câmara alvo, com um anel pulsando no impacto. A ponta rival joga farelos para trás |
+| Expedição saindo (D117) | Os soldados saem das vagas um atrás do outro e deixam um rastro pontilhado violeta que some em 5 s. As vagas vazias ficam tracejadas |
 | Tremor de tela | Não existe |
 
 - **Movimento reduzido:** uma opção nas configurações, que também segue a configuração do sistema. Com ela ligada:
@@ -299,7 +334,7 @@ Os wireframes são para a tela de referência de 360 × 800 dp. A largura do des
 │                                    │   rainha, aladas/meta, população
 ├────────────────────────────────────┤
 │  ~~ céu ~~   ψ        ψ            │
-│ ═══◯════════════════◯═════════════ │ ← superfície e olheiros
+│ ═══◯════════════════◯═════════════ │ ← superfície e cortadouros
 │    ║                ║              │
 │    ●══════[jardim]══●              │
 │    ║                ║         ◀ !  │ ← alerta fora da tela (24 dp)
@@ -517,7 +552,8 @@ Todo problema tem três camadas de sinal:
 
 | Problema | No lugar | Na borda / resumo | Extra |
 |---|---|---|---|
-| Túnel cheio com fila | Linha vermelha, pontos de fila, contorno pulsando a 1 Hz (D53) | Seta amarela se a fila passa de 5 | — |
+| Túnel quase cheio | Borda amarela suave pulsando a 0,5 Hz (D91) | — | — |
+| Túnel cheio com fila | Borda vermelha suave pulsando a 1 Hz (D91) e formigas na fila fora da boca | Seta amarela na borda da tela se a fila passa de 5 (D93) | — |
 | Sem rota | Formigas paradas com "?" em cima | Aviso fixo "Sem rota de volta" | — |
 | Falta ingrediente | Ícone cinza do ingrediente com "!" | — | Toque leva à câmara que produz o ingrediente |
 | Falta cuidadora | Pips vazios piscando | Número de Cuidar fica amarelo | — |
@@ -528,6 +564,7 @@ Todo problema tem três camadas de sinal:
 | Rainha atacada | Câmara real com borda vermelha piscando | Alerta no topo: "Rainha sob ataque" com o botão "Ir" | Vibração longa |
 | Câmara nupcial atacada | Igual à rainha | Igual, com o ícone ✦ | Vibração longa |
 
+- **Setas na borda (D93):** no máximo 4 por vez; problemas na mesma direção viram uma seta com número; tocar leva a câmera até lá; somem na visão geral.
 - **Hierarquia:** só **um** alerta vermelho aparece no topo por vez, o mais grave. A ordem é: rainha, aladas, inimigo dentro, fome, onda chegando. Os outros ficam como setas.
 - **Vibração:** pode ser desligada e nunca é o único sinal.
 

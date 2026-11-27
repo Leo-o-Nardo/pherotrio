@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pherotrio · Catálogo visual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --solo:#15110E; --painel:#211B17; --borda:#5A4B3F; --base:#43362B; --txt:#EFE7DC; --txt2:#B3A697; --perigo:#FF4F5E; --acu:#F5B841; --veg:#7FD16B; --def:#6FB3E8; --atk:#9A6BFF; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+  body { margin: 0; background: var(--solo); color: var(--txt); font: 14px/1.45 'Atkinson Hyperlegible', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  header { padding: 20px 16px 8px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; letter-spacing: .2px; }
+  header p { margin: 0; color: var(--txt2); }
+  nav { position: sticky; top: 0; z-index: 5; background: rgba(21,17,14,.94); backdrop-filter: blur(6px); border-bottom: 1px solid #2A221C; }
+  nav .in { max-width: 1100px; margin: 0 auto; display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; scrollbar-width: none; }
+  nav a, .chip { flex: none; color: var(--txt2); text-decoration: none; padding: 6px 11px; border-radius: 999px; background: var(--painel); font-weight: 700; font-size: 12px; border: 1px solid #2E2620; }
+  nav a.on { color: var(--txt); border-color: var(--borda); }
+  .ctl { max-width: 1100px; margin: 0 auto; padding: 4px 16px 0; display: flex; gap: 8px; flex-wrap: wrap; }
+  button.chip { cursor: pointer; font-family: inherit; }
+  button.chip[aria-pressed=true] { color: var(--txt); border-color: var(--borda); background: #2E2620; }
+  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
+  section { padding-top: 28px; }
+  h2 { font-size: 20px; margin: 0 0 2px; }
+  .lead { color: var(--txt2); margin: 0 0 14px; max-width: 70ch; }
+  h3 { font-size: 16px; margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .grid.wide { grid-template-columns: 1fr; }
+  .card { background: var(--painel); border: 1px solid #2E2620; border-radius: 14px; padding: 12px; min-width: 0; }
+  .card.var { border-color: #4B3D31; }
+  .card .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .card .sub { color: var(--txt2); font-size: 12px; margin: 2px 0 8px; }
+  .card .uso { color: var(--txt2); font-size: 12px; margin: 8px 0 0; }
+  .tag { font-size: 11px; font-weight: 700; color: var(--txt2); background: #2A221C; border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
+  .tag.pend { color: #1B1510; background: var(--acu); }
+  .tiles { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: flex-end; }
+  .tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; max-width: 100%; overflow-x: auto; }
+  .tile canvas { display: block; border-radius: 6px; }
+  .tile span { font-size: 11px; color: var(--txt2); font-weight: 700; }
+  .tile span b { color: var(--txt); }
+  .states { margin-top: 10px; border-top: 1px solid #2E2620; padding-top: 10px; }
+  .states .tile span { max-width: 150px; }
+  .sw { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .sw div { background: var(--painel); border: 1px solid #2E2620; border-radius: 12px; overflow: hidden; }
+  .sw i { display: block; height: 52px; }
+  .sw p { margin: 0; padding: 8px 10px 10px; font-size: 12px; color: var(--txt2); }
+  .sw p b { display: block; color: var(--txt); font-size: 14px; }
+  .sw p code { font: 700 12px ui-monospace, monospace; color: var(--txt); }
+  .type p { margin: 6px 0; }
+  .pend-list { display: grid; gap: 8px; }
+  .pend-list a { color: var(--txt); text-decoration: none; display: flex; justify-content: space-between; gap: 10px; background: var(--painel); border: 1px solid #4B3D31; border-radius: 12px; padding: 10px 12px; }
+  .pend-list a span { color: var(--txt2); font-size: 12px; }
+  /* componentes de interface (03 §6) */
+  .phone { width: 360px; max-width: 100%; background: #15110E; border: 1px solid #2E2620; border-radius: 18px; overflow: hidden; }
+  .hud-top { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-weight: 700; font-size: 12px; }
+  .hud-top .sp { flex: 1; }
+  .yr { position: relative; flex: 1; height: 6px; border-radius: 3px; background: #2E2620; }
+  .yr i { position: absolute; left: 0; top: 0; bottom: 0; width: 38%; border-radius: 3px; background: var(--veg); opacity: .75; }
+  .yr b { position: absolute; top: -5px; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 6px solid var(--perigo); }
+  .yr u { position: absolute; top: -8px; color: var(--acu); font-size: 10px; text-decoration: none; }
+  .seg { display: flex; background: var(--painel); border-radius: 8px; overflow: hidden; }
+  .seg button { all: unset; padding: 4px 8px; font-size: 12px; font-weight: 700; color: var(--txt2); cursor: pointer; display: flex; align-items: center; }
+  .seg button.on { color: var(--txt); background: #3A3028; }
+  .status { display: flex; gap: 6px; padding: 0 10px 8px; }
+  .st { flex: 1; display: flex; align-items: center; gap: 5px; background: var(--painel); border-radius: 10px; padding: 6px 7px; font-weight: 700; font-size: 12px; min-width: 0; }
+  .st small { color: var(--veg); font-size: 11px; }
+  .st small.neg { color: var(--perigo); }
+  .world { height: 180px; position: relative; overflow: hidden; }
+  .world canvas { position: absolute; inset: 0; }
+  .roles { display: flex; gap: 4px; padding: 8px 8px 4px; }
+  .role { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; background: var(--painel); border-radius: 12px; padding: 6px 0 5px; font-size: 11px; font-weight: 700; color: var(--txt2); border: 1px solid transparent; user-select: none; cursor: pointer; transition: transform .1s; }
+  .role b { color: var(--txt); font-size: 12px; }
+  .role.on { border-color: var(--borda); }
+  .role:active, .btn:active { transform: scale(.96); }
+  .acts { display: flex; gap: 6px; padding: 4px 8px 10px; }
+  .btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; border-radius: 12px; background: #3A3028; color: var(--txt); font-family: inherit; font-weight: 700; font-size: 14px; border: 0; cursor: pointer; transition: transform .1s; }
+  .btn.pri { background: var(--txt); color: #1B1510; }
+  .btn.dis { opacity: .4; pointer-events: none; }
+  .btn.sq { flex: 0 0 48px; }
+  .btn.red { background: #4A2226; color: #FFB3B9; }
+  .sheet { background: var(--painel); border-radius: 18px 18px 0 0; padding: 10px 14px 14px; border-top: 1px solid #3A3028; }
+  .grab { width: 36px; height: 4px; border-radius: 2px; background: var(--borda); margin: 0 auto 10px; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .row .grow { flex: 1; }
+  .kv { display: flex; gap: 8px; margin: 10px 0; }
+  .kv div { flex: 1; background: #2A221C; border-radius: 10px; padding: 8px; font-size: 12px; color: var(--txt2); }
+  .kv div b { display: flex; align-items: center; gap: 4px; color: var(--txt); font-size: 14px; }
+  .alert-top { display: flex; align-items: center; gap: 8px; margin: 8px 10px; padding: 8px 10px; border-radius: 12px; background: #3A1A1E; border: 1px solid var(--perigo); font-weight: 700; }
+  .alert-top .grow { flex: 1; }
+  .toast { display: inline-flex; align-items: center; gap: 8px; background: #2E2620; border-radius: 12px; padding: 8px 12px; font-weight: 700; }
+  .demo-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+  .tile canvas { cursor: zoom-in; }
+  #zoom { position: fixed; inset: 0; z-index: 9; background: rgba(10,8,6,.86); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 10px; padding: 16px; }
+  #zoom.on { display: flex; }
+  #zoom canvas { border-radius: 10px; cursor: zoom-out; }
+  #zoom p { margin: 0; color: var(--txt2); font-weight: 700; font-size: 12px; text-align: center; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+<script src="arte.js?v=117"></script>
+</head>
+<body>
+<header>
+  <h1>Pherotrio · Catálogo visual</h1>
+  <p>Todas as cores, formas, formigas, estruturas, túneis, percalços, ícones e componentes, cada um em quatro zooms e em todos os estados (D108). O app de exemplo só usa o que for aprovado aqui. Toque em qualquer desenho para ampliar. Os modelos ainda em decisão ficam em <a href="modelos.html" style="color:var(--acu)">modelos.html</a>.</p>
+</header>
+<nav><div class="in" id="nav"></div></nav>
+<div class="ctl">
+  <button class="chip" id="anim" aria-pressed="true">Animação ligada</button>
+  <button class="chip" id="rot" aria-pressed="true">Números no mundo</button>
+</div>
+<main id="main"></main>
+<div id="zoom"><canvas></canvas><p></p></div>
+<script>
+const A = window.Arte, C = A.C;
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+const main = document.getElementById('main'), nav = document.getElementById('nav');
+let ANIM = true, TAGS = true, T = 0;
+const views = [];
+const io = new IntersectionObserver(es => es.forEach(e => { e.target._v.vis = e.isIntersecting; }), { rootMargin: '120px' });
+
+// ---------- montagem ----------
+function el(tag, cls, html, parent) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
+function section(id, titulo, lead) {
+  const s = el('section', null, null, main); s.id = id; el('h2', null, titulo, s); if (lead) el('p', 'lead', lead, s);
+  const a = el('a', null, titulo.replace(/ \(.*/, ''), nav); a.href = '#' + id;
+  return s;
+}
+function grid(parent, wide) { return el('div', 'grid' + (wide ? ' wide' : ''), null, parent); }
+function card(parent, o) {
+  const c = el('div', 'card' + (o.variante ? ' var' : ''), null, parent); if (o.id) c.id = o.id;
+  const hd = el('div', 'hd', null, c); el('h3', null, o.titulo, hd);
+  if (o.tag) el('span', 'tag' + (o.variante ? ' pend' : ''), o.tag, hd);
+  if (o.sub) el('div', 'sub', o.sub, c);
+  const body = el('div', 'tiles', null, c);
+  if (o.uso) el('p', 'uso', o.uso, c);
+  c.body = body; return c;
+}
+// cena em células: box = [x0, y0, w, h]; draw(ctx, z, T, tags)
+function tile(parent, label, box, z, draw, bg, extra) {
+  const t = el('div', 'tile', null, parent), cv = el('canvas', null, null, t);
+  const [x0, y0, w, h] = box, W = Math.max(2, Math.round(w * z)), H = Math.max(2, Math.round(h * z));
+  cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  if (label) el('span', null, label, t);
+  const v = { cv, ctx: cv.getContext('2d'), x0, y0, w, h, z, draw, bg: bg || 'solo', vis: false, seed: views.length + 3, ...extra };
+  cv._v = v; views.push(v); io.observe(cv);
+  cv.onclick = () => openZoom(v, t.querySelector('span') ? t.querySelector('span').textContent : '');
+  return v;
+}
+// ampliação: mesma cena, zoom que cabe na tela (o nível de detalhe segue o zoom ampliado)
+const zm = document.getElementById('zoom'), zc = zm.querySelector('canvas');
+let zv = null;
+function openZoom(v, label) {
+  const z = Math.min(160, (innerWidth - 32) / v.w, (innerHeight - 120) / v.h), W = Math.round(v.w * z), H = Math.round(v.h * z);
+  zc.width = W * DPR; zc.height = H * DPR; zc.style.width = W + 'px'; zc.style.height = H + 'px';
+  if (zv) views.splice(views.indexOf(zv), 1);
+  zv = { ...v, cv: zc, ctx: zc.getContext('2d'), z, vis: true, done: false }; views.push(zv); render(zv);
+  zm.querySelector('p').textContent = label.replace(/^\d+ dp\/cél · /, '') + ' · ampliado a ' + Math.round(z) + ' dp/cél (detalhe de "' + A.LOD(z) + '")';
+  zm.classList.add('on');
+}
+zm.onclick = () => { zm.classList.remove('on'); if (zv) { views.splice(views.indexOf(zv), 1); zv = null; } };
+// tile desenhado em dp (para ícones e interface)
+function dpTile(parent, label, W, H, draw, bg) {
+  const t = el('div', 'tile', null, parent), cv = el('canvas', null, null, t);
+  cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  if (label) el('span', null, label, t);
+  const v = { cv, ctx: cv.getContext('2d'), dp: true, W, H, draw, bg, vis: false }; cv._v = v; views.push(v); io.observe(cv); return v;
+}
+function iconEl(k, s, col, parent) {
+  const cv = document.createElement('canvas'); cv.width = s * DPR; cv.height = s * DPR; cv.style.width = s + 'px'; cv.style.height = s + 'px'; cv.style.flex = 'none';
+  const ctx = cv.getContext('2d'); ctx.scale(DPR, DPR);
+  if (A.RES[k]) A.item(ctx, k, s / 2, s / 2, s * 0.8, { bg: C.painel }); else A.icone(ctx, k, s / 2, s / 2, s, col);
+  if (parent) parent.appendChild(cv); return cv;
+}
+const ZL = { 72: 'máximo', 48: 'perto', 24: 'médio', 14: 'longe', 6: 'geral', 8: 'geral' };
+const zlabel = z => `<b>${z}</b> dp/cél · ${A.LOD(z) === 'perto' ? 'perto' : A.LOD(z) === 'medio' ? 'médio' : A.LOD(z)}`;
+function zooms(parent, box, draw, bg, zs, extra) { (zs || [48, 24, 14, 6]).forEach(z => tile(parent, zlabel(z), box, z, draw, bg, extra)); }
+
+// ---------- render ----------
+function bgFill(v, ctx) {
+  const { x0, y0, w, h, z } = v;
+  if (v.bg === 'solo') A.solo(ctx, x0 - 1, y0 - 1, w + 2, h + 2, z, v.seed, 40);
+  else if (v.bg === 'base') { ctx.fillStyle = C.base; ctx.fillRect(x0, y0, w, h); }
+  else if (v.bg === 'painel') { ctx.fillStyle = C.painel; ctx.fillRect(x0, y0, w, h); }
+  else if (v.bg === 'ceu') { ctx.fillStyle = C.ceu; ctx.fillRect(x0, y0, w, h); }
+  else if (v.bg) { ctx.fillStyle = v.bg; ctx.fillRect(x0, y0, w, h); }
+}
+function render(v) {
+  const ctx = v.ctx; A.TEMPO = T;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, v.cv.width, v.cv.height);
+  if (v.dp) { if (v.bg) { ctx.fillStyle = v.bg; ctx.fillRect(0, 0, v.W, v.H); } v.draw(ctx, T); return; }
+  const k = DPR * v.z; ctx.setTransform(k, 0, 0, k, -v.x0 * k, -v.y0 * k);
+  bgFill(v, ctx);
+  const tags = [];
+  v.draw(ctx, v.z, T, tags);
+  if (TAGS && tags.length) A.tagsDraw(ctx, tags, v.z);
+}
+let last = 0;
+function loop(now) {
+  requestAnimationFrame(loop);
+  if (now - last < 33) return; last = now;
+  if (ANIM) T = now / 1000;
+  for (const v of views) if (v.vis && (ANIM || !v.done)) { render(v); v.done = !ANIM; }
+}
+document.getElementById('anim').onclick = e => { ANIM = !ANIM; e.target.setAttribute('aria-pressed', ANIM); e.target.textContent = ANIM ? 'Animação ligada' : 'Animação parada'; views.forEach(v => v.done = false); };
+document.getElementById('rot').onclick = e => { TAGS = !TAGS; e.target.setAttribute('aria-pressed', TAGS); views.forEach(v => v.done = false); };
+
+// ================= 1. Paleta =================
+{
+  const s = section('paleta', 'Paleta', 'Solo claro e quente com túneis escuros (D110); a cor forte fica para família de recurso, alerta e militar. Cada cor tem um papel só.');
+  const grupos = [
+    ['Mundo', [['Solo', '#8E765C', 'Terra não escavada: camadas de #8E765C a #695441, com pedrinhas (D110)'], ['Túnel / base', C.base, 'Túneis e interior das câmaras, mais escuro que o solo'], ['Fundo da interface', C.solo, 'Atrás de painéis e menus'], ['Céu', C.ceu, 'Faixa da superfície (varia ≤ 8% por estação)'], ['Água', C.agua, 'Alagamento, verde-lodo (D109)']]],
+    ['Famílias de recurso', [['Vegetal', C.veg, 'Folha, fungo e mistos vegetais'], ['Açúcar', C.acu, 'Seiva, néctar'], ['Animal', C.ani, 'Presa, proteína, quitina'], ['Mineral', C.min, 'Argila, barro'], ['Refugo', C.ref, 'Subproduto e itens cinza de falta']]],
+    ['Alerta', [['Quase cheio', C.quase, 'Pulso 0,5 Hz (amarelo)'], ['Cheio / ataque', C.cheio, 'Pulso 1 Hz (vermelho)'], ['Perigo', C.perigo, 'Inimigos, onda, alerta vermelho'], ['Alerta amarelo', '#FFD23F', 'Ícones de alerta amarelos']]],
+    ['Militar', [['Defesa', C.def, 'Estruturas de defesa, barricada'], ['Ataque', C.atk, 'Posto de guerra, galeria de assalto']]],
+    ['Interface', [['Painel', C.painel, 'Painéis, barras, selos'], ['Borda', C.borda, 'Contornos de interface e seleção'], ['Texto', C.txt, 'Texto principal e formigas'], ['Texto 2', C.txt2, 'Texto secundário, rótulos, setas de sentido, obra planejada']]],
+  ];
+  grupos.forEach(([g, cores]) => { el('h3', null, g, s).style.margin = '14px 0 8px'; const w = el('div', 'sw', null, s); cores.forEach(([n, c, u]) => el('div', null, `<i style="background:${c}"></i><p><b>${n}</b><code>${c}</code><br>${u}</p>`, w)); });
+  const t = section('tipografia', 'Tipografia', 'Atkinson Hyperlegible (D58): letras bem distintas, boa em tela pequena.');
+  const c = el('div', 'card type', null, t);
+  el('div', null, `<p style="font-size:20px;font-weight:700">Título 20 · Câmara de geleia</p><p style="font-size:16px">Painel 16 · 2 fungo + 2 néctar → 1 geleia real</p><p style="font-size:14px;font-weight:700">Rótulo 14 negrito · Falta cuidadora</p><p style="font-size:12px;font-weight:700">Número 12 negrito · 142 +12/min · ×14 · 3/6 · 0123456789</p><p style="font-size:12px;color:var(--txt2)">Texto 2 · 12 · usado para nomes nos rótulos do mundo</p>`, c);
+}
+
+// ================= 2. Recursos =================
+{
+  const s = section('recursos', 'Recursos', 'Forma = identidade; cor = família; mistos em metades verticais; N3 com contorno duplo (07 §11). De perto (9 px ou mais na tela) vira objeto ilustrado dentro da silhueta (D110). Tamanho na pilha: 0,27 célula. No zoom longe vira ponto colorido; no geral some (a câmara mostra só a cor).');
+  const g = grid(s), box = [-0.3, -0.3, 0.6, 0.6];
+  Object.entries(A.RES).forEach(([k, d]) => {
+    const fam = d.c.map(c => `<i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${c};vertical-align:-1px"></i>`).join(' ');
+    const cd = card(g, { titulo: d.nome, tag: d.n, sub: `${fam} forma: ${d.f}` });
+    [72, 48, 24, 14, 6].forEach(z => tile(cd.body, zlabel(z), box, z, (ctx, z) => { const l = A.LOD(z); if (l === 'geral') return; A.item(ctx, k, 0, 0, 0.27, { dot: l === 'longe' }); }, 'base'));
+    dpTile(cd.body, '<b>24</b> dp · HUD', 32, 32, ctx => A.item(ctx, k, 16, 16, 22, { bg: C.painel }), C.painel);
+    dpTile(cd.body, 'selo de falta', 32, 32, ctx => { ctx.translate(16, 16); A_selo(ctx, k); }, C.painel);
+  });
+  const p = card(grid(s, true), { titulo: 'Pilha na câmara', sub: '3 em baixo + 2 em cima, máximo 5; acima disso aparece ×n no zoom perto (D102).' });
+  const pb = [-0.1, -0.75, 2.4, 0.85];
+  [1, 3, 5, 14].forEach(n => tile(p.body, `${n} item${n > 1 ? 's' : ''} · 48`, pb, 48, (ctx, z, T, tags) => { ctx.fillStyle = C.base; ctx.fillRect(-0.1, -0.75, 2.4, 0.85); A.pile(ctx, 'fungo', n, 0.1, 1, 0, 3, z, tags); A.pile(ctx, 'acido', Math.max(1, n - 2), 2.2, -1, 0, 2, z, tags); }, 'base'));
+}
+function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle = A.mix(C.borda, C.quase, A.pulse(T, 0.5, 1)); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 12, 0, 6.2832); ctx.fill(); ctx.stroke(); A.item(ctx, k, 0, 0, 14, { gray: true }); }
+
+// ================= 3. Túneis =================
+{
+  const s = section('tuneis', 'Túneis', 'Curvos, da cor da base, sem borda; largura por nível (D99): 0,25 · 0,33 · 0,42 · 0,5 célula, com largura mínima na tela de 2 / 2 / 2,5 / 3 px. A borda só aparece em alerta (D91).');
+  const g = grid(s), box = [0, 0, 3.2, 1.4];
+  const P = A.curve({ x: 0.25, y: 1.0 }, { x: 2.95, y: 0.55 }, 0.18);
+  [1, 2, 3, 4].forEach(l => { const cd = card(g, { titulo: 'Nível ' + l, tag: A.LARG[l] + ' cél', sub: l === 1 ? 'Mão única ou dupla em fila única' : 'Duas faixas a ±20% da largura' }); zooms(cd.body, box, (ctx, z, T) => A.tunel(ctx, P, l, 'livre', z, { T, formigas: 1.4, dir: l === 1 ? 'ida' : 'duplo' })); });
+  const est = [
+    ['quase', 'Quase cheio', 'Borda amarela pulsando 0,5 Hz; formigas a 50% da velocidade', { formigas: 2.2 }],
+    ['cheio', 'Cheio', 'Borda vermelha pulsando 1 Hz; formigas a 20%', { formigas: 3 }],
+    ['livre', 'Fila na boca', 'Até 10 formigas visíveis; o resto vira +n no zoom perto', { fila: 16, formigas: 0.6 }],
+    ['planejado', 'Obra planejada', 'Tracejado em Texto 2', {}],
+    ['escavando', 'Escavando', 'Parte feita + resto tracejado; cavadora na ponta', {}],
+    ['rival', 'Túnel rival', 'Tracejado vermelho por cima (03 §3.6)', { inimigos: 2 }],
+  ];
+  est.forEach(([st, n, u, o]) => { const cd = card(g, { titulo: n, sub: u }); zooms(cd.body, box, (ctx, z, T, tags) => A.tunel(ctx, P, 2, st, z, { T, tags, dir: 'duplo', ...o })); });
+  // variantes de água
+  { const w = A.AGUA_VARIANTES.B; const cd = card(g, { id: 'agua', titulo: 'Alagado', tag: 'D109', sub: `Verde-lodo: corpo ${w.fill}, ondas ${w.linha}` }); zooms(cd.body, box, (ctx, z, T) => A.tunel(ctx, P, 2, 'alagado', z, { T })); }
+  // galeria de assalto
+  const ga = card(g, { id: 'galeria', titulo: 'Galeria de assalto', tag: 'D109', sub: 'Borda tracejada violeta andando no sentido do ataque' });
+  zooms(ga.body, box, (ctx, z, T) => A.tunel(ctx, P, 2, 'galeria', z, { T, formigas: 1, dir: 'ida' }));
+
+
+  // barricada
+  ['A'].forEach(v => { const cd = card(g, { id: 'barricada', titulo: 'Barricada', tag: 'D109', sub: 'Blocos de barro desencontrados; barra de vida 150' });
+    zooms(cd.body, box, (ctx, z, T) => { A.tunel(ctx, P, 2, 'livre', z, { T }); A.barricada(ctx, P, P.len * 0.55, 2, z, { variante: v, hp: 1 }); A.ant(ctx, 'rival', A.at(P, P.len * 0.75).x, A.at(P, P.len * 0.75).y, Math.PI, z); });
+    tile(cd.body, 'vida 40% · 48', box, 48, (ctx, z, T) => { A.tunel(ctx, P, 2, 'livre', z, { T }); A.barricada(ctx, P, P.len * 0.55, 2, z, { variante: v, hp: 0.4, alerta: true, T }); });
+  });
+  const nd = card(grid(s, true), { titulo: 'Junções e ligação com câmara', tag: 'D114', sub: 'Nó redondo na junção. O túnel chega reto na porta, no nível do chão, com batente de terra batida; as formigas passam por cima da abertura e a fila espera do lado de fora.' });
+  zooms(nd.body, [0, -0.3, 5.2, 2.7], (ctx, z, T, tags) => {
+    const a = A.curve({ x: 0.0, y: 0.05 }, { x: 0.7, y: 0.8 }, 0.12), b = A.curve({ x: 0.7, y: 0.8 }, { x: 0.95, y: 2.4 }, -0.1);
+    A.tunel(ctx, a, 2, 'livre', z, { T, formigas: 1, dir: 'duplo' }); A.tunel(ctx, b, 1, 'livre', z, { T, formigas: 1, dir: 'ida' });
+    A.ligacao(ctx, A.ESTRUTURAS.find(e => e.id === 'jardim'), 2.2, 1.3, { x: 0.7, y: 0.8 }, 2, z, { T, tags, formigas: 1, dir: 'duplo' });
+    A.no(ctx, 0.7, 0.8, 2, z);
+  });
+}
+
+// ================= 4. Percalços =================
+{
+  const s = section('percalcos', 'Percalços do solo', 'Manchas orgânicas no solo (D89, D96): rocha bloqueia, argila escava devagar, areia desaba, água alaga, toca de aranha ataca, "?" ainda não revelado.');
+  const g = grid(s), box = [0, 0, 3.4, 2.4];
+  const tipos = [['rocha', 'Rocha', 'Não escava; o túnel contorna'], ['argila', 'Argila', 'Escava em dobro do tempo'], ['areia', 'Areia', 'Escava rápido, mas desaba sem reforço'], ['toca', 'Toca de aranha', 'Anel tracejado vermelho = raio de ataque'], ['oculto', 'Não revelado', 'Névoa: só "?" até a escavação chegar']];
+  tipos.forEach(([t, n, u]) => { const cd = card(g, { titulo: n, sub: u }); zooms(cd.body, box, (ctx, z, T) => A.percalco(ctx, t, 1.7, 1.25, 1.2, 0.8, z, { T, seed: 41 + t.length })); });
+  [['B', A.AGUA_VARIANTES.B]].forEach(([k, w]) => { const cd = card(g, { titulo: 'Bolsão de água', tag: 'D109', sub: 'Verde-lodo; alaga túneis vizinhos na primavera' }); zooms(cd.body, box, (ctx, z, T) => A.percalco(ctx, 'agua', 1.7, 1.25, 1.2, 0.8, z, { T, agua: k })); });
+  const fo = card(g, { titulo: 'Fonte de seiva', sub: 'Anel da fonte: o coletor fica dentro dele' });
+  zooms(fo.body, box, (ctx, z, T, tags) => { ctx.strokeStyle = A.mix(C.solo, C.acu, 0.35); ctx.setLineDash([4 / z, 4 / z]); ctx.lineWidth = 1.4 / z; ctx.beginPath(); ctx.arc(1.7, 1.25, 1.05, 0, 6.2832); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = A.mix(C.solo, C.acu, 0.12); ctx.beginPath(); ctx.arc(1.7, 1.25, 1.05, 0, 6.2832); ctx.fill(); A.estrutura(ctx, A.ESTRUTURAS.find(e => e.id === 'coletor'), 0.7, 0.85, 'produzindo', z, { T, tags }); });
+}
+
+// ================= 5. Formigas =================
+{
+  const s = section('formigas', 'Formigas e castas', 'Corpo de 3 elipses (D90), carregando pela boca (D109), com pernas e antenas só no zoom perto (D113). A silhueta marcada diz a casta; a tinta leve do corpo (25%) diz a função: coleta creme, obra barro, linha de frente azul, apoio verde-água, ataque violeta, reprodução dourado (D112). No longe vira ponto; no geral some.');
+  const lu = card(grid(s, true), { titulo: 'Escala lado a lado', sub: 'No túnel de nível 2, zoom máximo (72) e perto (48)' });
+  const keys = Object.keys(A.CASTAS);
+  [72, 48].forEach(z => tile(lu.body, zlabel(z), [-0.1, -0.35, keys.length * 0.62 + 0.6, 0.7], z, (ctx, z, T) => { ctx.fillStyle = C.base; ctx.fillRect(-0.1, -0.2, keys.length * 0.62 + 0.6, 0.4); keys.forEach((k, i) => A.ant(ctx, k, 0.35 + i * 0.62 + (k === 'rainha' ? 0.25 : 0), 0, 0, z, { nod: Math.sin(T * 4 + i) })); }, 'solo'));
+  const g = grid(s), box = [-0.45, -0.32, 0.9, 0.64];
+  Object.entries(A.CASTAS).forEach(([k, d]) => {
+    const cd = card(g, { titulo: d.nome, tag: '×' + d.esc, uso: d.papel });
+    tile(cd.body, '<b>ampliado</b> p/ inspeção', box, 200, (ctx, z, T) => A.ant(ctx, k, 0, 0, 0, z, { nod: Math.sin(T * 4) }), 'base');
+    [72, 48, 24, 14].forEach(z => tile(cd.body, zlabel(z), box, z, (ctx, z, T) => A.ant(ctx, k, 0, 0, 0, z, { nod: Math.sin(T * 4) }), 'base'));
+    tile(cd.body, 'carregando · 72', box, 72, (ctx, z, T) => A.ant(ctx, k, 0, 0.05, 0, z, { carry: 'folha' }), 'base');
+    tile(cd.body, 'vaga vazia · 72', box, 72, (ctx, z) => A.ant(ctx, k, 0, 0, 0, z, { dashed: true }), 'base');
+    if (d.combate) tile(cd.body, 'ícone de combate · 72', [-0.45, -0.6, 0.9, 0.92], 72, (ctx, z) => A.ant(ctx, k, 0, 0, 0, z, { combatIcon: true }), 'base');
+  });
+  const lv = card(grid(s, true), { titulo: 'Ovo e larva', sub: 'No berçário e na câmara real' });
+  tile(lv.body, 'perto · 72', [-0.4, -0.3, 1.6, 0.5], 72, (ctx, z, T) => { A.item(ctx, 'ovo', 0, 0, 0.26); A.larva(ctx, 0.55, 0, 1, T, 0); A.larva(ctx, 1.0, 0, 1, T, 1); }, 'base');
+  tile(lv.body, 'perto · 48', [-0.4, -0.3, 1.6, 0.5], 48, (ctx, z, T) => { A.item(ctx, 'ovo', 0, 0, 0.26); A.larva(ctx, 0.55, 0, 1, T, 0); A.larva(ctx, 1.0, 0, 1, T, 1); }, 'base');
+}
+
+// ================= 6. Inimigos =================
+{
+  const s = section('inimigos', 'Inimigos', 'Vermelho perigo, sem contorno (D109). O traço de cada um aparece na silhueta.');
+  const g = grid(s), box = [-0.6, -0.4, 1.2, 0.8];
+  Object.entries(A.INIMIGOS).forEach(([k, d]) => {
+    const cd = card(g, { titulo: d.nome, tag: k === 'lacraia' ? 'chefe' : '', uso: d.traco });
+    const b = k === 'lacraia' ? [-1.6, -0.4, 2.0, 0.8] : box;
+    [k === 'lacraia' ? 110 : 200, 72, 48, 24, 14].forEach(z => tile(cd.body, z > 72 ? '<b>ampliado</b> p/ inspeção' : zlabel(z), b, z, (ctx, z, T) => { A.ant(ctx, k, k === 'lacraia' ? 0.25 : 0, 0, 0, z, { T }); if (k === 'lacraia' && A.LOD(z) !== 'geral') { const px = 1 / z, w = 30 * px; ctx.fillStyle = C.painel; ctx.fillRect(0.25 - w / 2 - px, -0.22 - 7 * px, w + 2 * px, 6 * px); ctx.fillStyle = C.perigo; ctx.fillRect(0.25 - w / 2, -0.22 - 6 * px, w * 0.8, 4 * px); } }, 'base'));
+  });
+  const nr = card(g, { titulo: 'Ninho rival', sub: 'Cúpula com borda dupla vermelha; túneis rivais tracejados' });
+  zooms(nr.body, [-0.3, -0.3, 3.6, 2.5], (ctx, z, T) => A.ninhoRival(ctx, 0, 0, z, { T }));
+  // legibilidade
+  const P = A.curve({ x: 0.2, y: 0.8 }, { x: 3.0, y: 0.5 }, 0.15);
+  [[0, 'sem contorno']].forEach(([ol, n]) => {
+    const cd = card(g, { id: 'contorno', titulo: 'Inimigos no túnel · ' + n, tag: 'D109', sub: 'Rivais e soldado rival misturados com operárias carregando' });
+    [48, 24, 14].forEach(z => tile(cd.body, zlabel(z), [0, 0, 3.2, 1.3], z, (ctx, z, T) => { A.tunel(ctx, P, 2, 'livre', z, { T, formigas: 1.6, dir: 'duplo', inimigos: 3, outline: ol }); const q = A.at(P, P.len * 0.5); A.ant(ctx, 'soldadoRival', q.x, q.y + 0.05, Math.PI, z, { outline: ol }); }));
+  });
+}
+
+// ================= 6b. Combate =================
+{
+  const s = section('combate', 'Combate', 'Investida com tranco: golpe a cada 0,6 s, quem apanha fica branco por um instante e é empurrado. Barrinha de vida só enquanto a formiga leva dano ou está ferida. Quem morre tomba e perde a cor; o inimigo vira presa. Ácido com fio, cura com anel e cruzinhas, explosão com teia de cola. Na câmara atacada, os inimigos entram (D116).');
+  const g = grid(s), K = A.combate, linha = K.luta(K.L2), corpo = K.luta(K.L1), JAR = A.ESTRUTURAS.find(e => e.id === 'jardim');
+  const ld = card(g, { id: 'linha', titulo: 'Linha de defesa', tag: 'D116', sub: 'Tanque e soldado na frente, atiradora e curandeira atrás; a explosiva entra e estoura no meio dos rivais', uso: 'Loop de 10 s roteirizado; no jogo, quem luta e quanto dura vem do 02 §6.' });
+  [56, 24, 14].forEach(z => tile(ld.body, zlabel(z), [0.6, -0.1, 4.6, 1.45], z, (ctx, z, T) => linha(ctx, z, T)));
+  const lc = card(g, { id: 'luta', titulo: 'Luta corpo a corpo', tag: 'D116', sub: 'Dois soldados contra três rivais; a terceira espera vaga na frente' });
+  [72, 36].forEach(z => tile(lc.body, zlabel(z), [0.9, 0.05, 3.6, 1.15], z, (ctx, z, T) => corpo(ctx, z, T)));
+  const ca = card(g, { id: 'atacada', titulo: 'Câmara atacada', tag: 'D116', sub: 'Os inimigos entram e mordem o posto e a pilha; as formigas se encolhem no fundo. Borda vermelha e barra de vida da câmara (D103).' });
+  [56, 24].forEach(z => tile(ca.body, zlabel(z), [-0.3, -0.75, 4.5, 1.9], z, (ctx, z, T, tags) => A.ligacao(ctx, JAR, 1.0, 0, { x: -0.3, y: -0.55 }, 1, z, { T, tags, seed: 11, est: 'ataque' })));
+}
+
+// ================= 6c. Eventos =================
+{
+  const s = section('eventos', 'Eventos', 'O que acontece dentro do formigueiro: túnel cavando com argileiras, câmara aberta da porta com o contorno enchendo, nascimento com pulo, onda rival com prévia tracejada e expedição com rastro violeta (D117). Cada cena é um loop de 9 ou 10 s.');
+  const g = grid(s), E = A.eventos;
+  const ev = (id, titulo, sub, box, fn, zs, uso) => { const c = card(g, { id, titulo, tag: 'D117', sub, uso }); (zs || [56, 24]).forEach(z => tile(c.body, zlabel(z), box, z, (ctx, z, T, tags) => fn(ctx, z, T, tags))); };
+  ev('escavacao', 'Escavação de túnel', 'Ponta irregular e farelos claros; duas operárias vão vazias à ponta e voltam com argila', [-0.7, 0.05, 4.9, 1.25], E.escavacao, null, 'No jogo, 4 cavadoras cavam 1 célula por segundo e a argila (1 a cada 5 pt) vai ao depósito pela rota normal (02 §4.2).');
+  ev('obra', 'Obra de câmara', 'Abre da porta para o fundo; o contorno enche como barra e o custo que falta fica no meio', [-0.5, -0.25, 4.9, 1.45], E.obra);
+  ev('nascimento', 'Nascimento', 'A larva se encolhe, estoura num anel da cor da casta e a formiga sai pulando até a porta', [-0.6, -0.5, 4.4, 2.25], E.nascimento);
+  ev('onda', 'Onda chegando', 'Linha tracejada da ponta rival até a câmara alvo, com anel no impacto; a ponta joga farelos', [-0.4, -0.25, 6.6, 1.45], E.onda, [48, 24], 'A prévia só aparece depois do aviso da onda (D25).');
+  ev('expedicao', 'Expedição saindo', 'Os soldados saem das vagas em coluna e deixam um rastro violeta que some em 5 s', [-0.15, -0.1, 6.5, 1.3], E.expedicao, [48, 24]);
+}
+
+// ================= 7. Estruturas =================
+{
+  const s = section('estruturas', 'Estruturas (26)', 'Cúpula de chão plano, nunca girada; porta lateral ou no teto; interior com 13% da cor da família (mistos em metades); sem borda fora de alerta (D101–D105); cenário do ofício no fundo (D110). P 2×1 · M 3×1 · G 3×2.');
+  let grupo = null, g;
+  A.ESTRUTURAS.forEach((sp, i) => {
+    if (sp.grupo !== grupo) { grupo = sp.grupo; el('h3', null, grupo, s).style.margin = '18px 0 8px'; g = grid(s, true); }
+    const [w, h] = A.DIM[sp.tam], cost = sp.tam === 'G' ? 36 : sp.tam === 'M' ? 24 : sp.cat === 'ext' ? 15 : 12;
+    const fam = sp.fam.map(c => `<i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${c};vertical-align:-1px"></i>`).join(' ');
+    const io2 = sp.ins ? sp.ins.map(([k, n]) => `${n} ${A.RES[k].nome.toLowerCase()}`).join(' + ') + ' → ' + A.RES[sp.out].nome.toLowerCase() : '';
+    const cd = card(g, { titulo: sp.nome, tag: `${sp.tam} ${w}×${h} · ${cost} pt`, sub: `${fam} ${io2}`, uso: sp.uso });
+    const box = [-1.0, -0.85, w + 1.3, h + 0.95], seed = 11 + i * 7;
+    const st0 = A.estadosDe(sp)[0];
+    zooms(cd.body, box, (ctx, z, T, tags) => A.estrutura(ctx, sp, 0, 0, st0, z, { T, seed, tags, stub: true }));
+    const sw = el('div', 'tiles states', null, cd);
+    A.estadosDe(sp).forEach(st => tile(sw, A.NOME_ESTADO[st], box, sp.tam === 'G' ? 26 : 30, (ctx, z, T, tags) => A.estrutura(ctx, sp, 0, 0, st, z, { T, seed, tags, stub: true })));
+  });
+  // as duas estruturas de túnel
+  el('h3', null, 'Estruturas de túnel', s).style.margin = '18px 0 8px';
+  const g2 = grid(s, true), P = A.curve({ x: 0.2, y: 0.9 }, { x: 3.0, y: 0.5 }, 0.15);
+  const b = card(g2, { titulo: 'Barricada', tag: 'no túnel · vida 150', sub: 'Bloqueia o túnel; formigas passam, inimigos param. Variantes em Túneis.', uso: 'Consome barro para construir; vira alerta vermelho quando atacada.' });
+  zooms(b.body, [0, 0, 3.2, 1.4], (ctx, z, T) => { A.tunel(ctx, P, 2, 'livre', z, { T, formigas: 0.8, dir: 'duplo' }); A.barricada(ctx, P, P.len * 0.55, 2, z, { hp: 0.8 }); });
+  const ga = card(g2, { titulo: 'Galeria de assalto', tag: 'túnel especial', sub: 'Túnel que leva a expedição até o ninho rival. Variantes em Túneis.', uso: 'Formigas que saem por ela chegam mais rápido ao alvo.' });
+  zooms(ga.body, [0, 0, 3.2, 1.4], (ctx, z, T) => A.tunel(ctx, P, 2, 'galeria', z, { T, formigas: 1.2, dir: 'ida' }));
+}
+
+// ================= 8. Superfície =================
+{
+  const s = section('superficie', 'Superfície e estações', 'Superfície viva (D110): chão ondulado com húmus, grama baixa, pedrinhas, folhas caídas, flores pequenas, morros e mato ao fundo, céu em degradê. O cortadouro é a boca com arco por onde as cortadeiras saem.');
+  const g = grid(s, true), box = [0, -2.6, 9, 3.8];
+  const PLS = [{ tipo: 'capim', x: 0.5, h: 1.1 }, { tipo: 'arbusto', x: 1.6, h: 1.3 }, { tipo: 'folhaLarga', x: 3.2, h: 1.6 }, { tipo: 'samambaia', x: 6.9, h: 1.5 }, { tipo: 'trevo', x: 7.9, h: 0.8 }, { tipo: 'dente', x: 8.6, h: 1.1 }];
+  const scene = est => (ctx, z, T, tags) => {
+    A.solo(ctx, -1, -0.6, 11, 2, z, 5);
+    const gy = A.superficie(ctx, est, -1, 11, z, T, PLS, [5.2]);
+    ctx.save(); ctx.translate(0, gy(5.2)); A.cortadouroBoca(ctx, 5.2, z); ctx.restore();
+    for (let i = 0; i < 3; i++) { const t = ((T * 0.18) + i / 3) % 1, ida = t < 0.5, u = ida ? t * 2 : (1 - t) * 2, x = 5.6 + u * 1.2; A.ant(ctx, 'cortadeira', x, gy(x) - 0.08, ida ? 0 : Math.PI, z, { carry: ida ? null : 'folha' }); }
+    A.tunel(ctx, A.curve({ x: 5.2, y: 0.05 }, { x: 6.0, y: 1.2 }, 0.1), 1, 'livre', z, { T, formigas: 1.2, dir: 'duplo' });
+  };
+  const cd = card(g, { titulo: 'Superfície nas 4 estações', tag: 'D110', sub: 'Zoom médio (24) e perto (48). No inverno as plantas ficam só no caule; no outono amarelam.' });
+  Object.entries(A.ESTACOES).forEach(([k, e]) => tile(cd.body, e.nome + ' · 24', box, 24, scene(k)));
+  tile(cd.body, 'Primavera · perto 48', [3.0, -2.2, 4.6, 3.2], 48, scene('primavera'));
+  const g2 = grid(s);
+  Object.entries(A.PLANTAS).forEach(([k, n], i) => {
+    const c = card(g2, { titulo: n, sub: 'Mesma função: dá folha ao cortadouro' }), b = [-1.1, -2.5, 2.2, 2.75];
+    Object.keys(A.ESTACOES).forEach(est => tile(c.body, A.ESTACOES[est].nome, b, 30, (ctx, z, T) => { ctx.fillStyle = A.ESTACOES[est].ceu; ctx.fillRect(-1.1, -2.5, 2.2, 2.5); A.solo(ctx, -1.2, 0, 2.4, 0.4, z, 3); A.planta(ctx, k, 0, 0, k === 'folhaLarga' ? 1.8 : k === 'samambaia' ? 1.6 : k === 'arbusto' ? 1.3 : 1.2, est, z, T, i * 5 + 2); }));
+  });
+}
+
+// ================= 9. Ícones =================
+{
+  const s = section('icones', 'Ícones de interface', 'Sólidos, de cantos redondos e com recortes (D110), sempre 24 dp na tela (03 §9). Ícones de alerta têm fundo Painel e anel na cor do alerta.');
+  const cd = card(grid(s, true), { titulo: 'Conjunto', tag: 'D110', sub: 'Em 24 dp (tamanho real) e ampliado em 48 dp para inspeção' });
+  cd.id = 'icones-set';
+  Object.entries(A.ICONES).forEach(([k, n]) => {
+    const t = el('div', 'tile', null, cd.body); t.style.width = '104px'; t.style.overflow = 'visible'; const row = el('div', null, null, t); row.style.cssText = 'display:flex;gap:8px;align-items:center;background:#2A221C;border-radius:10px;padding:8px';
+    iconEl(k, 24, null, row); iconEl(k, 48, null, row); el('span', null, n, t);
+  });
+  const sb = card(grid(s, true), { titulo: 'Setas de borda (D93)', sub: 'Até 4 na borda da tela, apontando para o alerta fora da vista; número quando há vários do mesmo tipo.' });
+  dpTile(sb.body, 'fila · inimigo · toca · água · rainha', 340, 64, ctx => { ['fila', 'inimigo', 'toca', 'agua', 'rainha'].forEach((t, i) => A.setaBorda(ctx, 34 + i * 66, 32, [-0.4, 0, 0.6, Math.PI / 2, -Math.PI / 2][i], t, i === 1 ? 3 : 1)); }, C.solo);
+  const ci = card(grid(s, true), { titulo: 'Ícones de combate sobre a formiga', sub: 'Só no zoom perto' });
+  dpTile(ci.body, 'escudo · alvo · cruz · bomba · bandeira', 260, 48, ctx => ['escudo', 'alvo', 'cruz', 'bomba', 'bandeira'].forEach((k, i) => A.combatIcon(ctx, k, 26 + i * 52, 24, 26)), '#2A221C');
+}
+
+// ================= 10. Componentes =================
+{
+  const s = section('componentes', 'Componentes de interface', 'Peças do HUD (03 §6.1) num quadro de 360 dp, que o app de exemplo vai reutilizar. Botões: 48 dp de altura, toque reduz a 0,96; painel abre em 200 ms.');
+  const wrap = el('div', 'demo-row', null, s);
+  const ph = el('div', 'phone', null, wrap);
+  // linha superior
+  const top = el('div', 'hud-top', null, ph);
+  el('span', null, 'Primavera · ano 2', top);
+  const yr = el('div', 'yr', '<i></i><b style="left:52%"></b><b style="left:78%"></b><u style="left:90%">★</u>', top);
+  const seg = el('div', 'seg', null, top); const bp = el('button', null, null, seg); iconEl('pausa', 14, null, bp); el('button', 'on', '1×', seg); el('button', null, '2×', seg);
+  // status
+  const st = el('div', 'status', null, ph);
+  const s1 = el('div', 'st', null, st); iconEl('fungo', 16, null, s1); el('span', null, '142 <small>+12/min</small>', s1);
+  const s2 = el('div', 'st', null, st); iconEl('rainha', 16, null, s2); el('span', null, '100%', s2);
+  const s3 = el('div', 'st', null, st); iconEl('aladas', 16, null, s3); el('span', null, '3/6', s3);
+  const s4 = el('div', 'st', null, st); iconEl('populacao', 16, null, s4); el('span', null, '48', s4);
+  // alerta vermelho de topo
+  const al = el('div', 'alert-top', null, ph); iconEl('a_inimigo', 24, null, al); el('span', 'grow', 'Inimigos no túnel leste', al); const ir = el('button', 'btn sq', null, al); ir.style.minHeight = '36px'; ir.style.flex = '0 0 36px'; iconEl('ir', 20, null, ir);
+  // mundo
+  const wd = el('div', 'world', null, ph); const wc = el('canvas', null, null, wd);
+  wc.width = 360 * DPR; wc.height = 180 * DPR; wc.style.width = '360px'; wc.style.height = '180px';
+  const wv = { cv: wc, ctx: wc.getContext('2d'), x0: 0, y0: -0.6, w: 15, h: 7.5, z: 24, bg: 'solo', seed: 2, vis: false, draw: (ctx, z, T, tags) => {
+    const NO = { x: 5.2, y: 3.2 }, ES = id => A.ESTRUTURAS.find(e => e.id === id);
+    A.tunel(ctx, A.curve({ x: 0.0, y: 4.2 }, NO, 0.1), 2, 'livre', z, { T, formigas: 1.2, dir: 'duplo' });
+    A.ligacao(ctx, ES('jardim'), 10.4, 1.4, NO, 2, z, { T, tags, seed: 4, formigas: 2, dir: 'duplo' });
+    A.ligacao(ctx, ES('real'), 6.0, 4.9, NO, 1, z, { T, tags, seed: 5, formigas: 1, dir: 'ida' });
+    A.ligacao(ctx, Object.assign({}, ES('destilaria'), { porta: 'R' }), 0.4, 1.0, NO, 1, z, { T, tags, seed: 6, est: 'falta_ing', fila: 3 });
+    A.no(ctx, NO.x, NO.y, 2, z);
+  } };
+  wc._v = wv; views.push(wv); io.observe(wc);
+  // papéis
+  const rl = el('div', 'roles', null, ph);
+  [['carregar', 'Carregar', 22], ['escavar', 'Escavar', 6], ['cuidar', 'Cuidar', 11], ['guardar', 'Guardar', 5], ['reserva', 'Reserva', 4]].forEach(([k, n, v], i) => { const r = el('div', 'role' + (i === 0 ? ' on' : ''), null, rl); iconEl(k, 20, null, r); el('b', null, v, r); el('span', null, n, r); r.onclick = () => { rl.querySelectorAll('.role').forEach(x => x.classList.remove('on')); r.classList.add('on'); }; });
+  // ações
+  const ac = el('div', 'acts', null, ph);
+  const b1 = el('button', 'btn pri', null, ac); iconEl('construir', 20, '#1B1510', b1); el('span', null, 'Construir', b1);
+  const b2 = el('button', 'btn', null, ac); iconEl('expedicao', 20, null, b2); el('span', null, 'Expedição', b2);
+  const b3 = el('button', 'btn sq', null, ac); iconEl('menu', 20, null, b3);
+
+  // painel de estrutura
+  const ph2 = el('div', 'phone', null, wrap); ph2.style.alignSelf = 'flex-end';
+  const sh = el('div', 'sheet', null, ph2); el('div', 'grab', null, sh);
+  const hr = el('div', 'row', null, sh); iconEl('fungo', 24, null, hr); el('div', 'grow', '<div style="font-size:20px;font-weight:700">Jardim de fungo</div><div style="color:#EBD58A;font-weight:700;font-size:14px">Falta ingrediente</div>', hr); const xb = el('button', 'btn sq', null, hr); xb.style.flex = '0 0 40px'; xb.style.minHeight = '40px'; iconEl('fechar', 18, null, xb);
+  const kv = el('div', 'kv', null, sh);
+  const k1 = el('div', null, null, kv); const kb1 = el('b', null, null, k1); iconEl('folha', 16, null, kb1); el('span', null, '0 / 2', kb1); el('span', null, 'Entrada', k1);
+  const k2 = el('div', null, null, kv); const kb2 = el('b', null, null, k2); iconEl('fungo', 16, null, kb2); el('span', null, '4', kb2); el('span', null, 'Saída', k2);
+  const k3 = el('div', null, null, kv); const kb3 = el('b', null, null, k3); iconEl('cuidar', 16, null, kb3); el('span', null, '2 / 2', kb3); el('span', null, 'Cuidadoras', k3);
+  el('p', null, '<span style="color:var(--txt2);font-size:14px">2 folha → 1 fungo + refugo · 4 s por ciclo</span>', sh).style.margin = '0 0 10px';
+  const ra = el('div', 'acts', null, sh); ra.style.padding = '0';
+  const m1 = el('button', 'btn', null, ra); iconEl('melhorar', 18, null, m1); el('span', null, 'Nível 2', m1);
+  const m2 = el('button', 'btn', null, ra); iconEl('pausa', 18, null, m2); el('span', null, 'Pausar', m2);
+  const m3 = el('button', 'btn red sq', null, ra); iconEl('demolir', 18, '#FFB3B9', m3);
+
+  // botões e toast
+  const bx = el('div', 'card', null, wrap); bx.style.maxWidth = '360px'; el('h3', null, 'Botões, aviso e toast', bx);
+  const r1 = el('div', 'acts', null, bx); r1.style.padding = '10px 0 4px';
+  el('button', 'btn pri', 'Primário', r1); el('button', 'btn', 'Secundário', r1);
+  const r2 = el('div', 'acts', null, bx); r2.style.padding = '4px 0';
+  el('button', 'btn dis', 'Desabilitado', r2); el('button', 'btn red', 'Perigoso', r2);
+  const tt = el('div', 'toast', null, bx); iconEl('estrela', 20, null, tt); el('span', null, 'Câmara de geleia liberada', tt); tt.style.marginTop = '8px';
+  const t2 = el('div', 'toast', null, bx); iconEl('a_agua', 24, null, t2); el('span', null, 'Primavera: risco de alagamento', t2); t2.style.marginTop = '8px';
+}
+
+// ================= 11. Pendências =================
+{
+  const s = section('pendencias', 'Para escolher', 'Rodada 9 decidida (D117): eventos dentro do formigueiro. Próximo: eventos da superfície (rodada 10).');
+  const l = el('div', 'pend-list', null, s);
+  el('a', null, '<b>Ver os modelos da rodada 9</b><span>modelos.html</span>', l).href = 'modelos.html';
+}
+
+// destaque da seção atual no índice
+const secs = [...document.querySelectorAll('section')], links = [...nav.querySelectorAll('a')];
+addEventListener('scroll', () => { let cur = 0; secs.forEach((s, i) => { if (s.getBoundingClientRect().top < 140) cur = i; }); links.forEach((a, i) => a.classList.toggle('on', i === cur)); }, { passive: true });
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.getElementById('anim').click();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

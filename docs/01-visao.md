@@ -13,7 +13,7 @@ Escave um formigueiro em corte lateral, combine folhas, seiva, presas e argila e
 
 **Um parágrafo**
 
-Você não controla formigas: você é a colônia. Decide onde escavar túneis e câmaras, o que cada berçário dá de comer às larvas e quantas operárias vão carregar, escavar, cuidar ou guardar, e as formigas executam sozinhas. Folhas viram fungo, seiva vira néctar, presas viram proteína, e as combinações desses recursos (pasta, ácido, carapaça, geleia, cola) liberam castas, defesas e upgrades, cada um exigindo o seu recurso. Cada olheiro aberto para colher mais folhas é também uma porta para predadores, e os ninhos rivais cavam até você pelos lados. Uma fase dura um ano da colônia (de 12 a 20 minutos, quatro estações). A mesma colônia cresce por 5 anos, e no fim de cada arco as aladas saem no voo nupcial e fundam um ninho novo, com um traço herdado (D67, D73). Se a rainha morre, a fase acaba.
+Você não controla formigas: você é a colônia. Decide onde escavar túneis e câmaras, o que cada berçário dá de comer às larvas e quantas operárias vão carregar, escavar, cuidar ou guardar, e as formigas executam sozinhas. Folhas viram fungo, seiva vira néctar, presas viram proteína, e as combinações desses recursos (pasta, ácido, carapaça, geleia, cola) liberam castas, defesas e upgrades, cada um exigindo o seu recurso. Cada cortadouro aberto para colher mais folhas é também uma porta para predadores, e os ninhos rivais cavam até você pelos lados. Uma fase dura um ano da colônia (de 12 a 20 minutos, quatro estações). A mesma colônia cresce por 5 anos, e no fim de cada arco as aladas saem no voo nupcial e fundam um ninho novo, com um traço herdado (D67, D73). Se a rainha morre, a fase acaba.
 
 ## 2. Fantasia do jogador
 
@@ -35,7 +35,7 @@ O prazer central é ver uma máquina viva que você projetou funcionando sozinha
 
 ### P3. A ameaça entra por onde você cresceu
 
-- **Na prática:** cada olheiro (entrada) aumenta a colheita e também a área a defender. Ninhos rivais cavam até o seu pelos lados. O layout do ninho é a sua defesa: gargalos, postos de guarda e profundidade da rainha importam.
+- **Na prática:** cada cortadouro (entrada) aumenta a colheita e também a área a defender. Ninhos rivais cavam até o seu pelos lados. O layout do ninho é a sua defesa: gargalos, postos de guarda e profundidade da rainha importam.
 - **Não fazer:** ondas que ignoram o layout. Torres de defesa autônomas sem custo logístico. Um único ponto de entrada fixo.
 
 ### P4. A colônia se lê em qualquer zoom
@@ -66,12 +66,12 @@ Os sistemas ficam em `02-mecanicas.md`, e o conteúdo (recursos, receitas, casta
 
 - **Tabuleiro:** corte lateral vertical. Uma faixa fina de superfície no topo com plantas em posições fixas. Abaixo, o solo onde o jogador escava túneis e câmaras.
 - **Recursos:** 4 naturais (folha das plantas, seiva dos bolsões de raízes, presa de inimigos mortos, argila de toda escavação) → 5 processados N1 → 5 combinados N2 → 2 combinados N3 (pós-MVP).
-- **Extração:** plantas e bolsões de raízes ficam em posições fixas, e o extrator precisa ser construído dentro do anel da fonte (olheiro embaixo da planta, coletor de seiva ao lado do bolsão). Os bolsões se esgotam e empurram a expansão. Presa vem de inimigos mortos e de expedições; argila, de escavar.
+- **Extração:** plantas e bolsões de raízes ficam em posições fixas, e o extrator precisa ser construído dentro do anel da fonte (cortadouro embaixo da planta, coletor de seiva ao lado do bolsão). Os bolsões se esgotam e empurram a expansão. Presa vem de inimigos mortos e de expedições; argila, de escavar.
 - **População:** a rainha põe ovos → o ovo vai para um berçário → a larva é alimentada conforme a **dieta** do berçário → nasce a casta correspondente.
 - **Papéis das operárias (sliders):** Carregar, Escavar, Cuidar, Guardar e Reserva (as que sobram, que defendem a rainha).
 - **Castas no MVP (proposta, `07` §12):** econômicas (operária, cortadeira, cavadora), de combate (soldado, tanque, atiradora, curandeira) e alada. Depois do MVP: explosiva e saqueadora.
 - **Estruturas de defesa e ataque:** posto de guarda, barricada, torre ácida, armadilha de cola e galeria de assalto no MVP; mina de gosma e posto de guerra depois.
-- **Ameaças no MVP:** predadores que descem pelos olheiros (de cima) e um ninho rival que ataca pelos túneis laterais (dos lados). Depois do MVP: escavadores que furam o solo em qualquer ponto (de baixo).
+- **Ameaças no MVP:** predadores que descem pelos cortadouros (de cima) e um ninho rival que ataca pelos túneis laterais (dos lados). Depois do MVP: escavadores que furam o solo em qualquer ponto (de baixo).
 - **Defesa:** postos de guarda que o jogador posiciona; as formigas de combate se distribuem sozinhas entre eles.
 - **Contra-ataque:** expedição ao ninho rival, que tem vida, manda ondas e devolve saque quando atacado.
 

@@ -6,7 +6,7 @@
 
 ## 1. O jogo em 30 segundos
 
-- **O que é:** estratégia econômica minimalista num formigueiro em corte lateral, para Android, em retrato. Inspirado na mecânica do Achikaps.
+- **O que é:** estratégia econômica num formigueiro em corte lateral, para Android, em retrato. Inspirado na mecânica do Achikaps. O visual parte do minimalismo, mas o objetivo é um jogo bonito e bem feito (D100).
 - **O jogador é a colônia:**
   - escava túneis e câmaras;
   - ajusta quantas operárias carregam, escavam, cuidam e guardam;
@@ -28,8 +28,9 @@
 | [`03-arte-e-interface.md`](03-arte-e-interface.md) | Paleta, legibilidade, telas, gestos, feedback, acessibilidade | (c) | Interface aprovada; **o visual do mundo será refeito na etapa (c2)** (D61) |
 | [`04-conteudo-e-progressao.md`](04-conteudo-e-progressao.md) | As 15 fases, arcos, transição, traços, dificuldade, tutorial, desafios, sandbox | (d) | Aprovado |
 | [`05-escopo-e-prototipo.md`](05-escopo-e-prototipo.md) | Escopo, arquitetura, esforço, protótipos e critérios, testes, roteiro, Steam, China, receita | (e) | Aprovado |
-| [`06-decisoes.md`](06-decisoes.md) | **Fonte da verdade das decisões:** D01 a D86 e as questões em aberto | Todas | Vivo |
-| `08-direcao-de-arte.md` | Visual do mundo: traçado dos túneis, câmaras, formigas, cores | (c2) | **A escrever (próxima etapa)** |
+| [`06-decisoes.md`](06-decisoes.md) | **Fonte da verdade das decisões:** D01 a D117 e as questões em aberto | Todas | Vivo |
+| `08-direcao-de-arte.md` | Visual do mundo: traçado dos túneis, câmaras, formigas, cores | (c2) | **A escrever** |
+| `../prototipo-arte/` | Protótipos visuais da (c2) em HTML, testados no Chrome em modo de dispositivo (D108). O catálogo visual está em `catalogo/index.html`, os modelos ainda em decisão em `catalogo/modelos.html` (com `catalogo/candidatos.js`), e a biblioteca de desenho que ele compartilha com o futuro app de exemplo, em `catalogo/arte.js`. O app de exemplo também vai ficar aqui (D106) | (c2) | Em andamento |
 | `../prototipo-visual/` | Rascunho de interação em HTML. **Não é referência de estilo** (D61) | — | Histórico |
 
 ### Como ler
@@ -54,8 +55,9 @@
 | (d) Conteúdo e progressão | ✅ |
 | (e) Escopo e protótipo | ✅ |
 | Fechamento (este índice) | ✅ |
-| **(c2) Direção de arte do mundo** | ⏭ Próxima |
-| Protótipo 1 (início do código) | Depois da c2, ou em paralelo a partir do portão de desempenho |
+| **(c2) Direção de arte do mundo** | ⏳ Em andamento: falta o catálogo visual, o app de exemplo e o `08` (D106) |
+| Revisão geral das decisões | Perto do design final (D106) |
+| Protótipo 1 (início do código) | Só depois do visual completo aprovado (D106) |
 
 ## 4. O que está decidido
 
@@ -105,15 +107,15 @@
 
 | Quando | Questões |
 |---|---|
-| **Etapa (c2)** | Q25 traçado dos túneis · Q26 cores do mundo (azul repetido) · Q27 minimapa |
+| **Etapa (c2)** | Nenhuma questão aberta. Falta testar as câmaras novas no protótipo (D101 a D105), definir a cor da água e escrever o `08` (Q25, Q26, Q27 e Q34 já resolvidas) |
 | **Antes do portão de desempenho** | Q32 modelo do celular de entrada |
 | **Nos protótipos** | Q03 receitas e tempos · Q15 prioridade das cuidadoras · Q18 tamanho da colônia · Q20 leitura dos recursos · Q21 inimigos no túnel · Q22 mudar sentido com formigas dentro · Q23 silhuetas das castas |
 | **Durante o protótipo 2** | Q31 som e música |
 | **Antes do protótipo 3** | Q01 nome do jogo |
 | **Antes do teste fechado ou no lançamento** | Q33 métricas anônimas · Q10 preço final |
-| **Depois do lançamento** | Q09 eventos ambientais · Q29 Electron ou Tauri · Q30 tradução para chinês |
+| **Depois do lançamento** | Q29 Electron ou Tauri · Q30 tradução para chinês |
 
-Também ficam em aberto as 39 decisões **provisórias**, que o protótipo pode derrubar. Elas estão marcadas no `06`.
+Também ficam em aberto as 56 decisões **provisórias**, que o protótipo pode derrubar. Elas estão marcadas no `06`.
 
 ## 6. Os 3 maiores riscos
 
@@ -131,7 +133,7 @@ Também ficam em aberto as 39 decisões **provisórias**, que o protótipo pode 
      - métricas (D86);
      - 2 ou 3 pessoas de fora no protótipo 3.
 3. **Projeto longo com retorno incerto.**
-   - São de 43 a 68 semanas focadas, e o cenário realista de receita é modesto (cerca de R$ 5 mil no 1º ano Android, `05` §9.3).
+   - São de 46 a 72 semanas focadas, e o cenário realista de receita é modesto (cerca de R$ 5 mil no 1º ano Android, `05` §9.3).
    - O risco é perder o ritmo antes de chegar à loja.
    - **Mitigação:**
      - marcos curtos com algo jogável no fim de cada um;
@@ -142,12 +144,10 @@ Também ficam em aberto as 39 decisões **provisórias**, que o protótipo pode 
 
 ## 7. Próxima ação
 
-1. **Etapa (c2): direção de arte do mundo.**
-   - Uma rodada de entrevista sobre traçado dos túneis, forma das câmaras, formigas sem patas e cores do mundo.
-   - Depois, mini-protótipos visuais de uma tela, testados no Redmi Note 14.
-   - O resultado é o `08-direcao-de-arte.md`.
-2. **Em seguida, o M0 e o M1** (`05` §8):
-   - `git init`;
-   - projeto base gerando APK;
-   - portão de desempenho.
-   - O portão pode começar em paralelo à c2, porque só usa formas simples.
+1. **Fechar a etapa (c2)** (D106):
+   - **catálogo visual:** uma página com todas as cores, recursos, castas, inimigos, estruturas, túneis, percalços, ícones e componentes de interface;
+   - **app de exemplo:** navegável, mostrando como vai ser o jogo final;
+   - **`08-direcao-de-arte.md`:** o documento que junta tudo;
+   - tudo testado no Redmi Note 14 e aprovado.
+2. **Revisão geral** das decisões, perto do design final (D106).
+3. **Só então o código:** M0 e M1 (`05` §8), com o projeto base gerando APK e o portão de desempenho medindo a arte aprovada.

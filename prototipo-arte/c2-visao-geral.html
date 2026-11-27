@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Pherotrio · c2 · mapa 80x80 com percalços</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#15110E;font-family:system-ui,sans-serif;color:#EFE7DC;overscroll-behavior:none}
+canvas{position:fixed;left:0;top:0;touch-action:none}
+#top{position:fixed;left:0;right:0;top:0;height:56px;background:#211B17;border-bottom:1px solid #5A4B3F;display:flex;align-items:center;justify-content:space-between;padding:0 12px;box-sizing:border-box;font-size:13px}
+#top span{color:#B3A697}
+#size{min-height:40px;background:#15110E;color:#EFE7DC;border:1px solid #5A4B3F;border-radius:8px;font-size:13px;padding:0 10px}
+#bot{position:fixed;left:0;right:0;bottom:0;height:112px;background:#211B17;border-top:1px solid #5A4B3F;box-sizing:border-box;padding:8px 12px;font-size:12px;color:#B3A697}
+#lod{color:#EFE7DC;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#btns{display:flex;gap:6px}
+#btns button{flex:1;min-height:44px;background:#15110E;color:#EFE7DC;border:1px solid #5A4B3F;border-radius:8px;font-size:13px;padding:0 4px}
+#btns button.on{border-color:#EFE7DC;background:#2B231D}
+#hint{margin-top:5px;line-height:1.25;font-size:11px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="top"><b id="season">Ano 2 · Verão</b><button id="size"></button></div>
+<div id="bot">
+  <div id="lod"></div>
+  <div id="btns"><button id="zout">− zoom</button><button id="all">Ver tudo</button><button id="zin">+ zoom</button><button id="spring">Primavera</button></div>
+  <div id="hint">Pinça para zoom, arraste para mover, toque duplo aproxima. Toque numa seta para ir até o problema.</div>
+</div>
+<script>
+const MW = 80, MH = 80, SKY = 3, Z_MAX = 64, TOP = 56, BOT = 112, INTEN = 0.4, VIS = 3;
+// tamanhos para comparar: túnel nível 1 e 2 (em células), escala das câmaras e das formigas
+const SIZES = {
+  antigo: { nome: 'Tamanho: antigo', t1: 0.375, t2: 0.5, cam: 1, ant: 1 },
+  menor: { nome: 'Tamanho: menor', t1: 0.25, t2: 0.34, cam: 0.6, ant: 0.8 },
+  minimo: { nome: 'Tamanho: mínimo', t1: 0.18, t2: 0.25, cam: 0.45, ant: 0.65 },
+};
+const SIZE_ORDER = ['menor', 'minimo', 'antigo'];
+const sizeKey = SIZES[new URLSearchParams(location.search).get('t')] ? new URLSearchParams(location.search).get('t') : 'menor';
+const SZ = SIZES[sizeKey];
+const C = { solo: '#15110E', base: '#43362B', txt: '#EFE7DC', txt2: '#B3A697', veg: '#7FD16B', acu: '#F5B841', ani: '#F06E9A', def: '#6FB3E8', perigo: '#FF4F5E', ceu: '#1C2530', painel: '#211B17', agua: '#3E5F6E' };
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let VW, VH, DPR, spring = false;
+function resize() { VW = innerWidth; VH = innerHeight; DPR = devicePixelRatio || 1; cv.width = VW * DPR; cv.height = VH * DPR; cv.style.width = VW + 'px'; cv.style.height = VH + 'px'; clampCam(); }
+const useH = () => VH - TOP - BOT;
+const zMin = () => Math.min(VW / MW, useH() / (MH + SKY)) * 0.98;
+const ux = () => VW / 2, uy = () => TOP + useH() / 2;
+const cam = { x: 38, y: 10, z: 24, anim: null };
+function clampCam() {
+  if (!VW) return;
+  cam.z = Math.max(zMin(), Math.min(Z_MAX, cam.z));
+  const hw = VW / 2 / cam.z, hh = useH() / 2 / cam.z;
+  cam.x = hw * 2 >= MW ? MW / 2 : Math.max(hw, Math.min(MW - hw, cam.x));
+  cam.y = hh * 2 >= MH + SKY ? (MH - SKY) / 2 : Math.max(-SKY + hh, Math.min(MH - hh, cam.y));
+}
+const w2s = (x, y) => ({ x: (x - cam.x) * cam.z + ux(), y: (y - cam.y) * cam.z + uy() });
+const s2w = (x, y) => ({ x: (x - ux()) / cam.z + cam.x, y: (y - uy()) / cam.z + cam.y });
+const lodOf = z => z >= 36 ? 'perto' : z >= 18 ? 'medio' : z >= 12 ? 'longe' : 'geral';
+const LOD_NOME = { perto: 'Perto', medio: 'Médio', longe: 'Longe', geral: 'Visão geral' };
+function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(11);
+function hex(c) { return [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); }
+function lerpCol(a, b, k) { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',') + ')'; }
+function mkBlob(o, seed) {
+  const r = rng(seed), p = [r() * 6.28, r() * 6.28, r() * 6.28], a = [0.06 + r() * .06, 0.05 + r() * .05, 0.03 + r() * .03];
+  o.k = th => 1 + a[0] * Math.sin(2 * th + p[0]) + a[1] * Math.sin(3 * th + p[1]) + a[2] * Math.sin(5 * th + p[2]);
+  o.pts = []; for (let i = 0; i <= 48; i++) { const th = i / 48 * 6.2832, k = o.k(th); o.pts.push({ x: o.x + o.rx * k * Math.cos(th), y: o.y + o.ry * k * Math.sin(th) }); }
+}
+function blobPath(o) { ctx.beginPath(); o.pts.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); ctx.closePath(); }
+
+// ---------- regiões (D95): centro, lados, fundo ----------
+const REG = [
+  { nome: 'Região 1 · centro', rects: [[26, 0, 28, 40]], aberta: true },
+  { nome: 'Região 2 · lado esquerdo', rects: [[0, 0, 26, 40]], aberta: true },
+  { nome: 'Região 3 · lado direito · fechada', rects: [[54, 0, 26, 40]], aberta: false, lab: [67, 3] },
+  { nome: 'Região 4 · centro fundo · fechada', rects: [[20, 40, 40, 40]], aberta: false, lab: [40, 43] },
+  { nome: 'Região 5 · lados fundos · fechada', rects: [[0, 40, 20, 40], [60, 40, 20, 40]], aberta: false, lab: [10, 43] },
+];
+
+// ---------- percalços (D96) ----------
+const OBS = [
+  { t: 'rocha', x: 40, y: 14, rx: 3.6, ry: 2.4 },
+  { t: 'rocha', x: 13, y: 23, rx: 4.5, ry: 1.8 },
+  { t: 'argila', x: 31, y: 26, rx: 5, ry: 2.6 },
+  { t: 'areia', x: 8, y: 10, rx: 5.5, ry: 3.6 },
+  { t: 'agua', x: 46.5, y: 31.6, rx: 3.2, ry: 1.8 },
+  { t: 'toca', x: 19, y: 33.6, rx: 0.8, ry: 0.6, alc: 4 },
+  { t: 'rocha', x: 66, y: 20, rx: 4, ry: 3 },
+  { t: 'agua', x: 40, y: 58, rx: 4, ry: 2.2 },
+  { t: 'toca', x: 64, y: 50, rx: 0.8, ry: 0.6, alc: 4 },
+  { t: 'areia', x: 70, y: 66, rx: 6, ry: 4 },
+  { t: 'rocha', x: 22, y: 62, rx: 5, ry: 2.5 },
+  { t: 'argila', x: 50, y: 70, rx: 6, ry: 3 },
+];
+OBS.forEach((o, i) => mkBlob(o, 500 + i * 7));
+const OBS_NOME = { rocha: 'rocha', argila: 'argila dura', areia: 'areia solta', agua: 'água', toca: 'toca de aranha' };
+
+// ---------- solo ----------
+const pebbles = []; for (let i = 0; i < 1500; i++) pebbles.push({ x: R() * MW, y: 0.4 + R() * (MH - 0.4), rx: 0.04 + R() * 0.09, ry: 0.03 + R() * 0.07, a: R() * 3.14, c: R() < .5 ? '#30271F' : '#382E25' });
+const roots = []; for (let i = 0; i < 44; i++) { const x = R() * MW; const pts = [[x, 0]]; let px = x, py = 0; const n = 3 + Math.floor(R() * 3); for (let k = 0; k < n; k++) { px += (R() - .5) * 0.8; py += 0.4 + R() * 0.7; pts.push([px, py]); } roots.push(pts); }
+const plants = []; for (let i = 0; i < 30; i++) plants.push({ x: 1 + R() * 78, h: 0.6 + R() * 1.4 });
+
+// ---------- rede ----------
+const nodes = new Map();
+function node(x, y) { const k = x.toFixed(2) + ',' + y.toFixed(2); if (!nodes.has(k)) nodes.set(k, { x, y, r: 0 }); return nodes.get(k); }
+const segs = [];
+function curve(a, b, bend) {
+  const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y, c = { x: mx - dy * bend, y: my + dx * bend };
+  const pts = []; for (let i = 0; i <= 12; i++) { const t = i / 12, u = 1 - t; pts.push({ x: u * u * a.x + 2 * u * t * c.x + t * t * b.x, y: u * u * a.y + 2 * u * t * c.y + t * t * b.y }); }
+  const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  return { pts, cum, len: cum[cum.length - 1] };
+}
+function at(p, s) {
+  s = Math.max(0, Math.min(p.len, s)); let i = 1; while (i < p.cum.length - 1 && p.cum[i] < s) i++;
+  const a = p.pts[i - 1], b = p.pts[i], seg = (p.cum[i] - p.cum[i - 1]) || 1, t = (s - p.cum[i - 1]) / seg;
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, ang: Math.atan2(b.y - a.y, b.x - a.x) };
+}
+function addLine(a, b, lvl, tag, endNode = true) {
+  const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]) / 3));
+  let prev = node(a[0], a[1]);
+  for (let i = 1; i <= n; i++) {
+    const x = a[0] + (b[0] - a[0]) * i / n, y = a[1] + (b[1] - a[1]) * i / n;
+    const cur = (i === n && !endNode) ? { x, y, r: 0 } : node(x, y);
+    segs.push({ a: prev, b: cur, lvl, tag, p: curve(prev, cur, (R() < .5 ? -1 : 1) * (0.04 + R() * 0.04)), state: 'livre' });
+    prev = cur;
+  }
+}
+const corridors = [
+  [[[40, 0], [40, 5], [36, 8], [34, 13], [34, 19]], 2, 'oeste'],
+  [[[40, 5], [45, 9], [47, 15], [46, 21], [42, 26]], 2, 'leste'],
+  [[[34, 19], [38, 23], [42, 26], [44, 29]], 1, 'agua'],
+  [[[34, 19], [30, 22], [29, 28], [30, 33]], 1, 'argila'],
+  [[[18, 0], [18, 5], [14, 9], [10, 12], [7, 16]], 1, 'areia'],
+  [[[18, 5], [24, 9], [30, 9], [36, 8]], 1, 'ponte'],
+  [[[14, 9], [20, 14], [22, 20], [24, 26], [22, 31]], 1, 'toca'],
+];
+corridors.forEach(([pts, lvl, tag]) => { for (let i = 1; i < pts.length; i++) addLine(pts[i - 1], pts[i], lvl, tag); });
+const CH = [
+  { x: 51, y: 7, rx: 2.2, ry: 1.1, cor: C.veg, icon: 'fungo', link: [45, 9] },
+  { x: 4, y: 20, rx: 2.4, ry: 1.2, cor: C.veg, icon: 'fungo', link: [7, 16] },
+  { x: 27.5, y: 14.5, rx: 2, ry: 1.1, cor: C.txt2, icon: 'dep', link: [30, 9] },
+  { x: 37.5, y: 30, rx: 2.4, ry: 1.2, cor: C.txt2, icon: 'ovo', link: [42, 26] },
+  { x: 32, y: 37.5, rx: 3.2, ry: 1.6, cor: C.txt2, icon: 'coroa', link: [30, 33] },
+  { x: 50, y: 24.5, rx: 2.4, ry: 1.2, cor: C.txt2, icon: 'nupcial', link: [46, 21] },
+  { x: 51.5, y: 16.5, rx: 2, ry: 1.1, cor: C.acu, icon: 'nectar', link: [47, 15] },
+  { x: 15.5, y: 31, rx: 2, ry: 1.1, cor: C.acu, icon: 'seiva', link: [22, 31] },
+  { x: 26, y: 4.5, rx: 2, ry: 1.1, cor: C.ani, icon: 'proteina', link: [24, 9] },
+];
+CH.forEach((ch, i) => {
+  // encolhe a câmara mantendo a borda voltada para o túnel no mesmo lugar
+  const dx = ch.link[0] - ch.x, dy = ch.link[1] - ch.y, d = Math.hypot(dx, dy) || 1;
+  const th0 = Math.atan2(dy / ch.ry, dx / ch.rx), rDir = Math.hypot(ch.rx * Math.cos(th0), ch.ry * Math.sin(th0)), mv = rDir * (1 - SZ.cam);
+  ch.x += dx / d * mv; ch.y += dy / d * mv; ch.rx *= SZ.cam; ch.ry *= SZ.cam;
+  mkBlob(ch, 200 + i * 13);
+  const th = Math.atan2((ch.link[1] - ch.y) / ch.ry, (ch.link[0] - ch.x) / ch.rx), k = ch.k(th) * 0.95;
+  addLine(ch.link, [ch.x + ch.rx * k * Math.cos(th), ch.y + ch.ry * k * Math.sin(th)], 1, 'camara', false);
+});
+const posts = [{ x: 40, y: 1.6 }, { x: 18, y: 1.6 }];
+function inObs(o, x, y, pad) { const th = Math.atan2((y - o.y) / o.ry, (x - o.x) / o.rx), k = o.k(th); const d = Math.hypot((x - o.x) / (o.rx * k), (y - o.y) / (o.ry * k)); return d <= 1 + pad / Math.min(o.rx, o.ry); }
+segs.forEach(s => {
+  const m = at(s.p, s.p.len / 2);
+  s.flood = OBS.some(o => o.t === 'agua' && s.p.pts.some(q => inObs(o, q.x, q.y, 2)));
+  s.sand = OBS.some(o => o.t === 'areia' && inObs(o, m.x, m.y, 0));
+  s.danger = OBS.some(o => o.t === 'toca' && s.p.pts.some(q => Math.hypot(q.x - o.x, q.y - o.y) <= o.alc));
+  if (s.tag === 'areia' && s.sand) s.state = 'cheio';
+  else if (s.tag === 'areia') s.state = 'quase';
+  else if (s.tag === 'oeste' && m.y < 9) s.state = 'quase';
+  if (s.sand) s.lvl = Math.min(s.lvl, 2);
+  s.w = s.lvl === 2 ? SZ.t2 : SZ.t1;
+  [s.a, s.b].forEach(n => { n.r = Math.max(n.r, s.w * 0.62); });
+});
+function setupAnts() {
+  segs.forEach(s => {
+    const st = s.state;
+    const dens = { livre: 0.3, quase: 0.75, cheio: 1.1 }[st];
+    s.v = { livre: 1, quase: 0.5, cheio: 0.18 }[st];
+    s.ants = []; const n = Math.max(1, Math.round(s.p.len * dens));
+    for (let i = 0; i < n; i++) s.ants.push({ ph: (i + R() * 0.4) / n, dir: s.lvl === 2 && i % 2 ? -1 : 1, leaf: R() < 0.4 });
+  });
+}
+setupAnts();
+// visibilidade (D98): percalço aparece se algum ponto dele está a até 3 células da colônia
+const colonyPts = []; segs.forEach(s => s.p.pts.forEach(q => colonyPts.push(q))); CH.forEach(ch => colonyPts.push({ x: ch.x, y: ch.y }));
+OBS.forEach(o => { o.vis = o.pts.some(q => colonyPts.some(c => Math.hypot(c.x - q.x, c.y - q.y) <= VIS)) || colonyPts.some(c => Math.hypot(c.x - o.x, c.y - o.y) <= VIS + Math.max(o.rx, o.ry)); });
+const rival = curve({ x: 58, y: 11 }, { x: 52.6, y: 13.8 }, 0.05);
+const enemies = [0.15, 0.3, 0.45, 0.6, 0.75].map(f => ({ f }));
+const spider = { x: 19, y: 33.6 };
+
+// ---------- problemas (para as setas) ----------
+function problems() {
+  const list = [];
+  const ch = segs.filter(s => s.state === 'cheio' || (spring && s.flood)).map(s => ({ ...at(s.p, s.p.len / 2), fl: spring && s.flood }));
+  const used = new Set();
+  ch.forEach((p, i) => {
+    if (used.has(i)) return; let sx = p.x, sy = p.y, n = 1; used.add(i);
+    ch.forEach((q, j) => { if (!used.has(j) && q.fl === p.fl && Math.hypot(q.x - p.x, q.y - p.y) < 6) { used.add(j); sx += q.x; sy += q.y; n++; } });
+    list.push({ x: sx / n, y: sy / n, tipo: p.fl ? 'agua' : 'fila', grave: 1 });
+  });
+  list.push({ x: 54.5, y: 12.8, tipo: 'inimigo', grave: 2 });
+  list.push({ x: spider.x, y: spider.y, tipo: 'toca', grave: 2 });
+  return list;
+}
+
+// ---------- desenho ----------
+function trace(p) { ctx.beginPath(); p.pts.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); }
+function ant(x, y, ang, leaf, lod, z, col) {
+  if (lod === 'longe') { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, 1.1 / z, 0, 6.2832); ctx.fill(); return; }
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); const s = 0.36 / 14 * SZ.ant; ctx.scale(s, s); ctx.fillStyle = col;
+  ctx.beginPath(); ctx.ellipse(-4.2, 0, 3.6, 2.6, 0, 0, 6.2832); ctx.fill();
+  ctx.beginPath(); ctx.arc(-0.4, 0, 0.8, 0, 6.2832); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(1.6, 0, 1.9, 1.3, 0, 0, 6.2832); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(4.4, 0, 1.9, 1.7, 0, 0, 6.2832); ctx.fill();
+  if (lod === 'perto') { ctx.strokeStyle = col; ctx.lineWidth = 0.7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(5.6, -0.8); ctx.quadraticCurveTo(7, -3, 8.6, -2.8); ctx.moveTo(5.6, 0.8); ctx.quadraticCurveTo(7, 3, 8.6, 2.8); ctx.stroke(); }
+  if (leaf) { ctx.fillStyle = C.veg; ctx.beginPath(); ctx.moveTo(7.5, -5); ctx.lineTo(10.5, -2); ctx.lineTo(7.5, 1); ctx.lineTo(4.5, -2); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+}
+function spiderDraw(x, y, lod, z) {
+  if (lod === 'geral' || lod === 'longe') { ctx.fillStyle = C.perigo; ctx.beginPath(); ctx.arc(x, y, 1.8 / z, 0, 6.2832); ctx.fill(); return; }
+  ctx.strokeStyle = C.perigo; ctx.lineWidth = 0.05; ctx.beginPath();
+  for (let i = 0; i < 4; i++) { const a = -0.9 + i * 0.6; [-1, 1].forEach(sd => { ctx.moveTo(x, y); ctx.lineTo(x + sd * Math.cos(a) * 0.55, y + Math.sin(a) * 0.45); }); }
+  ctx.stroke(); ctx.fillStyle = C.perigo; ctx.beginPath(); ctx.arc(x, y - 0.05, 0.2, 0, 6.2832); ctx.fill(); ctx.beginPath(); ctx.arc(x, y + 0.22, 0.14, 0, 6.2832); ctx.fill();
+}
+function icon(kind, x, y, s) {
+  ctx.lineWidth = 0.12 * s;
+  if (kind === 'fungo') { ctx.fillStyle = C.veg; ctx.beginPath(); ctx.arc(x, y, 0.42 * s, 0, 6.2832); ctx.fill(); }
+  if (kind === 'dep') { ctx.strokeStyle = C.txt2; ctx.strokeRect(x - .4 * s, y - .4 * s, .8 * s, .8 * s); }
+  if (kind === 'ovo') { ctx.strokeStyle = C.txt; ctx.beginPath(); ctx.ellipse(x, y, .3 * s, .42 * s, 0, 0, 6.2832); ctx.stroke(); }
+  if (kind === 'coroa') { ctx.fillStyle = C.txt; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(x + (i * .42 - .2) * s, y + .28 * s); ctx.lineTo(x + i * .42 * s, y - .34 * s); ctx.lineTo(x + (i * .42 + .2) * s, y + .28 * s); ctx.closePath(); ctx.fill(); } }
+  if (kind === 'nupcial') { ctx.fillStyle = C.txt; ctx.beginPath(); for (let i = 0; i < 8; i++) { const r = i % 2 ? .16 : .45, a = i / 8 * 6.2832 - Math.PI / 2; ctx.lineTo(x + Math.cos(a) * r * s, y + Math.sin(a) * r * s); } ctx.closePath(); ctx.fill(); }
+  if (kind === 'nectar') { ctx.fillStyle = C.acu; ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * 6.2832; ctx.lineTo(x + Math.cos(a) * .4 * s, y + Math.sin(a) * .4 * s); } ctx.closePath(); ctx.fill(); }
+  if (kind === 'seiva') { ctx.strokeStyle = C.acu; ctx.setLineDash([.15 * s, .12 * s]); ctx.beginPath(); ctx.arc(x, y, .55 * s, 0, 6.2832); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = C.acu; ctx.beginPath(); ctx.arc(x, y, .2 * s, 0, 6.2832); ctx.fill(); }
+  if (kind === 'proteina' || kind === 'presa') { ctx.fillStyle = C.ani; ctx.beginPath(); ctx.moveTo(x, y - .42 * s); ctx.lineTo(x + .4 * s, y + .3 * s); ctx.lineTo(x - .4 * s, y + .3 * s); ctx.closePath(); ctx.fill(); }
+  if (kind === 'rival') { ctx.strokeStyle = C.perigo; ctx.lineWidth = 0.1 * s; ctx.beginPath(); ctx.ellipse(x, y, 1.2 * s, .6 * s, 0, 0, 6.2832); ctx.stroke(); ctx.beginPath(); ctx.ellipse(x, y, .95 * s, .42 * s, 0, 0, 6.2832); ctx.stroke(); }
+}
+function drawObs(o, lod, px) {
+  if (o.t === 'toca') {
+    ctx.fillStyle = '#0B0907'; blobPath(o); ctx.fill();
+    ctx.strokeStyle = C.perigo; ctx.globalAlpha = 0.55; ctx.lineWidth = 1.4 * px; ctx.setLineDash([4 * px, 4 * px]);
+    ctx.beginPath(); ctx.arc(o.x, o.y, o.alc, 0, 6.2832); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; return;
+  }
+  const fill = { rocha: '#4A3F36', argila: '#4B3A2B', areia: '#3B3427', agua: C.agua }[o.t];
+  blobPath(o); ctx.fillStyle = fill; ctx.fill();
+  if (lod === 'geral') return;
+  ctx.save(); blobPath(o); ctx.clip();
+  if (o.t === 'rocha') { ctx.strokeStyle = '#5E5045'; ctx.lineWidth = 1.2 * px; ctx.beginPath(); for (let d = -o.ry * 2; d < o.rx * 4; d += 0.45) { ctx.moveTo(o.x - o.rx * 1.3 + d, o.y + o.ry * 1.3); ctx.lineTo(o.x - o.rx * 1.3 + d + o.ry * 2.6, o.y - o.ry * 1.3); } ctx.stroke(); }
+  if (o.t === 'argila') { ctx.fillStyle = '#6B5642'; const r = rng(o.x * 31 | 0); for (let i = 0; i < o.rx * o.ry * 3; i++) { ctx.beginPath(); ctx.arc(o.x + (r() - .5) * o.rx * 2.2, o.y + (r() - .5) * o.ry * 2.2, 0.09, 0, 6.2832); ctx.fill(); } }
+  if (o.t === 'areia') { ctx.fillStyle = '#8A7C64'; const r = rng(o.y * 37 | 0); for (let i = 0; i < o.rx * o.ry * 9; i++) { ctx.beginPath(); ctx.arc(o.x + (r() - .5) * o.rx * 2.2, o.y + (r() - .5) * o.ry * 2.2, 0.045, 0, 6.2832); ctx.fill(); } }
+  if (o.t === 'agua') { ctx.strokeStyle = '#5C8394'; ctx.lineWidth = 1.2 * px; ctx.beginPath(); for (let yy = o.y - o.ry; yy < o.y + o.ry; yy += 0.6) { for (let xx = o.x - o.rx; xx < o.x + o.rx; xx += 0.2) { const w = yy + Math.sin(xx * 3 + T) * 0.08; xx === o.x - o.rx ? ctx.moveTo(xx, w) : ctx.lineTo(xx, w); } } ctx.stroke(); }
+  ctx.restore();
+}
+let T = 0, arrowsDrawn = [];
+function draw() {
+  const z = cam.z, lod = lodOf(z), px = 1 / z;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = C.solo; ctx.fillRect(0, 0, VW, VH);
+  ctx.setTransform(DPR * z, 0, 0, DPR * z, DPR * (ux() - cam.x * z), DPR * (uy() - cam.y * z));
+  ctx.fillStyle = C.ceu; ctx.fillRect(-20, -SKY - 20, MW + 40, SKY + 20);
+  const g = ctx.createLinearGradient(0, 0, 0, MH); g.addColorStop(0, '#2C231B'); g.addColorStop(0.5, '#1E1813'); g.addColorStop(1, '#120E0B');
+  ctx.fillStyle = g; ctx.fillRect(-20, 0, MW + 40, MH + 20);
+  if (lod !== 'geral') pebbles.forEach(p => { ctx.fillStyle = p.c; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, p.a, 0, 6.2832); ctx.fill(); });
+  ctx.strokeStyle = '#3A3026'; ctx.lineWidth = Math.max(1.2 * px, 0.05); ctx.lineCap = 'round';
+  roots.forEach(r => { ctx.beginPath(); ctx.moveTo(r[0][0], r[0][1]); for (let k = 1; k < r.length; k++) { const a = r[k - 1], b = r[k]; ctx.quadraticCurveTo(a[0], (a[1] + b[1]) / 2, b[0], b[1]); } ctx.stroke(); });
+  ctx.strokeStyle = C.veg; ctx.lineWidth = Math.max(1.4 * px, 0.06);
+  plants.forEach(p => { ctx.beginPath(); ctx.moveTo(p.x, 0); ctx.lineTo(p.x, -p.h); ctx.stroke(); ctx.fillStyle = C.veg; ctx.beginPath(); ctx.moveTo(p.x, -p.h); ctx.lineTo(p.x + .25, -p.h - .2); ctx.lineTo(p.x + .5, -p.h); ctx.lineTo(p.x + .25, -p.h + .2); ctx.closePath(); ctx.fill(); });
+  OBS.filter(o => o.vis).forEach(o => drawObs(o, lod, px));
+
+  const minW = { perto: 2, medio: 2, longe: 2.5, geral: 3 }[lod] * px;
+  const extra = { perto: 2.5, medio: 2.5, longe: 3, geral: 3.5 }[lod] * px;
+  const tw = s => Math.max(s.w, minW);
+  CH.forEach(ch => { blobPath(ch); ctx.fillStyle = C.base; ctx.fill(); ctx.strokeStyle = ch.cor; ctx.lineWidth = Math.max(2 * px, 0.06); ctx.stroke(); });
+  const flooded = s => spring && s.flood;
+  segs.forEach(s => {
+    if (s.state === 'livre' || flooded(s)) return;
+    const hz = s.state === 'cheio' ? 1 : 0.5, amp = (s.state === 'cheio' ? 1 : 0.75) * INTEN;
+    const k = amp * (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(T * 6.2832 * hz)));
+    trace(s.p); ctx.lineCap = 'round'; ctx.strokeStyle = lerpCol(C.base, s.state === 'cheio' ? '#E0605A' : '#E3C45C', k); ctx.lineWidth = tw(s) + 2 * extra; ctx.stroke();
+  });
+  segs.forEach(s => { trace(s.p); ctx.lineCap = 'round'; ctx.strokeStyle = flooded(s) ? C.agua : C.base; ctx.lineWidth = tw(s); ctx.stroke(); });
+  ctx.fillStyle = C.base; nodes.forEach(n => { ctx.beginPath(); ctx.arc(n.x, n.y, Math.max(n.r, minW * 0.62), 0, 6.2832); ctx.fill(); });
+  if (lod !== 'geral') segs.forEach(s => { if (s.sand && !flooded(s)) { trace(s.p); ctx.setLineDash([1.5 * px, 3 * px]); ctx.strokeStyle = '#8A7C64'; ctx.lineWidth = 1.2 * px; ctx.stroke(); ctx.setLineDash([]); } });
+  trace(rival); ctx.strokeStyle = C.base; ctx.lineWidth = Math.max(SZ.t1, minW); ctx.stroke();
+  ctx.setLineDash([3 * px, 3 * px]); ctx.strokeStyle = C.perigo; ctx.lineWidth = Math.max(1.2 * px, 0.04); trace(rival); ctx.stroke(); ctx.setLineDash([]);
+  posts.forEach(p => { const h = 0.32 * Math.max(0.6, SZ.cam); ctx.fillStyle = C.base; ctx.fillRect(p.x - h, p.y - h, 2 * h, 2 * h); ctx.strokeStyle = C.def; ctx.lineWidth = Math.max(2 * px, 0.06); ctx.strokeRect(p.x - h, p.y - h, 2 * h, 2 * h); });
+  if (lod !== 'geral') CH.forEach(ch => icon(ch.icon, ch.x, ch.y, Math.min(1.2, ch.ry * 0.9)));
+  if (lod !== 'geral') {
+    segs.forEach(s => { if (flooded(s)) return; s.ants.forEach(a => {
+      let d = ((a.ph * s.p.len + a.dir * T * s.v) % s.p.len + s.p.len) % s.p.len;
+      const q = at(s.p, d), off = s.lvl === 2 ? a.dir * s.w * 0.2 : 0;
+      ant(q.x - Math.sin(q.ang) * off, q.y + Math.cos(q.ang) * off, q.ang + (a.dir < 0 ? Math.PI : 0), a.leaf && a.dir > 0, lod, z, C.txt);
+    }); });
+    enemies.forEach(e => { const f = (e.f + Math.sin(T * 0.7 + e.f * 9) * 0.05); const q = at(rival, rival.len * Math.min(0.95, Math.max(0.05, f))); ant(q.x, q.y, q.ang, false, lod, z, C.perigo); });
+  } else {
+    enemies.forEach(e => { const q = at(rival, rival.len * e.f); ctx.fillStyle = C.perigo; ctx.beginPath(); ctx.arc(q.x, q.y, 1.6 * px, 0, 6.2832); ctx.fill(); });
+  }
+  spiderDraw(spider.x + Math.sin(T * 0.8) * 0.6, spider.y - 0.9 + Math.cos(T * 0.6) * 0.3, lod, z);
+  // regiões fechadas
+  ctx.fillStyle = 'rgba(8,6,5,0.6)';
+  REG.filter(r => !r.aberta).forEach(r => r.rects.forEach(([x, y, w, h]) => ctx.fillRect(x, y, w, h)));
+  ctx.strokeStyle = '#6A5A4C'; ctx.lineWidth = 1.5 * px; ctx.setLineDash([5 * px, 4 * px]);
+  REG.forEach(r => r.rects.forEach(([x, y, w, h]) => ctx.strokeRect(x, y, w, h))); ctx.setLineDash([]);
+  ctx.globalAlpha = 0.6; [['seiva', 72, 30], ['presa', 60, 34], ['seiva', 34, 66], ['presa', 8, 56], ['rival', 70, 58]].forEach(([k, x, y]) => icon(k, x, y, 1.4)); ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#5A4B3F'; ctx.lineWidth = 1 * px; ctx.strokeRect(0, -SKY, MW, MH + SKY);
+
+  // ---------- camada de tela ----------
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const inView = p => p.x > 0 && p.x < VW && p.y > TOP && p.y < VH - BOT;
+  const pill = (txt, x, y, col) => { ctx.font = '11px system-ui,sans-serif'; const w = ctx.measureText(txt).width + 10; x = Math.max(w / 2 + 4, Math.min(VW - w / 2 - 4, x)); ctx.fillStyle = 'rgba(21,17,14,0.85)'; ctx.fillRect(x - w / 2, y - 8, w, 16); ctx.fillStyle = col || C.txt2; ctx.fillText(txt, x, y); };
+  REG.filter(r => r.lab).forEach(r => { const p = w2s(r.lab[0], r.lab[1]); if (inView(p)) pill(lod === 'geral' ? r.nome.replace(' · fechada', '') : r.nome, p.x, p.y); });
+  OBS.forEach(o => {
+    const p = w2s(o.x, o.y); if (!inView(p)) return;
+    if (!o.vis) { ctx.fillStyle = 'rgba(90,75,63,0.5)'; ctx.beginPath(); ctx.arc(p.x, p.y, 9, 0, 6.2832); ctx.fill(); ctx.fillStyle = C.txt2; ctx.font = 'bold 12px system-ui'; ctx.fillText('?', p.x, p.y + 0.5); }
+    else if (lod === 'perto' || lod === 'medio') pill(OBS_NOME[o.t], p.x, p.y + (o.t === 'toca' ? 18 : 0));
+  });
+  if (lod === 'perto' || lod === 'medio') {
+    const done = new Set();
+    segs.forEach(s => {
+      if (!(s.sand || (s.flood && !spring))) return; const key = s.tag + (s.sand ? 's' : 'f'); if (done.has(key)) return; done.add(key);
+      const m = at(s.p, s.p.len / 2), p = w2s(m.x + 0.8, m.y - 0.8); if (inView(p)) pill(s.sand ? 'areia: máx. nv2' : 'alaga na primavera', p.x + 40, p.y, s.sand ? C.txt2 : '#8FB3C2');
+    });
+  }
+  arrowsDrawn = [];
+  if (lod !== 'geral') {
+    const m = 30, L = m, Rr = VW - m, Tt = TOP + m, B = VH - BOT - m, cx = ux(), cy = uy();
+    const off = problems().map(p => { const s = w2s(p.x, p.y); return { ...p, sx: s.x, sy: s.y, ang: Math.atan2(s.y - cy, s.x - cx) }; })
+      .filter(p => p.sx < 6 || p.sx > VW - 6 || p.sy < TOP + 6 || p.sy > VH - BOT - 6).sort((a, b) => a.ang - b.ang);
+    const groups = [];
+    off.forEach(p => { const gr = groups.find(gg => Math.abs(gg.ang - p.ang) < 0.35); if (gr) { gr.items.push(p); if (p.grave > gr.top.grave) gr.top = p; } else groups.push({ ang: p.ang, items: [p], top: p }); });
+    groups.slice(0, 4).forEach(gr => {
+      const dx = Math.cos(gr.ang), dy = Math.sin(gr.ang);
+      const tx = dx > 0 ? (Rr - cx) / dx : dx < 0 ? (L - cx) / dx : 1e9, ty = dy > 0 ? (B - cy) / dy : dy < 0 ? (Tt - cy) / dy : 1e9, t = Math.min(tx, ty);
+      const x = cx + dx * t, y = cy + dy * t, col = gr.top.grave === 2 ? C.perigo : (gr.top.tipo === 'agua' ? '#8FB3C2' : '#FFD23F');
+      ctx.fillStyle = C.painel; ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 18, 0, 6.2832); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(x + dx * 27, y + dy * 27); ctx.lineTo(x + dx * 19 - dy * 7, y + dy * 19 + dx * 7); ctx.lineTo(x + dx * 19 + dy * 7, y + dy * 19 - dx * 7); ctx.closePath(); ctx.fill();
+      const tp = gr.top.tipo;
+      if (tp === 'inimigo') { ctx.fillStyle = C.perigo; [-5, 0, 5].forEach(o => { ctx.beginPath(); ctx.arc(x + o, y, 2.6, 0, 6.2832); ctx.fill(); }); }
+      else if (tp === 'toca') { ctx.strokeStyle = C.perigo; ctx.lineWidth = 1.4; ctx.beginPath(); for (let i = 0; i < 4; i++) { const a = -0.9 + i * 0.6; [-1, 1].forEach(sd => { ctx.moveTo(x, y); ctx.lineTo(x + sd * Math.cos(a) * 9, y + Math.sin(a) * 7); }); } ctx.stroke(); ctx.fillStyle = C.perigo; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 6.2832); ctx.fill(); }
+      else if (tp === 'agua') { ctx.fillStyle = '#8FB3C2'; ctx.beginPath(); ctx.moveTo(x, y - 8); ctx.quadraticCurveTo(x + 7, y + 2, x, y + 6); ctx.quadraticCurveTo(x - 7, y + 2, x, y - 8); ctx.fill(); }
+      else { ctx.fillStyle = C.txt; [-6, -2, 2, 6].forEach(o => { ctx.beginPath(); ctx.arc(x + o, y + 2, 1.7, 0, 6.2832); ctx.fill(); }); ctx.fillRect(x - 8, y - 5, 16, 2); }
+      if (gr.items.length > 1) { ctx.fillStyle = C.txt; ctx.beginPath(); ctx.arc(x + 13, y - 13, 7, 0, 6.2832); ctx.fill(); ctx.fillStyle = C.solo; ctx.font = 'bold 10px system-ui'; ctx.fillText(gr.items.length, x + 13, y - 12.5); }
+      arrowsDrawn.push({ x, y, target: gr.top });
+    });
+  }
+  document.getElementById('lod').textContent = LOD_NOME[lod] + ' · ' + (Math.round(z * 10) / 10) + ' dp por célula' + (lod === 'geral' ? ' · mapa inteiro' : '');
+}
+
+// ---------- câmera e gestos ----------
+function goTo(x, y, z) { cam.anim = { x0: cam.x, y0: cam.y, z0: cam.z, x1: x, y1: y, z1: z, t0: performance.now(), dur: 450 }; }
+function zoomAt(sx, sy, f) { const w = s2w(sx, sy); cam.z *= f; clampCam(); cam.x = w.x - (sx - ux()) / cam.z; cam.y = w.y - (sy - uy()) / cam.z; clampCam(); }
+const ptrs = new Map(); let moved = false, lastTap = { t: 0, x: 0, y: 0 };
+cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); if (ptrs.size === 0) moved = false; ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY }); cam.anim = null; });
+cv.addEventListener('pointermove', e => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  const ox = p.x, oy = p.y; p.x = e.clientX; p.y = e.clientY;
+  if (ptrs.size === 1) {
+    if (Math.hypot(p.x - p.sx, p.y - p.sy) > 8) moved = true;
+    if (moved) { cam.x -= (p.x - ox) / cam.z; cam.y -= (p.y - oy) / cam.z; clampCam(); }
+  } else if (ptrs.size === 2) {
+    moved = true;
+    const o = [...ptrs.entries()].find(([k]) => k !== e.pointerId)[1];
+    const d0 = Math.hypot(ox - o.x, oy - o.y), d1 = Math.hypot(p.x - o.x, p.y - o.y);
+    const m0 = { x: (ox + o.x) / 2, y: (oy + o.y) / 2 }, m1 = { x: (p.x + o.x) / 2, y: (p.y + o.y) / 2 };
+    const w = s2w(m0.x, m0.y); if (d0 > 0) cam.z *= d1 / d0; clampCam();
+    cam.x = w.x - (m1.x - ux()) / cam.z; cam.y = w.y - (m1.y - uy()) / cam.z; clampCam();
+  }
+});
+function endPtr(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  const single = ptrs.size === 1; ptrs.delete(e.pointerId);
+  if (!single || moved) return;
+  const x = e.clientX, y = e.clientY;
+  const hit = arrowsDrawn.find(a => Math.hypot(a.x - x, a.y - y) < 26);
+  if (hit) { goTo(hit.target.x, hit.target.y, Math.max(cam.z, 24)); return; }
+  const now = performance.now();
+  if (now - lastTap.t < 320 && Math.hypot(x - lastTap.x, y - lastTap.y) < 30) {
+    const w = s2w(x, y), lod = lodOf(cam.z);
+    goTo(w.x, w.y, lod === 'medio' ? 40 : 24); lastTap.t = 0; return;
+  }
+  lastTap = { t: now, x, y };
+}
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+document.getElementById('zin').onclick = () => goTo(cam.x, cam.y, Math.min(Z_MAX, cam.z * 1.6));
+document.getElementById('zout').onclick = () => goTo(cam.x, cam.y, Math.max(zMin(), cam.z / 1.6));
+document.getElementById('all').onclick = () => goTo(MW / 2, (MH - SKY) / 2, zMin());
+const sizeBtn = document.getElementById('size'); sizeBtn.textContent = SZ.nome;
+sizeBtn.onclick = () => { const nx = SIZE_ORDER[(SIZE_ORDER.indexOf(sizeKey) + 1) % SIZE_ORDER.length]; location.search = '?t=' + nx; };
+document.getElementById('spring').onclick = e => { spring = !spring; e.target.classList.toggle('on', spring); document.getElementById('season').textContent = spring ? 'Ano 2 · Primavera (chuva)' : 'Ano 2 · Verão'; };
+
+window.addEventListener('resize', resize); resize();
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
+  if (cam.anim) {
+    const a = cam.anim, k = Math.min(1, (now - a.t0) / a.dur), e = 1 - Math.pow(1 - k, 3);
+    cam.z = a.z0 + (a.z1 - a.z0) * e; cam.x = a.x0 + (a.x1 - a.x0) * e; cam.y = a.y0 + (a.y1 - a.y0) * e; clampCam();
+    if (k >= 1) cam.anim = null;
+  }
+  draw(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

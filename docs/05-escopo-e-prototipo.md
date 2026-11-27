@@ -23,7 +23,7 @@
   - **Protótipo 2:** a árvore e o combate geram escolhas?
   - **Protótipo 3:** o arco 1 ensina e prende?
   - Depois vêm a produção, o teste fechado e o lançamento.
-- **Esforço estimado:** de **43 a 68 semanas de trabalho focado**, já com a margem (§3). Em calendário, depende de quantas horas por semana o usuário tiver.
+- **Esforço estimado:** de **46 a 72 semanas de trabalho focado**, já com a margem (§3). Em calendário, depende de quantas horas por semana o usuário tiver.
 - **Primeira tarefa de código:** o portão de desempenho (D81, D85).
 - **Itens novos que apareceram nesta etapa:**
   - **som e música** (Q31), que nenhum documento cobria;
@@ -36,7 +36,7 @@
 | Área | O que entra | Onde está definido |
 |---|---|---|
 | Campanha | 3 arcos de 5 fases, inverno de transição, voo nupcial, 12 traços, fases de assalto | `04` §1 a §5 |
-| Conteúdo | 17 recursos, 10 castas, 26 estruturas, 4 inimigos com traços, rival substituível | `07`, `02` §6 e §7 |
+| Conteúdo | 17 recursos, 10 castas, 26 estruturas, 4 inimigos com traços, rival substituível, 5 percalços do terreno | `07`, `02` §4.4, §6 e §7 |
 | Sistemas | Túneis com fila, sentido e 4 níveis; pedidos de transporte; papéis; fome; estações; ondas; expedição | `02` |
 | Modos | 8 desafios, sandbox configurável, 3 dificuldades, estrelas | `04` §4, §7 e §8 |
 | Interface | As 10 telas do `03`, gestos, indicadores de trânsito, tutorial embutido | `03` §6 a §9, `04` §6 |
@@ -54,7 +54,6 @@
 |---|---|---|
 | **Steam (PC)**: paisagem, mouse e teclado, conquistas, save na nuvem | Depois que o Android estiver estável | **Sim** (§9.1) |
 | **Chinês simplificado** pela Steam | Junto com a Steam ou logo depois | **Sim**: fonte CJK, textos externos, sem texto dentro de imagem |
-| Eventos ambientais (Q09) | Atualização de conteúdo | Não |
 | Novos arcos ou biomas | Atualização de conteúdo | A estrutura de dados já permite |
 | iOS | Só se o Android e a Steam derem retorno (exige Mac e US$ 99 por ano) | Não, mas o Capacitor já suporta |
 
@@ -118,6 +117,7 @@
 | Árvore completa: 17 recursos, processadoras genéricas, planilha → JSON | 2 a 3 | |
 | Castas e combate: 5 lógicas, 3 efeitos, 4 inimigos, ondas, estações | 3 a 5 | |
 | Rival, expedição e assalto | 2 a 3 | |
+| Percalços do terreno, névoa perto da colônia e alagamento na primavera (D96 a D98) | 2 a 3 | |
 | **Protótipo 3** | | |
 | Estrutura da campanha: arcos, transição, regiões, voo, traços, estrelas, objetivos, save | 3 a 4 | |
 | Arco 1 jogável com tutorial | 2 a 3 | |
@@ -130,12 +130,12 @@
 | Monetização: compras, AdMob, consentimento | 1 a 2 | D82 |
 | Ficha da loja e materiais | 1 | |
 | Teste fechado (14 dias) e correções | 3 a 4 | §7.3 |
-| **Subtotal** | **36 a 57** | |
-| **Margem de 20%** | **7 a 11** | Imprevistos e retrabalho |
-| **Total** | **43 a 68** | |
+| **Subtotal** | **38 a 60** | |
+| **Margem de 20%** | **8 a 12** | Imprevistos e retrabalho |
+| **Total** | **46 a 72** | |
 
 **Leitura:**
-- Com cerca de 20 horas por semana, isso dá algo entre **1,5 e 2,5 anos de calendário**.
+- Com cerca de 20 horas por semana, isso dá algo entre **1,8 e 2,8 anos de calendário**.
 - É bastante, e é coerente com "qualidade acima de prazo" (D50).
 - Se um dia o prazo apertar, a alternativa guardada na D77 continua valendo: o arco 3 vira uma atualização.
 
@@ -262,7 +262,7 @@ Os critérios são de **comportamento**, para não depender só de "achei legal"
   - PT-BR e EN;
   - arte da etapa c2 aplicada;
   - APK instalável.
-- **Responde:** Q20 (leitura dos ícones), Q23 (silhuetas), Q27 (minimapa).
+- **Responde:** Q20 (leitura dos ícones), Q23 (silhuetas), D92 (leitura da visão geral a 7 ou 8 dp por célula).
 - **Critérios de sucesso:**
   - quem não conhece o jogo termina o arco 1 sem ajuda;
   - leva de 60 a 75 minutos;
@@ -312,9 +312,10 @@ Os critérios são de **comportamento**, para não depender só de "achei legal"
 
 | Marco | Conteúdo | Em paralelo |
 |---|---|---|
-| **M0** | `git init`, projeto base, gerar APK de teste | — |
+| **V** | Visual completo aprovado: `08`, catálogo visual e app de exemplo (D106). É trabalho de design, fora da tabela de esforço, que conta só a construção | — |
+| **M0** | Projeto base, gerar APK de teste (o repositório git já existe) | — |
 | **M1** | Portão de desempenho aprovado | — |
-| **M2** | Protótipo 1 aprovado | Etapa **(c2)**: direção de arte (`08`) |
+| **M2** | Protótipo 1 aprovado | — |
 | **M3** | Protótipo 2 aprovado | Planilha da árvore; esboço de som (Q31) |
 | **M4** | Protótipo 3 aprovado (arco 1 completo) | Recrutar testadores; nome final (Q01) |
 | **M5** | Conteúdo completo: arcos 2 e 3, desafios, sandbox | Ficha da loja, ícone, vídeo |
@@ -391,7 +392,7 @@ As hipóteses:
 |---|---|---|
 | O núcleo não diverte | O jogo todo cai | Protótipo 1 com critérios claros e decisão explícita (§5.6) |
 | Desempenho em celular fraco | Avaliações ruins, menos alcance | Portão na semana 1 e medição a cada marco |
-| Projeto longo (de 1,5 a 2,5 anos) | Cansaço e perda de ritmo | Marcos curtos com algo jogável no fim de cada um |
+| Projeto longo (de 1,8 a 2,8 anos) | Cansaço e perda de ritmo | Marcos curtos com algo jogável no fim de cada um |
 | Só quem desenhou testa os protótipos | Falhas de entendimento aparecem tarde | Métricas, bots, e 2 ou 3 pessoas de fora no protótipo 3 |
 | Poucos downloads | Receita baixa (§9.3) | Ficha caprichada, vídeo do formigueiro funcionando, divulgação em comunidades; Steam como segunda chance |
 | Escopo de conteúdo grande | Balanceamento infinito | Planilha + bots + simulador de economia |

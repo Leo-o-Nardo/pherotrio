@@ -49,7 +49,7 @@ Argila ──►  Barro  ──┬─►  Carapaça
 
 | Recurso | Fonte no mapa | Extrator | Observação |
 |---|---|---|---|
-| **Folha** | Planta fixa na superfície | Olheiro | Produção por estação (máx. na primavera, zero no inverno). |
+| **Folha** | Planta fixa na superfície | Cortadouro | Produção por estação (máx. na primavera, zero no inverno). |
 | **Seiva** | Bolsão de raízes fixo no solo | Coletor de seiva | Finito por bolsão (300 a 600). |
 | **Presa** | Inimigos mortos e saque de expedição | — (corpos recolhidos) | Depende de combate. |
 | **Argila** | Qualquer escavação | — (sai de toda obra) e Poço de argila | 1 argila a cada 5 pt escavados. O Poço de argila gera argila continuamente. |
@@ -92,7 +92,7 @@ Todas as processadoras usam **o mesmo código** (uma processadora genérica que 
 
 | Estrutura | Tipo | Receita | Tempo nv1 / nv2 | Vagas de Cuidar nv1 / nv2 | Upgrade (nv2) |
 |---|---|---|---|---|---|
-| **Olheiro** | extratora | planta → folha (corte de 3 s) | — | 4 / 6 cortadoras (Carregar) | 4 quitina |
+| **Cortadouro** | extratora | planta → folha (corte de 3 s) | — | 4 / 6 cortadoras (Carregar) | 4 quitina |
 | **Coletor de seiva** | extratora | bolsão → 1 seiva a cada 4 s por cuidadora | — | 3 / 4 | 6 barro |
 | **Poço de argila** | extratora | escavadoras geram 1 argila a cada 5 pt | — | 2 / 4 escavadoras | 4 quitina |
 | **Jardim de fungo** | N1 | 2 folha → 1 fungo + refugo | 4 s / 2,7 s | 2 / 3 | 10 néctar |
@@ -107,7 +107,7 @@ Todas as processadoras usam **o mesmo código** (uma processadora genérica que 
 | **Câmara tóxica** | N3 | 1 ácido + 1 cola → 1 gosma | 10 s / 7 s | 2 / 3 | 2 geleia |
 | **Câmara de feromônio** | N3 | 1 geleia + 1 ácido → 1 feromônio | 12 s / 8 s | 2 / 3 | 2 geleia |
 
-Custo de escavação: câmaras 20 pt, extratoras 15 pt. Todo upgrade custa **25 pt + o recurso específico** da tabela (D47).
+Tamanho e custo de escavação (D105): as processadoras são médias (3 × 1, 24 pt) e as extratoras são pequenas (2 × 1, 15 pt). Na base, a lixeira é média, e a câmara real, o berçário, o depósito e a câmara nupcial são grandes (3 × 2, 36 pt). Todo upgrade custa **25 pt + o recurso específico** da tabela (D47).
 
 ## 4. Castas
 
@@ -181,7 +181,7 @@ Assim, alargar túneis puxa o galho mineral e ainda cria demanda de cola e carap
 
 ## 7. Exemplo de leitura: o caminho até uma atiradora
 
-1. Abrir um **olheiro** numa planta → folha → **jardim** → fungo.
+1. Abrir um **cortadouro** numa planta → folha → **jardim** → fungo.
 2. Abrir um **coletor de seiva** num bolsão de raízes → seiva → **destilaria** → néctar.
 3. Matar inimigos (ondas do outono) → presa → **câmara de presas** → proteína (+ quitina de brinde).
 4. Néctar + proteína → **câmara ácida** → ácido.

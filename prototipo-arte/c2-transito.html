@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pherotrio · c2 · trânsito com pulso suave</title>
+<style>
+body{margin:0;background:#211B17;color:#EFE7DC;font-family:system-ui,sans-serif}
+header{padding:10px 12px 2px}
+h1{font-size:16px;margin:0 0 4px;font-weight:600}
+p.sub{font-size:12px;color:#B3A697;margin:0;line-height:1.4}
+.bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px 0}
+.bar button{background:#15110E;color:#B3A697;border:1px solid #5A4B3F;border-radius:8px;padding:6px 10px;font-size:13px;min-height:40px}
+.bar button.on{border-color:#EFE7DC;color:#EFE7DC;background:#2B231D}
+#wrap{display:flex;justify-content:center;padding-top:8px}
+canvas{display:block;touch-action:manipulation}
+.row{display:flex;align-items:center;gap:10px;padding:10px 12px 0;font-size:13px;color:#B3A697}
+.row input{flex:1;accent-color:#EFE7DC}
+.desc{font-size:12px;color:#B3A697;padding:8px 12px 16px;line-height:1.5;max-width:560px;margin:0 auto}
+.desc b{color:#EFE7DC;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>Trânsito: pulso na borda · v3</h1>
+  <p class="sub">Túnel mais claro. Quando enche, a borda aparece e pulsa: amarelo suave no quase cheio, vermelho suave no cheio. Toque num túnel para mudar o estado dele.</p>
+</header>
+<div class="bar" id="opts"></div>
+<div class="row"><span>Força do pulso</span><input type="range" id="inten" min="20" max="100" step="5" value="40"><span id="intenOut">40%</span></div>
+<div class="bar" id="tun"></div>
+<div class="bar" id="view"></div>
+<div id="wrap"><canvas id="c"></canvas></div>
+<div class="desc" id="desc"></div>
+<script>
+const W = 360, H = 600, SURF = 40, G = 13, VMAX = 32;
+const C = { solo: '#15110E', esc: '#2B231D', txt: '#EFE7DC', txt2: '#B3A697', veg: '#7FD16B', ceu: '#1C2530' };
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let S = 1, DPR = 1;
+function resize() {
+  S = Math.min(window.innerWidth, 560) / W; DPR = window.devicePixelRatio || 1;
+  cv.style.width = W * S + 'px'; cv.style.height = H * S + 'px';
+  cv.width = Math.round(W * S * DPR); cv.height = Math.round(H * S * DPR);
+}
+window.addEventListener('resize', resize); resize();
+
+function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(7);
+function hex(c) { return [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); }
+function lerpCol(a, b, k) { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',') + ')'; }
+
+// ---------- solo: faixas suaves, pedrinhas, raízes ----------
+const bandCols = ['#2A2119', '#271F18', '#241C16', '#211A14', '#1E1712', '#1B1510', '#18130F', '#15110E'];
+const pebbles = [];
+for (let i = 0; i < 170; i++) pebbles.push({ x: -420 + R() * 1200, y: SURF + 8 + R() * 1150, rx: 0.8 + R() * 2.4, ry: 0.6 + R() * 1.8, a: R() * 3.14, c: R() < .5 ? '#30271F' : '#382E25' });
+const roots = [];
+for (let i = 0; i < 13; i++) {
+  const x = -380 + R() * 1120; const pts = [[x, SURF]]; let px = x, py = SURF;
+  const n = 3 + Math.floor(R() * 3);
+  for (let k = 0; k < n; k++) { px += (R() - .5) * 20; py += 10 + R() * 16; pts.push([px, py]); }
+  roots.push(pts);
+}
+const plants = [{ x: 60, h: 26 }, { x: 118, h: 16 }, { x: 300, h: 30 }, { x: -150, h: 22 }, { x: 480, h: 24 }, { x: -60, h: 14 }];
+
+// ---------- câmaras em bolha, cada uma com variação própria ----------
+const CH = [
+  { id: 'fungo', x: 78, y: 215, rx: 44, ry: 22, cor: C.veg, icon: 'fungo' },
+  { id: 'dep', x: 292, y: 205, rx: 40, ry: 20, cor: C.txt2, icon: 'dep' },
+  { id: 'berc', x: 92, y: 440, rx: 40, ry: 21, cor: C.txt2, icon: 'ovo' },
+  { id: 'rainha', x: 262, y: 482, rx: 52, ry: 27, cor: C.txt2, icon: 'coroa' },
+];
+CH.forEach((ch, i) => {
+  const r = rng(100 + i * 17);
+  const p = [r() * 6.28, r() * 6.28, r() * 6.28], a = [0.05 + r() * .05, 0.04 + r() * .04, 0.02 + r() * .025];
+  ch.k = th => 1 + a[0] * Math.sin(2 * th + p[0]) + a[1] * Math.sin(3 * th + p[1]) + a[2] * Math.sin(5 * th + p[2]);
+});
+const ND = { olh: { x: 180, y: SURF }, n1: { x: 174, y: 140 }, n2: { x: 132, y: 318 }, n3: { x: 262, y: 345 } };
+function endpoint(id, other) {
+  if (ND[id]) return ND[id];
+  const ch = CH.find(c => c.id === id);
+  const o = ND[other] || other;
+  const th = Math.atan2((o.y - ch.y) / ch.ry, (o.x - ch.x) / ch.rx), k = ch.k(th) * 0.97;
+  return { x: ch.x + ch.rx * k * Math.cos(th), y: ch.y + ch.ry * k * Math.sin(th) };
+}
+
+// ---------- túneis em curvas bem suaves ----------
+function bez(a, b, bend) {
+  const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y;
+  const c = { x: mx - dy * bend, y: my + dx * bend };
+  const pts = [];
+  for (let i = 0; i <= 48; i++) { const t = i / 48, u = 1 - t; pts.push({ x: u * u * a.x + 2 * u * t * c.x + t * t * b.x, y: u * u * a.y + 2 * u * t * c.y + t * t * b.y }); }
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  return { pts, cum, len: cum[cum.length - 1] };
+}
+function at(p, s) {
+  s = Math.max(0, Math.min(p.len, s)); let i = 1;
+  while (i < p.cum.length - 1 && p.cum[i] < s) i++;
+  const a = p.pts[i - 1], b = p.pts[i], seg = (p.cum[i] - p.cum[i - 1]) || 1, t = (s - p.cum[i - 1]) / seg;
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, ang: Math.atan2(b.y - a.y, b.x - a.x) };
+}
+const TD = [
+  ['olh', 'n1', 2, 'cheio', true],
+  ['n1', 'fungo', 1, 'quase', true],
+  ['n1', 'dep', 1, 'livre', false],
+  ['n1', 'n2', 1, 'livre', false],
+  ['n2', 'berc', 1, 'livre', false],
+  ['n2', 'n3', 1, 'cheio', false],
+  ['n3', 'rainha', 1, 'quase', false],
+];
+const tunnels = TD.map(([f, t, lvl, state, carry]) => {
+  const a = endpoint(f, t), b = endpoint(t, f);
+  const bend = (R() < .5 ? -1 : 1) * (0.05 + R() * 0.04);
+  const p = bez(a, b, bend);
+  return { p, w: lvl === 2 ? 12 : 9, state, carry, ants: [], queue: 0, inAcc: 0, outAcc: 0, cap: Math.floor(p.len / G) };
+});
+
+// ---------- simulação simples de fila ----------
+function rates(t) {
+  if (t.state === 'livre') return { inR: 0.6, out: Infinity };
+  if (t.state === 'quase') { const occ = t.ants.length / t.cap; return { inR: 1.3, out: 1.3 * (1 + 3 * (occ - 0.85)) }; }
+  return { inR: 1.8, out: 0.8 };
+}
+function step(t, dt) {
+  const r = rates(t);
+  t.inAcc += r.inR * dt;
+  while (t.inAcc >= 1) { t.inAcc -= 1; if (t.queue < 14) t.queue++; }
+  if (r.out !== Infinity) t.outAcc = Math.min(1, t.outAcc + Math.max(0, r.out) * dt);
+  for (let i = 0; i < t.ants.length; i++) {
+    const a = t.ants[i]; const lim = i === 0 ? t.p.len : t.ants[i - 1].s - G;
+    a.s = Math.min(a.s + VMAX * dt, Math.max(a.s, lim));
+  }
+  const f = t.ants[0];
+  if (f && f.s >= t.p.len - 0.01 && (r.out === Infinity || t.outAcc >= 1)) { if (r.out !== Infinity) t.outAcc -= 1; t.ants.shift(); }
+  const last = t.ants[t.ants.length - 1];
+  if (t.queue > 0 && (!last || last.s >= G)) { t.queue--; t.ants.push({ s: 0, leaf: t.carry && R() < .7 }); }
+}
+function meas(t) {
+  const end = t.p.pts[t.p.pts.length - 1];
+  const spill = tunnels.filter(u => u !== t && Math.hypot(u.p.pts[0].x - end.x, u.p.pts[0].y - end.y) < 1).reduce((n, u) => n + Math.min(u.queue, 8), 0);
+  const occ = (t.ants.length + spill) / t.cap;
+  if ((t.queue > 0 || spill > 0) && occ > 0.85) return 'cheio';
+  if (occ >= 0.7) return 'quase';
+  return 'livre';
+}
+for (let i = 0; i < 900; i++) tunnels.forEach(t => step(t, 0.05));
+
+// ---------- controles ----------
+const show = { B: false, C: false, D: false, E: true, quaseP: true, longe: false, lab: true, old: false };
+let inten = 0.4, tunStyle = 'claro', pulseWhere = 'borda';
+const WHERE = [['borda', 'Pulso na borda'], ['interior', 'Pulso no interior']];
+const OPTS = [['E', 'Pulso ligado'], ['quaseP', 'Pulsar também o quase cheio']];
+const VIEW = [['longe', 'Zoom longe'], ['lab', 'Rótulos'], ['old', 'Cor antiga (comparar)']];
+const TUN = [['claro', 'Túnel mais claro'], ['borda', 'Túnel com borda'], ['ambos', 'Claro + borda'], ['antigo', 'Como antes']];
+const TUN_DESC = {
+  claro: 'o interior do túnel e das câmaras fica bem mais claro que o solo.',
+  borda: 'o interior continua escuro, mas ganha uma borda fina e clara dos dois lados.',
+  ambos: 'interior mais claro e borda fina: é o destaque mais forte.',
+  antigo: 'igual à versão anterior, para comparar.',
+};
+function mkBtns(el, list) {
+  list.forEach(([k, label]) => {
+    const b = document.createElement('button'); b.textContent = label; b.dataset.k = k;
+    b.onclick = () => { show[k] = !show[k]; sync(); };
+    document.getElementById(el).appendChild(b);
+  });
+}
+mkBtns('opts', OPTS); mkBtns('view', VIEW);
+TUN.forEach(([k, label]) => {
+  const b = document.createElement('button'); b.textContent = label; b.dataset.t = k;
+  b.onclick = () => { tunStyle = k; sync(); };
+  document.getElementById('tun').appendChild(b);
+});
+WHERE.forEach(([k, label]) => {
+  const b = document.createElement('button'); b.textContent = label; b.dataset.p = k;
+  b.onclick = () => { pulseWhere = k; sync(); };
+  document.getElementById('opts').appendChild(b);
+});
+document.getElementById('inten').oninput = e => { inten = e.target.value / 100; document.getElementById('intenOut').textContent = e.target.value + '%'; };
+let msg = '';
+function sync() {
+  document.querySelectorAll('.bar button[data-k]').forEach(b => b.classList.toggle('on', !!show[b.dataset.k]));
+  document.querySelectorAll('.bar button[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === tunStyle));
+  document.querySelectorAll('.bar button[data-p]').forEach(b => b.classList.toggle('on', b.dataset.p === pulseWhere));
+  let h = '<b>Pulso ' + (pulseWhere === 'borda' ? 'na borda' : 'no interior') + ':</b> o túnel quase cheio pulsa devagar em amarelo suave; o cheio pulsa uma vez por segundo em vermelho suave. A fila e a lentidão das formigas continuam valendo.';
+  h += '<br><b>Destaque:</b> ' + TUN_DESC[tunStyle];
+  if (msg) h += '<br><br>' + msg;
+  document.getElementById('desc').innerHTML = h;
+}
+sync();
+function tunBase() { return (tunStyle === 'claro' || tunStyle === 'ambos') ? '#43362B' : C.esc; }
+function tunEdge() { return tunStyle === 'borda' || tunStyle === 'ambos'; }
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect(); const z = show.longe ? 0.5 : 1;
+  const sx = (e.clientX - r.left) / S, sy = (e.clientY - r.top) / S;
+  const wx = W / 2 + (sx - W / 2) / z, wy = sy / z;
+  let best = null, bd = 18 / z;
+  tunnels.forEach(t => t.p.pts.forEach(q => { const d = Math.hypot(q.x - wx, q.y - wy); if (d < bd) { bd = d; best = t; } }));
+  if (best) {
+    best.state = { livre: 'quase', quase: 'cheio', cheio: 'livre' }[best.state];
+    if (best.state === 'livre') best.queue = 0;
+    msg = 'Túnel mudado para: <b>' + { livre: 'livre', quase: 'quase cheio', cheio: 'cheio' }[best.state] + '</b> (leva alguns segundos para encher ou esvaziar).';
+    sync();
+  }
+});
+
+// ---------- desenho ----------
+function tracePath(p) { ctx.beginPath(); p.pts.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); }
+function blobPath(ch) {
+  ctx.beginPath();
+  for (let i = 0; i <= 72; i++) { const th = i / 72 * 6.2832, k = ch.k(th); const x = ch.x + ch.rx * k * Math.cos(th), y = ch.y + ch.ry * k * Math.sin(th); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+  ctx.closePath();
+}
+function drawAnt(x, y, ang, leaf, longe) {
+  if (longe) { ctx.fillStyle = C.txt; ctx.beginPath(); ctx.arc(x, y, 3.2, 0, 6.2832); ctx.fill(); return; }
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(0.85, 0.85); ctx.fillStyle = C.txt;
+  ctx.beginPath(); ctx.ellipse(-4.2, 0, 3.6, 2.6, 0, 0, 6.2832); ctx.fill();
+  ctx.beginPath(); ctx.arc(-0.4, 0, 0.8, 0, 6.2832); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(1.6, 0, 1.9, 1.3, 0, 0, 6.2832); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(4.4, 0, 1.9, 1.7, 0, 0, 6.2832); ctx.fill();
+  ctx.strokeStyle = C.txt; ctx.lineWidth = 0.7; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(5.6, -0.8); ctx.quadraticCurveTo(7, -3, 8.6, -2.8); ctx.moveTo(5.6, 0.8); ctx.quadraticCurveTo(7, 3, 8.6, 2.8); ctx.stroke();
+  if (leaf) { ctx.fillStyle = C.veg; ctx.beginPath(); ctx.moveTo(7.5, -5); ctx.lineTo(10.5, -2); ctx.lineTo(7.5, 1); ctx.lineTo(4.5, -2); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+}
+function drawIcon(ch) {
+  const { x, y } = ch;
+  if (ch.icon === 'fungo') { ctx.fillStyle = C.veg; ctx.beginPath(); ctx.arc(x, y, 6, 0, 6.2832); ctx.fill(); }
+  if (ch.icon === 'dep') { ctx.strokeStyle = C.txt2; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.roundRect(x - 6, y - 6, 12, 12, 2); ctx.stroke(); }
+  if (ch.icon === 'ovo') { ctx.strokeStyle = C.txt; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(x, y, 4.5, 6, 0, 0, 6.2832); ctx.stroke(); }
+  if (ch.icon === 'coroa') { ctx.fillStyle = C.txt; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(x + i * 6 - 3, y + 4); ctx.lineTo(x + i * 6, y - 5); ctx.lineTo(x + i * 6 + 3, y + 4); ctx.closePath(); ctx.fill(); } }
+}
+let T = 0;
+function draw() {
+  const longe = show.longe, z = longe ? 0.5 : 1, ext = longe ? 1.7 : 1;
+  ctx.setTransform(DPR * S, 0, 0, DPR * S, 0, 0);
+  ctx.fillStyle = C.solo; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.translate(W / 2, 0); ctx.scale(z, z); ctx.translate(-W / 2, 0);
+  ctx.fillStyle = C.ceu; ctx.fillRect(-900, -200, 2200, SURF + 200);
+  const soil = ctx.createLinearGradient(0, SURF, 0, SURF + 720);
+  soil.addColorStop(0, '#2C231B'); soil.addColorStop(0.5, '#1E1813'); soil.addColorStop(1, '#120E0B');
+  ctx.fillStyle = soil; ctx.fillRect(-900, SURF, 2200, 2400);
+  pebbles.forEach(p => { ctx.fillStyle = p.c; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, p.a, 0, 6.2832); ctx.fill(); });
+  ctx.strokeStyle = '#3A3026'; ctx.lineWidth = 1.3; ctx.lineCap = 'round';
+  roots.forEach(r => { ctx.beginPath(); ctx.moveTo(r[0][0], r[0][1]); for (let k = 1; k < r.length; k++) { const a = r[k - 1], b = r[k]; ctx.quadraticCurveTo(a[0], (a[1] + b[1]) / 2, b[0], b[1]); } ctx.stroke(); });
+  plants.forEach(pl => {
+    ctx.strokeStyle = C.veg; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(pl.x, SURF); ctx.lineTo(pl.x, SURF - pl.h); ctx.stroke();
+    ctx.fillStyle = C.veg;
+    for (let k = 0.45; k <= 1; k += 0.3) { const yy = SURF - pl.h * k, sd = k > 0.7 ? 1 : -1; ctx.beginPath(); ctx.moveTo(pl.x, yy); ctx.lineTo(pl.x + 4 * sd, yy - 3); ctx.lineTo(pl.x + 8 * sd, yy); ctx.lineTo(pl.x + 4 * sd, yy + 3); ctx.closePath(); ctx.fill(); }
+  });
+  ctx.fillStyle = '#3A2F27'; ctx.beginPath(); ctx.ellipse(ND.olh.x, SURF, 16, 5, 0, Math.PI, 0); ctx.fill();
+
+  const base = tunBase(), edge = tunEdge(), EDGE = '#8A7563', ew = 1.6 * ext, tw = t => t.w * (longe ? 1.5 : 1);
+  const nodes = [['n1', 9], ['n2', 7], ['n3', 7]];
+  CH.forEach(ch => { blobPath(ch); ctx.fillStyle = base; ctx.fill(); ctx.strokeStyle = ch.cor; ctx.lineWidth = longe ? 3 : 2; ctx.stroke(); });
+
+  const st = tunnels.map(meas);
+  if (edge) {
+    ctx.strokeStyle = EDGE; ctx.lineCap = 'round';
+    tunnels.forEach(t => { tracePath(t.p); ctx.lineWidth = tw(t) + ew * 2; ctx.stroke(); });
+    ctx.fillStyle = EDGE;
+    nodes.forEach(([k, r]) => { ctx.beginPath(); ctx.arc(ND[k].x, ND[k].y, r + ew, 0, 6.2832); ctx.fill(); });
+  }
+  const pulsing = s => show.E && s !== 'livre' && !(s === 'quase' && !show.quaseP);
+  const pk = (s, floor) => { const hz = s === 'cheio' ? 1 : 0.5, amp = (s === 'cheio' ? 1 : 0.75) * inten; return amp * (floor + (1 - floor) * (0.5 + 0.5 * Math.sin(T * 6.2832 * hz))); };
+  if (pulseWhere === 'borda') {
+    tunnels.forEach((t, i) => {
+      const s = st[i]; if (!pulsing(s)) return;
+      tracePath(t.p); ctx.lineCap = 'round';
+      ctx.strokeStyle = lerpCol(base, s === 'cheio' ? '#E0605A' : '#E3C45C', pk(s, 0.45));
+      ctx.lineWidth = tw(t) + 2 * 2.4 * ext; ctx.stroke();
+    });
+  }
+  tunnels.forEach(t => { tracePath(t.p); ctx.lineCap = 'round'; ctx.strokeStyle = base; ctx.lineWidth = tw(t); ctx.stroke(); });
+  ctx.fillStyle = base;
+  nodes.forEach(([k, r]) => { ctx.beginPath(); ctx.arc(ND[k].x, ND[k].y, r, 0, 6.2832); ctx.fill(); });
+  if (pulseWhere === 'interior') {
+    tunnels.forEach((t, i) => {
+      const s = st[i]; if (!pulsing(s)) return;
+      tracePath(t.p); ctx.lineCap = 'butt';
+      ctx.strokeStyle = lerpCol(base, s === 'cheio' ? '#C0544C' : '#C2A64A', pk(s, 0.3));
+      ctx.lineWidth = tw(t) - 1; ctx.stroke();
+    });
+  }
+  CH.forEach(drawIcon);
+
+  const labels = [];
+  tunnels.forEach((t, i) => {
+    const s = st[i];
+    if (show.old) { tracePath(t.p); ctx.strokeStyle = { livre: '#4FD1B0', quase: '#FFD23F', cheio: '#FF4F5E' }[s]; ctx.lineWidth = t.w * 0.3; ctx.stroke(); }
+    if (show.D && s === 'quase') { tracePath(t.p); ctx.setLineDash([2 * ext, 5 * ext]); ctx.strokeStyle = C.txt2; ctx.lineWidth = 1.4 * ext; ctx.stroke(); ctx.setLineDash([]); }
+    if (show.D && s === 'cheio') {
+      ctx.strokeStyle = C.txt2; ctx.globalAlpha = 0.7; ctx.lineWidth = 1.4 * ext; ctx.beginPath();
+      for (let d = 5; d < t.p.len - 3; d += 7 * ext) { const q = at(t.p, d), a = q.ang + Math.PI / 4, h = t.w * 0.55; ctx.moveTo(q.x - Math.cos(a) * h, q.y - Math.sin(a) * h); ctx.lineTo(q.x + Math.cos(a) * h, q.y + Math.sin(a) * h); }
+      ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    t.ants.forEach(a => { const q = at(t.p, a.s); drawAnt(q.x, q.y, q.ang, a.leaf, longe); });
+    const m = at(t.p, t.p.len / 2), nx = -Math.sin(m.ang), ny = Math.cos(m.ang);
+    if (show.C && (!longe || s === 'cheio')) {
+      const off = t.w / 2 + 9 * ext, gx = m.x + nx * off, gy = m.y + ny * off, n = { livre: 1, quase: 2, cheio: 3 }[s];
+      const bw = 2.6 * ext, bh = 7 * ext, gap = 3.6 * ext;
+      for (let k = 0; k < 3; k++) {
+        const x = gx + (k - 1) * gap - bw / 2, hh = bh * (0.5 + k * 0.25), y = gy + bh / 2 - hh;
+        ctx.strokeStyle = C.txt2; ctx.lineWidth = 0.8 * ext; ctx.strokeRect(x, y, bw, hh);
+        if (k < n) { ctx.fillStyle = s === 'cheio' ? C.txt : C.txt2; ctx.fillRect(x, y, bw, hh); }
+      }
+    }
+    const q0 = at(t.p, 0), vis = Math.min(t.queue, 8);
+    const feeder = tunnels.find(u => u !== t && Math.hypot(u.p.pts[u.p.pts.length - 1].x - q0.x, u.p.pts[u.p.pts.length - 1].y - q0.y) < 1);
+    for (let k = 0; k < vis; k++) {
+      let x, y, ang;
+      if (q0.y <= SURF + 1) { const sd = k % 2 ? 1 : -1, j = Math.floor(k / 2); x = q0.x + sd * (14 + j * 11); y = SURF - 3; ang = sd > 0 ? Math.PI : 0; }
+      else { const q = at(feeder.p, feeder.p.len - 10 - k * 10); x = q.x; y = q.y; ang = q.ang; }
+      drawAnt(x, y, ang, t.carry && k % 3 !== 2, longe);
+    }
+    if (t.queue > 8) {
+      let x = q0.x, y = SURF - 16;
+      if (q0.y > SURF + 1) { const q = at(feeder.p, feeder.p.len - 95); x = q.x - Math.sin(q.ang) * (feeder.w / 2 + 14); y = q.y + Math.cos(q.ang) * (feeder.w / 2 + 14); }
+      labels.push({ x, y, txt: '+' + (t.queue - 8), strong: true });
+    }
+    if (show.lab) labels.push({ x: m.x - nx * (t.w / 2 + 16), y: m.y - ny * (t.w / 2 + 16), txt: { livre: 'livre', quase: 'quase cheio', cheio: 'cheio' }[s] });
+  });
+  ctx.restore();
+
+  ctx.font = '10px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  labels.forEach(l => {
+    const x = W / 2 + (l.x - W / 2) * z, y = l.y * z, w = ctx.measureText(l.txt).width + 8;
+    ctx.fillStyle = 'rgba(21,17,14,0.8)'; ctx.fillRect(x - w / 2, y - 7, w, 14);
+    ctx.fillStyle = l.strong ? C.txt : C.txt2; ctx.fillText(l.txt, x, y);
+  });
+}
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
+  tunnels.forEach(t => step(t, dt)); draw(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

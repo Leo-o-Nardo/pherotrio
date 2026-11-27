@@ -12,7 +12,7 @@
 
 | Unidade | Significado |
 |---|---|
-| **célula** | Um quadrado da grade do mapa. Uma câmara ocupa 1 célula. O tamanho do mapa varia por fase (ex.: 15 × 30; linha 0 = superfície). |
+| **célula** | Um quadrado da grade do mapa. Uma estrutura ocupa de 2 × 1 a 3 × 2 células, conforme o tipo (D105). O mapa tem cerca de 80 × 80 células por arco (D94); linha 0 = superfície. |
 | **s / min** | Tempo de jogo em velocidade 1×. |
 | **pt** | Ponto de escavação. Uma escavadora produz 1 pt/s trabalhando no local. |
 | **/min** | Taxa por minuto. |
@@ -25,7 +25,7 @@ O jogador **observa fluxos e reage a sinais**: filas de carregadoras nos túneis
 ### 1.2 Minuto a minuto
 A cada 30 a 60 s surge uma **decisão de investimento**:
 - trocar a dieta de um berçário (operárias agora ou tanques para a onda de daqui a 2 minutos?);
-- abrir um novo olheiro ou coletor de seiva (mais recurso; um olheiro também é mais uma porta para defender);
+- abrir um novo cortadouro ou coletor de seiva (mais recurso; um cortadouro também é mais uma porta para defender);
 - fazer upgrade de um túnel engarrafado;
 - mandar uma expedição agora, aproveitando que a onda acabou;
 - começar a encher a câmara nupcial, sabendo que as aladas comem e não trabalham.
@@ -62,10 +62,10 @@ Um ano em 4 estações, sempre na ordem **outono → inverno → primavera → v
 
 | Slider | O que faz | Para onde vai |
 |---|---|---|
-| **Carregar** | Atende pedidos de transporte; corta folha no olheiro; recolhe corpos (presa) | Rede inteira |
+| **Carregar** | Atende pedidos de transporte; corta folha no cortadouro; recolhe corpos (presa) | Rede inteira |
 | **Escavar** | Constrói túneis, câmaras e upgrades (1 pt/s no local) | Obras pendentes, na ordem em que foram pedidas |
 | **Cuidar** | Ocupa as vagas de trabalho dentro das estruturas (extratoras, processadoras, berçários) | Estruturas com vaga livre, por prioridade (abaixo) |
-| **Guardar** | Fica nos postos de guarda e olheiros; luta com força de operária | Postos, divididos igualmente |
+| **Guardar** | Fica nos postos de guarda e cortadouros; luta com força de operária | Postos, divididos igualmente |
 | **Reserva** (o que sobra) | Fica na câmara real; defende a rainha se um inimigo chegar até ela | Câmara real |
 
 - O slider mostra **número de formigas**, não porcentagem, porque com 60 a 120 formigas a contagem é legível.
@@ -78,7 +78,7 @@ Um ano em 4 estações, sempre na ordem **outono → inverno → primavera → v
 ## 4. Mapa, escavação e estruturas
 
 ### 4.1 Regras de posicionamento
-- **Grade:** maior que a tela, com tamanho definido por fase (ex.: 15 × 30 células), rolagem nos dois eixos e zoom de pinça (D32). No zoom inicial (24 dp por célula, D55), a tela em retrato mostra cerca de 15 colunas. Algumas células são **rocha** (não escaváveis) e servem de ferramenta para desenhar cada fase.
+- **Grade:** um mapa por arco, com cerca de 80 × 80 células (D94), que se abre por regiões do centro para os lados (D95). Rolagem nos dois eixos e zoom de pinça (D32); afastando ao máximo, o mapa inteiro cabe na tela (D92). No zoom inicial (24 dp por célula, D55), a tela em retrato mostra cerca de 15 colunas. O terreno tem **percalços** (§4.4).
 - **Rede (teia de túneis):**
   - estruturas ficam em células e se ligam a **nós** (cruzamentos);
   - nós se ligam por **segmentos de túnel de no máximo 3 células**;
@@ -86,7 +86,7 @@ Um ano em 4 estações, sempre na ordem **outono → inverno → primavera → v
   - túneis não se cruzam: para cruzar, você coloca um nó;
   - o traçado visual do segmento (reto, curvo ou orgânico) fica para a etapa de direção de arte (Q25).
 - **Conexão:** uma estrutura sem caminho até a câmara real fica inativa (ícone de "desconectada").
-- **Extratores (D20):** o olheiro precisa estar dentro do anel da planta (até 1 célula de distância da base). O coletor de seiva precisa estar dentro do anel do bolsão de raízes (até 1 célula). O poço de argila pode ficar em qualquer célula escavável.
+- **Extratores (D20):** o cortadouro precisa estar dentro do anel da planta (até 1 célula de distância da base). O coletor de seiva precisa estar dentro do anel do bolsão de raízes (até 1 célula). O poço de argila pode ficar em qualquer célula escavável.
 - **Sem limite de câmaras** (D32). O crescimento é limitado pela economia (manutenção, mão de obra de escavação) e pelo tamanho do mapa da fase.
 - **Demolir:** 1 toque e confirmação. Não devolve nada.
 
@@ -97,8 +97,9 @@ Um ano em 4 estações, sempre na ordem **outono → inverno → primavera → v
 | Túnel nível 1 | 4 por célula | 1 s por célula |
 | Túnel níveis 2 a 4 | ver a tabela de túneis abaixo (D52) | — |
 | Nó | 2 | < 1 s |
-| Câmara (qualquer) | 20 | 5 s |
-| Extratora (olheiro, coletor de seiva, poço de argila) | 15 | 4 s |
+| Câmara média, 3 × 1 (produção e lixeira, D105) | 24 | 6 s |
+| Câmara grande, 3 × 2 (câmara real, berçário, depósito, câmara nupcial, D105) | 36 | 9 s |
+| Extratora, 2 × 1 (cortadouro, coletor de seiva, poço de argila) | 15 | 4 s |
 | Posto de guarda e estruturas de defesa | 10 a 15 + recursos (ver `07` §5) | 3 a 4 s |
 | Upgrade de estrutura para nível 2 | 25 pt + recurso específico (ver `07` §3 e §6; D47) | 7 s |
 
@@ -135,7 +136,7 @@ Todo túnel tem uma capacidade fixa. Quando está cheio, a formiga seguinte espe
 - **Simulador de referência:** o comportamento acima foi testado no simulador de rotas mostrado na etapa (b2), em 2026-11-25.
 
 - **Problema que resolve:** escavar custa mão de obra, não recurso. Assim o jogador sente o custo de oportunidade (escavadoras não carregam) sem uma moeda extra. Como escavar rende argila, expandir também alimenta construção. Upgrades pedem recursos específicos, o que dá uso a cada galho da árvore.
-- **Risco de balanceamento:** escavar barato demais deixa o layout irrelevante. Escavar caro demais deixa o começo lento. A primeira variável a ajustar no protótipo é o custo da câmara (20 pt).
+- **Risco de balanceamento:** escavar barato demais deixa o layout irrelevante. Escavar caro demais deixa o começo lento. A primeira variável a ajustar no protótipo é o custo da câmara (24 pt a média e 36 pt a grande, D105).
 
 ### 4.3 Estruturas
 
@@ -156,7 +157,7 @@ Para cada estrutura, o problema que resolve e o risco:
 | Estrutura | Problema de jogabilidade que resolve | Risco de balanceamento |
 |---|---|---|
 | Câmara real | Ritmo de crescimento limitado e previsível: a população é uma cadeia, não uma compra (D02). | 4 ovos/min pode ser lento demais na primavera. O upgrade é a válvula. |
-| Olheiro | Liga economia e defesa: cada olheiro é uma porta (P3). | Se uma planta der folha demais, um olheiro basta e a expansão perde sentido. |
+| Cortadouro | Liga economia e defesa: cada cortadouro é uma porta (P3). | Se uma planta der folha demais, um cortadouro basta e a expansão perde sentido. |
 | Coletor de seiva | Recurso finito que obriga a expandir (D20). | Bolsões grandes demais anulam a pressão. Pequenos demais deixam o galho do néctar inviável. |
 | Poço de argila | Mantém a argila disponível quando a escavação para. | Se for eficiente demais, ninguém escava pelo mapa. |
 | Jardim | Coração da economia; consome 2 recursos (folha e trabalho). | É a estrutura mais sensível do jogo. Calibrar primeiro. |
@@ -166,6 +167,25 @@ Para cada estrutura, o problema que resolve e o risco:
 | Berçário | Decisão de dieta = decisão de composição do exército (D09). | Trocar a dieta no meio desperdiça recursos? Regra: a larva atual termina com a dieta antiga. |
 | Câmara nupcial | Torna a vitória um investimento físico que pode ser atacado. | Se for fácil de defender, as aladas viram detalhe. O chefe do verão mira nela. |
 | Posto de guarda | Controle espacial da defesa sem micro (D19). | Um único posto na entrada certa pode bastar. As 2 direções de ataque (D10) evitam isso. |
+
+### 4.4 Percalços do terreno (D96 a D98)
+
+Os percalços existem para obrigar o jogador a montar **rotas diferentes**. Como cada túnel tem capacidade limitada (D52), um terreno que estreita ou bloqueia a passagem força a dividir o fluxo.
+
+| Percalço | Regra (hipótese a calibrar) | Arco onde é ênfase (D97) |
+|---|---|---|
+| **Rocha** | Não pode ser escavada | Todos |
+| **Argila dura** | Escavar custa 3 vezes mais pontos e tempo, e rende o dobro de argila (D41) | 2 (F6) |
+| **Areia solta** | Túnel não passa do nível 2 sem reforço de barro por célula. Estrutura em areia precisa de reforço | 3 (F11) |
+| **Água** | Na primavera, túneis e câmaras a até 2 células de um bolsão alagam e ficam fechados até o verão. As formigas lá dentro saem. Aviso no inverno. Dique de barro protege uma célula | 2 (F8) |
+| **Toca de predador** | Formigas a até 4 células podem ser atacadas pela aranha da toca. A toca pode ser destruída em combate e rende presa | 1 (F4) e 3 |
+
+- **Visibilidade (D98):**
+  - até cerca de 3 células de qualquer túnel, nó ou câmara, o terreno aparece por completo;
+  - mais longe, um percalço aparece só como "?";
+  - fontes, plantas e ninhos rivais aparecem sempre.
+- **Alagamento e rotas:** quando um túnel alaga, as rotas são recalculadas na hora. Se não houver outra rota, aparece o aviso "Sem rota" (§9).
+- **Diagnóstico:** o painel do túnel mostra o percalço por onde ele passa (ex.: "areia: nível máximo 2").
 
 ## 5. Ciclo de vida e castas
 
@@ -209,7 +229,7 @@ Ao trocar a dieta de um berçário, as larvas que já estão lá terminam com a 
 - Inimigos mortos deixam **corpos (presa)** no local. Carregadoras os recolhem quando não há inimigo a até 2 células.
 - **Alvo dos inimigos:**
   - formigas rivais vão para a câmara real;
-  - aranhas atacam a primeira formiga que encontram (as carregadoras no olheiro são as vítimas típicas);
+  - aranhas atacam a primeira formiga que encontram (as carregadoras no cortadouro são as vítimas típicas);
   - o chefe do verão vai para a câmara nupcial.
 
 ### 6.2 Atributos das formigas do jogador
@@ -224,11 +244,11 @@ Os traços de cada inimigo (enxame, blindado, rápido, chefe) e contra quais cas
 |---|---|---|---|---|---|---|
 | Formiga rival | lado | 12 | 2 | 1,0 | 1 | Segue para a câmara real |
 | Soldado rival | lado | 40 | 5 | 0,7 | 3 | Segue para a câmara real |
-| Aranha | cima (olheiro) | 70 | 8 | 1,2 | 5 | Caça a formiga mais próxima |
-| Lacraia (chefe do verão) | cima (olheiro) | 300 | 12 | 0,6 | 20 | Vai para a câmara nupcial |
+| Aranha | cima (cortadouro) | 70 | 8 | 1,2 | 5 | Caça a formiga mais próxima |
+| Lacraia (chefe do verão) | cima (cortadouro) | 300 | 12 | 0,6 | 20 | Vai para a câmara nupcial |
 
 ### 6.4 Direções de ataque (D10)
-- **De cima:** inimigos caminham pela faixa de superfície e descem por um **olheiro**. A linha do tempo mostra qual olheiro cerca de 45 s antes. **Sem olheiro, não há ataque de cima**, mas também não há folha.
+- **De cima:** inimigos caminham pela faixa de superfície e descem por um **cortadouro**. A linha do tempo mostra qual cortadouro cerca de 45 s antes. **Sem cortadouro, não há ataque de cima**, mas também não há folha.
 - **Dos lados:** cada fase tem 1 ou 2 **bocas rivais** na borda lateral do mapa. Uma onda lateral sai da boca e **cava em linha reta** (0,5 cél/s) até a estrutura mais próxima do jogador. **O túnel cavado permanece.** Cada onda lateral deixa um novo acesso ao seu ninho, e esse acesso também serve para as suas expedições (D27).
 - **De baixo:** pós-MVP.
 
@@ -315,7 +335,7 @@ Princípio: **todo problema tem um lugar na tela**. Nada fica escondido só em n
 ## 11. Riscos de balanceamento do sistema
 
 1. **Jardim de fungo:** é o centro de tudo. Um erro de 20% nele muda a fase inteira. Calibrar primeiro, isolado.
-2. **Começo lento:** com 12 operárias, a primeira obra pode demorar. Meta: o primeiro olheiro funcionando antes de 0:30.
+2. **Começo lento:** com 12 operárias, a primeira obra pode demorar. Meta: o primeiro cortadouro funcionando antes de 0:30.
 3. **Distribuição ótima fixa:** se os sliders tiverem uma resposta certa que não muda, o jogo vira planilha. As estações precisam mudar o gargalo. Medir no protótipo.
 4. **Expedição de inverno dominante:** ver alvo em 7.2.
 5. **Excesso de regras para o MVP:** a árvore do MVP (`07` §12) tem 14 recursos, 8 castas e cerca de 22 estruturas, bem mais que o Achikaps. A campanha (etapa d) precisa introduzir as regras uma de cada vez. O protótipo (etapa e) usará só uma fração disso.

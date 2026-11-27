@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pherotrio · Modelos da rodada 9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --solo:#15110E; --painel:#211B17; --borda:#5A4B3F; --txt:#EFE7DC; --txt2:#B3A697; --acu:#F5B841; }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 90px; }
+  body { margin: 0; background: var(--solo); color: var(--txt); font: 14px/1.45 'Atkinson Hyperlegible', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  header { padding: 20px 16px 8px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--txt2); }
+  header a { color: var(--acu); }
+  #sel { position: sticky; top: 0; z-index: 5; background: rgba(21,17,14,.95); backdrop-filter: blur(6px); border-bottom: 1px solid #2A221C; }
+  #sel .in { max-width: 1100px; margin: 0 auto; padding: 8px 16px; display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 6px 14px; }
+  .grp { flex: none; display: flex; align-items: center; gap: 4px; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .grp b { font-size: 11px; color: var(--txt2); margin-right: 2px; flex: none; }
+  .chip { flex: none; cursor: pointer; font: 700 12px inherit; font-family: inherit; color: var(--txt2); padding: 5px 9px; border-radius: 999px; background: var(--painel); border: 1px solid #2E2620; }
+  .chip.on { color: #1B1510; background: var(--txt); border-color: var(--txt); }
+  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
+  section { padding-top: 26px; }
+  h2 { font-size: 20px; margin: 0 0 2px; }
+  .lead { color: var(--txt2); margin: 0 0 12px; max-width: 72ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+  .card { background: var(--painel); border: 1px solid #2E2620; border-radius: 14px; padding: 12px; min-width: 0; }
+  .card.on { border-color: var(--txt); box-shadow: 0 0 0 1px var(--txt) inset; }
+  .card .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  h3 { font-size: 16px; margin: 0; }
+  .sub { color: var(--txt2); font-size: 12px; margin: 2px 0 8px; }
+  .tag { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 6px; white-space: nowrap; color: #1B1510; background: var(--acu); }
+  .pick { margin-top: 10px; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 13px; width: 100%; min-height: 40px; border-radius: 10px; border: 0; background: #3A3028; color: var(--txt); }
+  .card.on .pick { background: var(--txt); color: #1B1510; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: flex-end; }
+  .tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; max-width: 100%; overflow-x: auto; }
+  .tile canvas { display: block; border-radius: 6px; cursor: zoom-in; }
+  .tile span { font-size: 11px; color: var(--txt2); font-weight: 700; }
+  .tile span b { color: var(--txt); }
+  #zoom { position: fixed; inset: 0; z-index: 9; background: rgba(10,8,6,.88); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 10px; padding: 16px; }
+  #zoom.on { display: flex; }
+  #zoom canvas { border-radius: 10px; cursor: zoom-out; }
+  #zoom p { margin: 0; color: var(--txt2); font-weight: 700; font-size: 12px; text-align: center; }
+</style>
+<script src="arte.js?v=117"></script>
+<script src="candidatos.js?v=9h"></script>
+</head>
+<body>
+<header>
+  <h1>Modelos da rodada 9</h1>
+  <p>Eventos de dentro do formigueiro (D116 fechada). Cinco perguntas: escavação de túnel, obra de câmara, nascimento, onda lateral chegando e expedição saindo. Cada cena roda em loop curto; no jogo, os tempos vêm do 02. A barra de cima troca a opção de todas as cenas ao mesmo tempo. Toque em qualquer desenho para ampliar. <a href="index.html">Voltar ao catálogo</a>.</p>
+</header>
+<div id="sel"><div class="in" id="selIn"></div></div>
+<main id="main"></main>
+<div id="zoom"><canvas></canvas><p></p></div>
+<script>
+const A = window.Arte, C = A.C, K = window.Cand;
+const DPR = A.DPR = Math.min(window.devicePixelRatio || 1, 3);
+const REC = { escava: 'B', obra: 'A', nasce: 'C', onda: 'B', expedicao: 'B' };
+const SEL = Object.assign({}, REC);
+const ROT = { escava: 'Escavação', obra: 'Obra', nasce: 'Nascimento', onda: 'Onda', expedicao: 'Expedição' };
+const main = document.getElementById('main'), views = [], pickers = [];
+const io = new IntersectionObserver(es => es.forEach(e => { e.target._v.vis = e.isIntersecting; }), { rootMargin: '120px' });
+function el(tag, cls, html, parent) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
+function escolher(dim, val) { SEL[dim] = val; atualizar(); }
+function atualizar() {
+  document.querySelectorAll('#selIn .chip').forEach(c => c.classList.toggle('on', SEL[c.dataset.d] === c.dataset.v));
+  pickers.forEach(([card, dim, val]) => card.classList.toggle('on', SEL[dim] === val));
+}
+const selIn = document.getElementById('selIn');
+Object.keys(ROT).forEach(d => { const g = el('div', 'grp', '<b>' + ROT[d] + '</b>', selIn); Object.keys(K.OPCOES[d]).forEach(v => { const c = el('button', 'chip', v, g); c.dataset.d = d; c.dataset.v = v; c.onclick = () => escolher(d, v); }); });
+
+function section(id, titulo, lead) { const s = el('section', null, null, main); s.id = id; el('h2', null, titulo, s); if (lead) el('p', 'lead', lead, s); return s; }
+function card(parent, o) {
+  const c = el('div', 'card', null, parent);
+  const hd = el('div', 'hd', null, c); el('h3', null, o.titulo, hd); if (o.rec) el('span', 'tag', '⭐ recomendado', hd);
+  if (o.sub) el('div', 'sub', o.sub, c);
+  c.body = el('div', 'tiles', null, c);
+  if (o.dim) { const b = el('button', 'pick', 'Escolher este', c); b.onclick = () => escolher(o.dim, o.val); pickers.push([c, o.dim, o.val]); }
+  return c;
+}
+function tile(parent, label, box, z, draw, bg, ov) {
+  const t = el('div', 'tile', null, parent), cv = el('canvas', null, null, t);
+  const [x0, y0, w, h] = box, W = Math.round(w * z), H = Math.round(h * z);
+  cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px';
+  if (label) el('span', null, label, t);
+  const v = { cv, ctx: cv.getContext('2d'), x0, y0, w, h, z, draw, bg, ov: ov || {}, vis: false, label };
+  cv._v = v; views.push(v); io.observe(cv); cv.onclick = () => abrirZoom(v); return v;
+}
+let T = 0;
+function render(v) {
+  const S = Object.assign({}, SEL, v.ov), ctx = v.ctx; A.TEMPO = T;
+  const k = DPR * v.z; ctx.setTransform(k, 0, 0, k, -v.x0 * k, -v.y0 * k); ctx.clearRect(v.x0, v.y0, v.w, v.h);
+  A.solo(ctx, v.x0 - 1, v.y0 - 1, v.w + 2, v.h + 2, v.z, 3);
+  const tags = []; v.draw(ctx, v.z, T, tags, S); if (tags.length) A.tagsDraw(ctx, tags, v.z);
+}
+let last = 0;
+function loop(now) { requestAnimationFrame(loop); if (now - last < 33) return; last = now; T = now / 1000; for (const v of views) if (v.vis) render(v); }
+const zm = document.getElementById('zoom'), zc = zm.querySelector('canvas'); let zv = null;
+function abrirZoom(v) {
+  const z = Math.min(160, (innerWidth - 32) / v.w, (innerHeight - 120) / v.h), W = Math.round(v.w * z), H = Math.round(v.h * z);
+  zc.width = W * DPR; zc.height = H * DPR; zc.style.width = W + 'px'; zc.style.height = H + 'px';
+  if (zv) views.splice(views.indexOf(zv), 1);
+  zv = { ...v, cv: zc, ctx: zc.getContext('2d'), z, vis: true }; views.push(zv); render(zv);
+  zm.querySelector('p').textContent = 'ampliado a ' + Math.round(z) + ' dp por célula'; zm.classList.add('on');
+}
+zm.onclick = () => { zm.classList.remove('on'); if (zv) { views.splice(views.indexOf(zv), 1); zv = null; } };
+
+// ---------------- casos ----------------
+const BE = [-0.7, 0.05, 4.9, 1.25], BO = [-0.5, -0.25, 4.9, 1.45], BN = [-0.6, -0.5, 4.4, 2.25], BW = [-0.4, -0.25, 6.6, 1.45], BX = [-0.15, -0.1, 6.5, 1.3];
+
+// ---------------- perguntas ----------------
+function pergunta(id, n, titulo, lead, dim, tiles) {
+  const s = section(id, n + '. ' + titulo, lead), g = el('div', 'grid', null, s);
+  Object.entries(K.OPCOES[dim]).forEach(([k, m]) => { const c = card(g, { titulo: m.nome, sub: m.desc, dim, val: k, rec: REC[dim] === k }); tiles(c.body, { [dim]: k }); });
+}
+pergunta('escava', 1, 'Escavação de túnel', 'Um túnel novo de 3 células saindo de um nó. 7 s cavando e 2 s pronto, em loop. No jogo, 4 escavadoras cavam 1 célula por segundo (02 §4.2).', 'escava', (b, ov) => {
+  tile(b, 'perto · 56', BE, 56, K.escavacao, null, ov);
+  tile(b, 'médio · 24', BE, 24, K.escavacao, null, ov);
+});
+pergunta('obra', 2, 'Obra de câmara', 'Um jardim de fungo sendo cavado: 7,5 s de obra e a câmara pronta no fim. O transporte da terra segue a resposta da pergunta 1.', 'obra', (b, ov) => {
+  tile(b, 'perto · 56', BO, 56, K.obra, null, ov);
+  tile(b, 'médio · 24', BO, 24, K.obra, null, ov);
+});
+pergunta('nasce', 3, 'Nascimento', 'No berçário, a larva da direita termina e nasce um soldado, que vai para a porta. As outras duas continuam comendo. 9 s em loop.', 'nasce', (b, ov) => {
+  tile(b, 'perto · 56', BN, 56, K.nascimento, null, ov);
+  tile(b, 'médio · 24', BN, 24, K.nascimento, null, ov);
+});
+pergunta('onda', 4, 'Onda lateral chegando', 'A onda sai da boca rival, à direita fora da tela, e cava em linha reta até a câmara mais próxima (02 §6.4). Quando bate, a câmara entra em ataque. O aviso na linha do ano e a seta na borda continuam (03 §8).', 'onda', (b, ov) => {
+  tile(b, 'perto · 48', BW, 48, K.onda, null, ov);
+  tile(b, 'médio · 24', BW, 24, K.onda, null, ov);
+});
+pergunta('expedicao', 5, 'Expedição saindo', 'Três soldados saem do posto de guarda para a boca rival, à direita fora da tela. O posto fica desfalcado: as vagas vazias aparecem tracejadas.', 'expedicao', (b, ov) => {
+  tile(b, 'perto · 48', BX, 48, K.expedicao, null, ov);
+  tile(b, 'médio · 24', BX, 24, K.expedicao, null, ov);
+});
+atualizar();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

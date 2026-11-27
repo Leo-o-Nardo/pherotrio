@@ -438,11 +438,12 @@
 - **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c) · **Detalha:** D32, D34
 - **Decisão:**
   - **Tela de referência:** 360 × 800 dp.
-  - **Zoom:** de 12 a 64 dp por célula, começando em 24 dp. No zoom inicial, 15 células ocupam a largura da tela.
+  - **Zoom:** até 64 dp por célula, começando em 24 dp. No zoom inicial, 15 células ocupam a largura da tela. O zoom mínimo passou a ser o que faz o mapa inteiro caber na tela (D92).
   - **Níveis de detalhe:**
     - perto (36 dp ou mais): três círculos, ícones e números;
     - médio (18 a 35 dp): símbolos;
-    - longe (menos de 18 dp): pontos, cor dos túneis e alertas.
+    - longe (12 a 17 dp): pontos, estado dos túneis e alertas;
+    - visão geral (abaixo de 12 dp, D92): sem formigas, só a rede, as câmaras, o pulso e os alertas.
   - **Alertas:** sempre com 24 dp na tela, em qualquer zoom.
 - **Alternativas:** zoom contínuo sem níveis, que desenha todo o detalhe sempre e é ruim para leitura e desempenho.
 - **Motivo:** resolve o risco de "fila invisível no zoom distante" (D52) e o custo de desenhar muitas formigas.
@@ -684,7 +685,7 @@
 ### D74. Mapa grande por arco, que se abre por regiões
 - **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (d) · **Atualiza:** D32
 - **Decisão:**
-  - **Um mapa por arco,** grande (ex.: 40 × 80 células).
+  - **Um mapa por arco,** grande (80 × 80 células, D94).
   - **Regiões:** o mapa é dividido em cerca de 5 regiões, e cada fase do arco libera uma nova, com fontes, profundidade ou um rival vizinho novo.
   - **Planejamento:** as regiões ainda fechadas aparecem escurecidas, com os ícones do que existe nelas, para o jogador planejar.
   - **Liberdade:** dentro das regiões abertas, o jogador escava e coloca o que quiser, onde quiser.
@@ -692,7 +693,7 @@
   - mapa inteiro aberto desde a fase 1, grande demais para o começo;
   - mapa do tamanho de uma fase, sem espaço para crescer.
 - **Motivo:** escolha do usuário, que pediu o mapa bem grande para dar liberdade de escolha. As regiões trazem novidade a cada ano.
-- **Risco:** com o zoom mínimo de 12 dp por célula (D55), um mapa de 40 × 80 não cabe na tela, e talvez seja preciso uma visão geral. Ver Q27.
+- **Risco:** com o zoom mínimo de 12 dp por célula (D55), um mapa de 40 × 80 não cabe na tela, Resolvido pela visão geral (D92) e pelas setas na borda (D93).
 
 ### D75. Benefício do novo ninho: escolher 1 entre 3 traços
 - **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (d) · **Detalha:** D67
@@ -866,6 +867,448 @@
 - **Motivo:** compensa em parte o fato de só o usuário e Claude testarem os protótipos (D79).
 - **Em aberto:** métricas anônimas no lançamento (Q33).
 
+### D87. Túneis em curvas bem suaves
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Resolve:** Q25
+- **Decisão:**
+  - cada segmento é desenhado como uma curva leve entre dois nós;
+  - a curvatura é pequena (proposta: desvio de 5% a 9% do comprimento) e o lado é sorteado;
+  - a lógica continua igual: segmentos de até 3 células, nós, capacidade, fila e sentido (D52);
+  - a largura continua sendo o sinal do nível (D53), por isso as bordas são lisas.
+- **Alternativas:**
+  - retos, que o usuário achou esquisitos;
+  - orgânicos com bordas irregulares, que atrapalhariam a leitura do nível pela largura.
+- **Motivo:** escolha do usuário. Tira a rigidez sem perder a leitura.
+
+### D88. Câmaras em bolha, cada uma com forma própria
+- **Status:** ~~Provisória~~ **Substituída pela D101** em 2026-11-26 (a variação própria por semente continua, só no teto) · **Data:** 2026-11-25 · **Etapa:** (c2) · **Substitui:** o formato de `03` §3.3
+- **Decisão:**
+  - a câmara é uma oval deformada por uma variação suave, gerada a partir de uma semente própria. Cada câmara fica diferente, e a mesma câmara fica sempre igual;
+  - a variação é limitada (proposta: até cerca de 15% do raio), para garantir uma área central livre para o ícone, o anel de progresso e as vagas de cuidadoras;
+  - o túnel abre a borda onde entra.
+- **Alternativas:** retângulo arredondado (antes); oval regular.
+- **Motivo:** escolha do usuário. Dá cara de formigueiro.
+- **Risco:** encaixar os indicadores da câmara. Mitigação: a área central segura.
+
+### D89. Solo com faixas suaves, pedrinhas e raízes
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2)
+- **Decisão:**
+  - o solo escurece com a profundidade numa **transição contínua**, sem degraus visíveis entre as faixas. É uma exceção à regra "plano, sem degradê" (`03` §1), pedida pelo usuário depois de ver as faixas em degraus no protótipo;
+  - pedrinhas pequenas e raízes finas, sempre com pouco contraste;
+  - as raízes ficam perto da superfície;
+  - a cor de cada arco pode mudar o tom das faixas (bioma).
+- **Regra:** a decoração nunca pode ser clara ou do tamanho de uma formiga ou de um recurso (regra 3 do `03` §1).
+- **Motivo:** escolha do usuário. Dá noção de profundidade num mapa grande e dá vida ao fundo.
+
+### D90. Formiga em elipses com cintura e antenas no zoom perto
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Refina:** D34 · **Revista em parte por D109** (sem antenas; carrega pela boca)
+- **Decisão:**
+  - **corpo:** abdômen e cabeça em elipse, com um ponto fino entre o abdômen e o tórax (a "cintura");
+  - **sem patas**;
+  - **antenas:** dois traços curtos, que só aparecem no zoom perto;
+  - **zoom longe:** a formiga vira um ponto;
+  - as castas continuam se diferenciando pela proporção e por um detalhe (`03` §3.5, a ser reajustado no `08`).
+- **Alternativas:** 3 círculos (D34); elipses sem antenas.
+- **Motivo:** escolha do usuário. Lê como formiga sem precisar de patas.
+
+### D91. Túnel mais claro e trânsito mostrado por pulso na borda
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Resolve:** Q26 · **Substitui:** a linha central colorida da D53 e do `03` §3.2
+- **Decisão:**
+  - **Destaque:** o interior dos túneis, nós e câmaras fica bem mais claro que o solo (proposta: `#43362B`, no lugar do Escavado `#2B231D`), sem borda;
+  - **Túnel livre:** sem cor nenhuma;
+  - **Quase cheio:** aparece uma borda que pulsa devagar (cerca de 0,5 Hz) em **amarelo suave**;
+  - **Cheio:** a borda pulsa uma vez por segundo em **vermelho suave**;
+  - **Fila e lentidão:** continuam valendo como sinal principal, sem cor (formigas coladas e fila fora da boca do túnel);
+  - **Força do pulso:** 40% (escolha do usuário em 2026-11-25). O quase cheio também pulsa.
+- **Alternativas testadas no protótipo:**
+  - parede acesa sem cor;
+  - medidor de barrinhas;
+  - listras;
+  - pulso no interior;
+  - túnel com borda fixa.
+- **Motivo:** escolha do usuário. O túnel livre fica calmo, e a cor só aparece quando há problema. Com isso, o azul repetido some (o azul fica só nas defesas).
+- **Regra "cor nunca sozinha" (D54) continua atendida:** o estado também aparece pela fila, pelo ritmo do pulso (lento ou rápido) e pela borda, que só existe quando há problema.
+- **Protótipo:** `prototipo-arte/c2-transito.html` (v3).
+
+### D92. Zoom mínimo mostra o mapa inteiro (visão geral)
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Resolve:** Q27 (com a D93) · **Atualiza:** D55
+- **Decisão:**
+  - a pinça continua dando e tirando zoom (D57);
+  - **afastando ao máximo, o mapa inteiro do arco cabe na tela.** O limite não é mais fixo em 12 dp por célula; ele é calculado para cada mapa.
+    - Exemplo: um mapa de 80 × 80 (D94) numa área útil de cerca de 360 × 600 dp dá cerca de **4,5 dp por célula**, limitado pela largura.
+  - as regiões ainda fechadas aparecem escurecidas, com os ícones do que existe nelas (D74);
+  - **novo nível de detalhe, "visão geral"**, abaixo de 12 dp por célula:
+    - formigas não aparecem (o desenho fica leve, e o movimento não é legível nesse tamanho);
+    - túneis como linhas na cor do interior, com pelo menos 3 dp de largura na tela;
+    - câmaras como formas cheias, com a borda na cor da categoria;
+    - o pulso na borda dos túneis (D91) continua, mais grosso;
+    - alertas com 24 dp na tela, como em qualquer zoom (D55).
+  - **toque duplo** na visão geral aproxima direto para o zoom médio no ponto tocado.
+- **Alternativas:**
+  - minimapa fixo no canto: ocupa espaço numa tela pequena e fica pequeno demais para ler;
+  - manter o limite de 12 dp: menos da metade do mapa cabe na tela.
+- **Motivo:** escolha do usuário. Planejar a rede inteira sem botão novo, usando o mesmo gesto de pinça.
+- **Testar no protótipo:** se 7 a 8 dp por célula ainda permitem ler a rede no Redmi e no celular de entrada. Protótipo: `prototipo-arte/c2-visao-geral.html` (mapa 40 × 80, os 4 níveis de detalhe e as setas da D93).
+
+### D93. Setas na borda da tela para problemas fora da vista
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Resolve:** Q27 (com a D92) · **Detalha:** `03` §9
+- **Decisão:**
+  - quando um problema está fora da tela, aparece uma **seta na beirada**, apontando na direção dele;
+  - **dentro da seta:** o ícone do tipo de problema (inimigo, onda, túnel cheio, fome, rainha);
+  - **cor pela gravidade:** vermelho de perigo para inimigo, onda e rainha; amarelo para túnel cheio e outros gargalos. O ícone repete a informação, então a cor nunca está sozinha (D54);
+  - **toque na seta:** a câmera desliza até o problema;
+  - **limite:** no máximo 4 setas por vez. Problemas na mesma direção viram uma seta com número;
+  - na visão geral (D92) as setas somem, porque tudo já está na tela.
+- **Alternativas:** só alertas no topo; nenhuma indicação fora da tela.
+- **Motivo:** escolha do usuário. O mapa grande não pode esconder problemas.
+
+### D94. Mapa do arco com 80 × 80 células
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Atualiza:** D74, D92
+- **Decisão:**
+  - o mapa de cada arco passa a ter cerca de **80 × 80 células**, o dobro da largura anterior (40 × 80);
+  - a visão geral (D92) mostra o mapa inteiro a cerca de **4,5 dp por célula**. Nesse zoom ela é um "mapa esquemático": serve para ver a rede, os pulsos e os problemas, e para escolher aonde ir; para construir, o jogador aproxima.
+- **Alternativas:**
+  - 60 × 80 (cerca de 6 dp por célula na visão geral);
+  - 100 × 100 (cerca de 3,6 dp por célula, com os túneis virando fios).
+- **Motivo:** o usuário quer muito espaço lateral, com percalços que obriguem a montar rotas diferentes.
+- **Risco:** a leitura da visão geral a 4,5 dp por célula. Testar no Redmi e no celular de entrada.
+
+### D95. O mapa se abre do centro para os lados
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Detalha:** D74
+- **Decisão:**
+  - **fase 1 do arco:** começa numa faixa central;
+  - **cada ano seguinte:** abre uma região à esquerda ou à direita, e depois as regiões fundas, com recursos e percalços novos;
+  - **proposta de 5 regiões:**
+    - centro superior;
+    - lado esquerdo superior;
+    - lado direito superior;
+    - centro fundo;
+    - lados fundos.
+  - A ordem dos lados pode mudar de arco para arco.
+- **Alternativas:** abrir de cima para baixo; tudo aberto desde o começo.
+- **Motivo:** escolha do usuário. Força a rede a crescer para os lados.
+
+### D96. Percalços do terreno
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Resolve:** Q09 (a água traz um evento ambiental para o lançamento)
+- **Decisão:** 5 percalços, cada um criando uma decisão de rota diferente. Os números são hipóteses a calibrar.
+
+| Percalço | Regra | Decisão que cria |
+|---|---|---|
+| **Rocha** | Não pode ser escavada | Desviar |
+| **Argila dura** | Escavar custa 3 vezes mais pontos e tempo, mas rende o dobro de argila (D41) | Rota curta e cara, ou longa e barata |
+| **Areia solta** | Túnel em areia não passa do nível 2. Para chegar ao 3 ou 4, cada célula precisa de reforço com barro. Estruturas não podem ficar em areia sem reforço | Gargalo de capacidade: uma rota só não dá conta |
+| **Água** | Bolsões fixos. Na primavera, túneis e câmaras a até 2 células de um bolsão alagam: ficam fechados até o verão, e as formigas lá dentro saem. Um aviso aparece no inverno. Contra-ataque proposto: **dique de barro**, que protege uma célula (se confirmado, vira a 27ª estrutura no `07`) | Ter rota reserva, ou investir em diques |
+| **Toca de predador** | Uma aranha mora ali. Formigas que passam a até 4 células podem ser atacadas. A toca pode ser destruída em combate e rende presa | Rota rápida e perigosa, rota segura e longa, ou limpar a toca |
+
+- **Alternativas também consideradas:** raízes grossas e cavernas naturais. Ficaram de fora por escolha do usuário; as raízes continuam só como decoração (D89).
+- **Motivo:** o sistema de capacidade dos túneis (D52) fica muito mais interessante quando o terreno obriga a dividir o fluxo.
+- **Cor da água:** a definir na (c2). Precisa se distinguir da cor de defesa e não trazer de volta o "azul em tudo".
+
+### D97. Cada arco enfatiza alguns percalços
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2)
+- **Decisão:**
+  - a **rocha** aparece em todos os arcos;
+  - **arco 1, solo de floresta:** toca de predador, que entra na F4 junto com a aranha;
+  - **arco 2, barranco de argila:** argila dura (F6) e água (F8);
+  - **arco 3, campo aberto:** areia solta (F11), com tocas de predador. Água é rara (a F12 é um ano seco);
+  - os percalços são apresentados aos poucos, como as outras novidades (D51), com cartão de tutorial (D63).
+- **Alternativa:** todos os percalços em todos os arcos.
+- **Motivo:** escolha do usuário. Cada arco ganha um jeito próprio de montar rotas.
+
+### D98. Percalços visíveis só perto da colônia
+- **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c2) · **Atualiza:** D74
+- **Decisão:**
+  - **perto da colônia:** o terreno aparece por completo até cerca de **3 células** de qualquer túnel, nó ou câmara;
+  - **mais longe:** um percalço aparece só como uma marca vaga de "algo aqui" (?). Escavar até lá revela o que é;
+  - **sempre visíveis, mesmo longe:** fontes de recurso, plantas e ninhos rivais, que o jogador precisa para planejar (D74);
+  - **regiões fechadas:** seguem a mesma regra.
+- **Alternativas:** tudo visível sempre; percalço só aparece ao bater nele.
+- **Motivo:** escolha do usuário. Dá surpresa sem ser injusto: uma rota já construída nunca é destruída por algo que estava escondido.
+
+### D99. Túneis, câmaras e formigas menores
+- **Status:** Provisória · **Data:** 2026-11-26 · **Etapa:** (c2) · **Atualiza:** `03` §3.2 (largura dos túneis) e D88 (tamanho das câmaras)
+- **Decisão:**
+  - **túnel:** largura por nível de 0,25, 0,33, 0,42 e 0,5 célula, ou seja, **6, 8, 10 e 12 dp** no zoom inicial de 24 dp (antes 6, 9, 12 e 15 dp). O protótipo testou os níveis 1 e 2;
+  - a **espessura mínima na tela** continua (2 dp nos zooms perto e médio, 2,5 dp no longe, 3 dp na visão geral), para o túnel não sumir de longe;
+  - **câmara:** o desenho fica com cerca de **60%** do tamanho do protótipo anterior, de 2,5 a 4 células de largura e de 1,3 a 2 de altura. A câmara real é a maior. Ao encolher, a borda virada para o túnel fica no mesmo lugar;
+  - **formiga:** **80%** do tamanho anterior, com corpo de cerca de 0,29 célula (cerca de 7 dp no zoom inicial). Na mão dupla, as duas faixas ficam a 20% da largura do túnel, a partir do centro.
+- **Alternativas:**
+  - tamanho antigo: túneis de 9 e 12 dp nos níveis 1 e 2, câmaras de 4 a 6 células;
+  - mínimo: túneis de 4 e 6 dp, câmaras a 45%, formigas a 65%.
+- **Motivo:** escolha do usuário depois de comparar os três tamanhos no protótipo. A rede ficava pesada e tomava muito espaço do mapa 80 × 80.
+- **Conflito resolvido pela D105:** o desenho da câmara era maior que a 1 célula que ela ocupava na mecânica (`02` §1). Agora cada estrutura ocupa de 2 × 1 a 3 × 2 células, e o desenho cabe nelas. O tamanho das câmaras desta decisão vale só para o protótipo de 2026-11-26.
+- **Risco:** com 2 dp de diferença entre um nível e o próximo, pode ficar difícil ler o nível pela largura, e a largura muda o combate (D53). Verificar com os 4 níveis lado a lado no protótipo 1. Se não der para ler, reforçar com um detalhe, como uma borda dupla no nível 4.
+
+### D100. Bonito e bem feito acima do minimalismo
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Atualiza:** D61 e `03` §1
+- **Decisão:**
+  - o objetivo da arte é um jogo **bonito e bem feito**. O minimalismo do Achikaps é uma referência de partida, não uma regra a seguir 100%;
+  - as regras 1 e 5 do `03` §1 (plano, sem textura; menos movimento que informação) viram **guias**. Elas cedem quando um detalhe deixa o jogo mais bonito sem atrapalhar a leitura, como o solo em transição contínua (D89);
+  - continuam como **regras firmes**, porque protegem a leitura:
+    - forma antes de cor (regra 2);
+    - o fundo some e o fluxo aparece (regra 3);
+    - vermelho só para perigo (regra 4);
+  - o que já foi testado e rejeitado continua como referência: formigas com patas e mundo ilustrado (D61), túneis retos e azul repetido (D91).
+- **Motivo:** esclarecimento do usuário em 2026-11-26.
+
+### D101. Câmara em cúpula de chão plano
+- **Status:** Provisória · **Data:** 2026-11-26 · **Etapa:** (c2) · **Resolve:** Q34 (junto com D102 a D105) · **Substitui:** D88
+- **Decisão:**
+  - **forma:** teto arredondado e chão reto, sempre na horizontal, com o chão para baixo;
+  - **entrada:** o túnel entra pela lateral ou pelo teto, nunca pelo chão;
+  - **variação:** cada câmara tem uma leve variação própria no teto, de no máximo 10% da altura, gerada por semente (como na D88). Assim duas câmaras iguais não ficam idênticas;
+  - **proporção:** a categoria pode mudar a proporção. Câmaras de base são mais altas e as de defesa, mais baixas.
+- **Alternativas:** bolha (D88); forma por categoria; hexágono regular.
+- **Motivo:** escolha do usuário. Tem cara de câmara de formigueiro, e o chão dá lugar ao conteúdo (D102).
+
+### D102. Conteúdo real dentro da câmara
+- **Status:** Provisória · **Data:** 2026-11-26 · **Etapa:** (c2) · **Substitui:** o ícone central do `03` §3.3
+- **Decisão:**
+  - **produção:**
+    - os **ingredientes** ficam empilhados no chão, no lado por onde chegam, com a forma de cada recurso (D48);
+    - as **cuidadoras** ficam visíveis no meio, com um movimento curto de trabalho enquanto a receita roda;
+    - o **produto pronto** fica empilhado no outro canto, esperando a carregadora;
+    - um **ícone pequeno do produto** aparece no teto só quando a câmara está vazia, para dizer o que ela faz;
+  - **base:**
+    - câmara real: a rainha (formiga grande) e os ovos saindo;
+    - berçário: as larvas;
+    - depósito: pilhas por família;
+    - câmara nupcial: as aladas esperando;
+    - lixeira: um monte de refugo;
+  - **limite das pilhas:** até 5 itens por pilha. Acima disso a pilha para de crescer, e o número aparece no zoom perto;
+  - **entrada e saída das carregadoras** (acrescentado em 2026-11-26, a pedido do usuário):
+    - a formiga **nunca some**: ela entra pela porta, anda pelo chão até a pilha de ingredientes, deixa o item (a pilha cresce na hora) e sai pela mesma porta;
+    - quem busca o produto anda até a pilha do outro canto, pega um item e sai carregando;
+    - pela porta do teto, a formiga desce andando pelo teto e pela parede até o chão;
+    - nos nós, ela só passa de um túnel para o outro;
+  - **por zoom:**
+    - perto e médio mostram tudo;
+    - longe mostra as pilhas como pontos coloridos;
+    - visão geral mostra só a forma tingida (D103).
+- **Alternativas:** ícone no centro (antes); tudo só no toque, num painel.
+- **Motivo:** escolha do usuário. Segue a regra "o fluxo aparece" e mostra o que falta sem precisar ler número.
+- **Risco:** muita coisa num espaço de 3 × 1 células. Mitigação: o limite das pilhas e os níveis de zoom.
+
+### D103. Câmara tingida pela família, sem borda
+- **Status:** Provisória · **Data:** 2026-11-26 · **Etapa:** (c2) · **Substitui:** a borda de 2 dp na cor da categoria do `03` §3.3
+- **Decisão:**
+  - **interior:** a cor dos túneis (`#43362B`, D91) misturada com 10 a 15% da cor da família do produto. Defesa usa a cor Defesa, ataque usa a cor Ataque, e a base fica sem tinta;
+  - **combinados (N2 e N3):** a tinta segue as metades do produto (D48), com divisão vertical;
+  - **sem borda:** a borda fica reservada aos alertas, com o mesmo pulso dos túneis (D91):
+    - amarelo suave para atenção (falta ingrediente, falta cuidadora, saída cheia);
+    - vermelho suave para sob ataque;
+  - **nível 2:** no lugar da borda dupla, o chão ganha uma faixa mais clara de piso reforçado (proposta, a confirmar no protótipo).
+- **Alternativas:** borda colorida (antes); só o chão colorido; sem cor.
+- **Motivo:** escolha do usuário. Fica coerente com os túneis, e um único sinal de alerta vale para túnel e câmara.
+
+### D104. Indicadores dentro da cena
+- **Status:** Provisória · **Data:** 2026-11-26 · **Etapa:** (c2) · **Substitui:** a tabela de estados da estrutura do `03` §3.3
+- **Decisão:**
+
+  | Estado | Sinal |
+  |---|---|
+  | Produzindo | Linha fina no chão que enche da esquerda para a direita durante a receita, na cor do produto; cuidadoras trabalhando |
+  | Falta ingrediente | Selo pequeno acima da câmara com a forma do ingrediente que falta, em cinza, e pulso amarelo na borda |
+  | Falta cuidadora | A vaga vazia aparece como silhueta tracejada de formiga, no lugar onde ela ficaria, e pulso amarelo na borda |
+  | Saída cheia | A pilha de produto chega ao máximo e a borda pulsa em amarelo |
+  | Pausada pelo jogador | Interior 50% mais escuro e ícone ‖ no teto |
+  | Sob ataque | Pulso vermelho na borda e barra de vida acima da câmara |
+
+  - **números** (estoque, vagas, tempo) aparecem só no zoom perto. O resto fica no painel, ao tocar na câmara;
+  - os **alertas** continuam com 24 dp fixos na tela em qualquer zoom (`03` §3.1).
+- **Alternativas:** anel de progresso, pontos de vagas e ingredientes em cima (antes); só os problemas na tela.
+- **Motivo:** escolha do usuário. Os sinais fazem parte da cena em vez de ficarem por cima dela.
+
+### D105. Tamanho das estruturas por tipo
+- **Status:** Provisória · **Data:** 2026-11-26 · **Etapa:** (c2) · **Resolve:** o conflito da D99 · **Atualiza:** `02` §1 e §4.2, `07` §3
+- **Decisão:**
+  - **pequena, 2 × 1 células:** as extratoras e as estruturas de defesa e ataque com lugar fixo (posto de guarda, torre ácida, armadilha de cola, mina de gosma e posto de guerra);
+  - **média, 3 × 1 células:** as 11 estruturas de produção e a lixeira;
+  - **grande, 3 × 2 células:** câmara real, berçário, depósito e câmara nupcial;
+  - a barricada e a galeria de assalto continuam dentro do túnel, sem câmara própria;
+  - o **desenho ocupa exatamente as células** da estrutura: a cúpula (D101) fica dentro do retângulo. Isso resolve o conflito da D99;
+  - todas ficam na horizontal e não giram;
+  - **custo de escavação** (hipótese a calibrar): 12 pt + 4 pt por célula. A média custa **24 pt** e a grande, **36 pt** (antes, 20 pt para qualquer câmara). As pequenas mantêm o custo atual: extratoras 15 pt e defesa de 10 a 15 pt mais recursos.
+- **Alternativas:** tudo com 1 célula e o desenho encolhido; todas com 3 × 1.
+- **Motivo:** escolha do usuário. O espaço vira decisão, e os percalços (D96) pesam ainda mais na hora de montar as rotas.
+- **Risco:** a câmara grande mais cara pode deixar o começo lento. Calibrar junto com o custo da câmara, que já era a primeira variável a ajustar (`02` §4.2).
+
+### D106. Visual completo e aprovado antes do código; revisão geral no fim
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Substitui:** a parte da D61 que deixava a (c2) correr em paralelo ao protótipo · **Atualiza:** `05` §8 e `00` §7
+- **Decisão:**
+  - o código só começa depois de **todo o visual pronto e aprovado**;
+  - a etapa (c2) entrega três peças:
+    - o `08-direcao-de-arte.md`;
+    - um **catálogo visual**: uma página com todas as cores, recursos, castas, inimigos, estruturas, túneis, percalços, ícones e componentes de interface;
+    - um **app de exemplo** navegável, que mostra como vai ser o jogo final;
+  - **revisão geral:** quando o design estiver perto do final, todas as decisões são revistas para melhorar ainda mais. Até lá, elas valem como estão, sem buscar a perfeição em cada uma.
+- **Motivo:** pedido do usuário.
+- **Risco:** o portão de desempenho agora vem depois do visual. Se a arte aprovada pesar demais no celular de entrada, ela volta para ajuste.
+- **Mitigação:** o catálogo e o app de exemplo usam o mesmo tipo de desenho da engine (formas vetoriais desenhadas em tempo real), e o portão de desempenho mede exatamente a arte aprovada.
+
+### D107. Zoom em dois modos: acompanhar de perto, decidir de longe
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Refina:** D55 e D92
+- **Decisão:**
+  - **de perto, o formigueiro vivo:** tudo detalhado, com cada formiga trabalhando e indo a um destino. O jogador pode acompanhar uma formiga do começo ao fim da tarefa;
+  - **de longe, a visão de comando:** a colônia como um todo, para as decisões macro, como onde expandir, que rota abrir e onde defender;
+  - **detalhe pequeno é aceitável:** formas nas pilhas, antenas e outros detalhes finos podem ficar pequenos no zoom médio, porque o jogador aproxima quando quer ver;
+  - **proposta para avaliar no app de exemplo:** seguir uma formiga com um toque, com a câmera acompanhando.
+- **Motivo:** visão do usuário. Acompanhar as formiguinhas é parte da graça do jogo.
+
+### D108. Como fazer o catálogo visual e o app de exemplo
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** D106
+- **Decisão:**
+  - **ordem:** primeiro o catálogo, depois o app. O app só monta peças já aprovadas no catálogo;
+  - **o que ainda não tem design** (castas, inimigos, água, superfície, barricada, galeria de assalto, ícones de interface) é desenhado direto no catálogo. Onde houver dúvida real, aparecem 2 ou 3 variantes lado a lado para escolher;
+  - **o app de exemplo** cobre todas as telas do `03` §6, navegáveis, com a colônia viva e dados de exemplo. Ele não tem economia nem fase jogável, que ficam para o protótipo 1;
+  - **cada item do catálogo** aparece nos 4 zooms (perto, médio, longe, visão geral) e em todos os estados, com nome, cor e onde é usado;
+  - **teste:** no Chrome do computador, no modo de dispositivo das ferramentas do desenvolvedor. O teste no Redmi fica para o final de tudo;
+  - **técnica:** catálogo e app usam a mesma biblioteca de desenho, para que o app mostre exatamente o que foi aprovado.
+- **Alternativas:** app primeiro; os dois juntos; uma rodada de perguntas para cada grupo; só o tamanho de perto; página publicada no claude.ai.
+- **Motivo:** escolhas do usuário.
+
+### D109. Primeiras escolhas do catálogo visual
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** D96, D98, D108 · **Revê:** a cor provisória da água no `03`, o contorno dos inimigos no `03` §3.6 e as antenas e o jeito de carregar do D90
+- **Decisão:**
+  - **água:** verde-lodo, com corpo #41604F e ondas #5F8670, nos túneis alagados e nos bolsões de água. Ela não repete o azul da defesa;
+  - **galeria de assalto:** túnel normal com a borda tracejada violeta (#9A6BFF) andando no sentido do ataque;
+  - **barricada:** blocos de barro desencontrados atravessando o túnel, com barra de vida;
+  - **inimigos:** sem contorno escuro; a leitura vem do vermelho de perigo e da silhueta;
+  - **obra planejada** (túnel e câmara): tracejado mais espaçado, com traços de 5 dp e vãos de 8 dp;
+  - **formigas sem antenas** em todas as castas, porque as antenas confundiam com as mandíbulas da cortadeira;
+  - **carregar pela boca:** o item vai na frente da cabeça, e não mais em cima do corpo.
+- **Em aberto, com modelos para decidir em `prototipo-arte/catalogo/modelos.html`:**
+  - fundo do jogo (o atual ficou pesado e cansativo);
+  - recursos com mais detalhe no zoom perto, já que o zoom permite (D107);
+  - diferenciação melhor entre as castas;
+  - personalidade das estruturas;
+  - superfície menos lisa;
+  - vários tipos de planta com a mesma função e desenhos diferentes;
+  - estilo dos ícones de interface;
+  - nome novo para o olheiro, que é difícil de entender.
+- **Alternativas:** água azul-acinzentada ou cinza-azulada clara; galeria tingida de violeta; barricada em tampão arredondado; contorno de 1 ou 2 dp nos inimigos.
+- **Motivo:** escolhas do usuário vendo as variantes lado a lado no catálogo.
+
+### D110. Rodada 2 do catálogo: fundo, superfície, recursos, castas, estruturas, ícones e nome
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** D109 · **Revê:** as cores de solo e túnel do D91 e do `03` §1, os recursos lisos do D48 no zoom perto, a cor única das formigas do D90, a cúpula lisa do D103 e o nome "olheiro" do D08 e do D20
+- **Decisão:**
+  - **fundo em terra clara:** o solo passa a ser claro e quente, em camadas onduladas que escurecem pouco com a profundidade (#8E765C → #695441), com pedrinhas e pouco granulado. Túneis e câmaras ficam escuros (#30261F). O contraste se inverte: antes o túnel era mais claro que o solo;
+  - **superfície viva:** chão ondulado com faixa de húmus, grama baixa, pedrinhas, folhas caídas, flores pequenas, morros e mato em silhueta ao fundo e céu em degradê;
+  - **plantas:** capim, trevo, samambaia, folha larga e dente-de-leão, todos com a mesma função. A haste com losangos sai; a substituta está em decisão em `prototipo-arte/catalogo/modelos.html`;
+  - **recursos de perto:** viram objeto ilustrado dentro da silhueta da forma (folha com nervura, gota com brilho, favo, tijolo, torrão…). Abaixo de 9 px na tela volta à forma simples; no zoom longe, ponto. A forma continua sendo a identidade (D48);
+  - **castas:** silhueta marcada (cortadeira com mandíbula grande e espinhos, cavadora com pá, soldado de cabeça enorme, tanque largo com escudo, atiradora com gota de ácido, saqueadora listrada, explosiva inchada) e corpo **levemente** tingido pelo grupo: defesa (azul), ataque (violeta) e reprodução (dourado); trabalho fica creme. A tinta é fraca, para não virar uma "boate"; a intensidade final está em teste no mesmo arquivo de modelos;
+  - **estruturas com ofício:** cada câmara ganha cenário do próprio trabalho no fundo, em tons apagados e atrás do conteúdo: fungo crescendo e fios pendurados no jardim, gotas pingando na destilaria, tachos borbulhando na câmara ácida, prateleiras na olaria, almofada e nichos de ovos na câmara real, estacas e escudos na defesa, flâmulas no posto de guerra, nichos no depósito. Continua sem borda fora de alerta (D103);
+  - **ícones sólidos:** preenchidos, de cantos redondos, com recortes. Reserva vira lua, construir vira cúpula com +, expedição vira bandeira e população vira formiga vista de cima;
+  - **nome:** o "olheiro" passa a se chamar **cortadouro**. Nas decisões anteriores, onde estiver escrito olheiro, leia cortadouro.
+- **Alternativas:** fundo atual, em estratos escuros, com profundidade ilustrada ou terracota; superfície lisa ou só com relevo; recursos geométricos com volume; castas só com silhueta ou com uma marca de cor; câmara com parede de terra batida; ícones de traço ou duotom; "posto de corte", "saída de folhas" ou manter "olheiro".
+- **Motivo:** escolhas do usuário vendo os modelos lado a lado. O fundo claro tira o peso e o cansaço da tela.
+
+### D111. Rodada 3 do catálogo: arbusto no lugar da haste
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** D110
+- **Decisão:**
+  - **planta nova:** o **arbusto de folhinhas** entra no lugar da haste com losangos. Galhos finos e copa de folhinhas em três tufos, com luz em cima e sombra embaixo. Tem flores brancas na primavera, folhas cor de ferrugem no outono e galhos pelados no inverno. Dá folha como as outras;
+  - **tinta das castas:** o usuário acha que 25% fica bom, mas quer testar a força junto com o número de cores. Sai da regra de 3 cores por grupo do D110 e vai para teste em `prototipo-arte/catalogo/modelos.html`: 3 cores (por grupo), 4 cores (trabalho também com cor), 6 cores (por função) e 11 cores (uma por casta), com a força ajustável.
+- **Alternativas:** junco (taboa) ou flor alta.
+- **Motivo:** o arbusto é a única planta redonda e é a que mais varia a linha da superfície. A flor alta fazia uma mancha amarela grande, perto do dourado da reprodução.
+
+### D112. Rodada 4 do catálogo: castas em 6 tons, com 25% de tinta
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Revê:** as 3 cores por grupo do D110
+- **Decisão:**
+  - **6 tons por função:** coleta (operária e cortadeira) fica creme; obra (cavadora) em barro #C98A55; linha de frente (soldado e tanque) em azul; apoio (atiradora e curandeira) em verde-água #5CC6A8; ataque (explosiva e saqueadora) em violeta; reprodução (alada e rainha) em dourado;
+  - **força:** 25% de mistura da cor com o creme. A silhueta continua sendo a diferença principal (D110).
+- **Alternativas:** 3 cores por grupo, 4 cores (trabalho em ocre) e 11 tons (um por casta); forças de 15% a 35%.
+- **Motivo:** escolha do usuário vendo os esquemas lado a lado com a força ajustável. A cor por função separa quem faz coisas diferentes dentro do mesmo grupo sem chegar nas 11 cores, que ficavam parecidas entre si com a tinta fraca.
+- **Em teste na rodada 5** (`prototipo-arte/catalogo/modelos.html`): pernas e antenas no zoom perto, o item saltando da câmara ao ficar pronto e uma pausa curta entre um item e o próximo. Resolvido no D113.
+
+### D113. Rodada 5 do catálogo: pernas, antenas, item saltando e pausa
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Revê:** a retirada das antenas do D109 e as formigas sem patas do D90
+- **Decisão:**
+  - **pernas e antenas, só no zoom perto:** seis pernas finas saindo do tórax, um pouco mais escuras que o corpo. Mexem no passo de tripé quando a formiga anda e param quando ela trabalha numa câmara. As antenas são finas, mais escuras que o corpo, dobradas no cotovelo para fora e abertas em V, para não parecerem a mandíbula da cortadeira. No zoom médio e no longe a formiga continua sem pernas nem antenas;
+  - **item saltando ("moedinha"):** quando a barra de produção enche, o item recém-feito pula de onde as formigas trabalham até acima do teto da câmara, girando como moeda, dá um brilho e some, em 0,9 s. Tem no mínimo 12 px na tela, para aparecer no zoom médio; no longe não aparece. Vale para câmaras de produção e extratoras. Cada câmara termina numa hora diferente, então os saltos não acontecem todos juntos;
+  - **pausa de 0,8 s entre itens:** a barra fica cheia e clareia, e as formigas param de trabalhar; depois zera e começa o próximo item. A pausa entra no tempo de cada receita (Q03).
+- **Alternativas:** sem pernas; pernas paradas; pernas sem antenas; pernas e antenas também no zoom médio. Item pulando para a pilha de saída, selo subindo de 22 px ou moedinha com "+1". Sem pausa ou com a barra esvaziando; pausas de 0,3 e 0,5 s.
+- **Motivo:** escolhas do usuário vendo os modelos animados. Pernas e antenas dão vida de perto sem pesar no zoom médio; a moedinha mostra o que cada câmara faz sem precisar tocar nela, e a pausa dá o ritmo de "pronto, próximo".
+- **Próximo:** o encaixe dos túneis nas estruturas. Resolvido no D114.
+
+### D114. Rodada 6 do catálogo: encaixe do túnel na porta, com batente
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** D101 (o túnel entra pela lateral ou pelo teto)
+- **Decisão:**
+  - **chegada reta:** o túnel chega reto na porta da câmara. Nas portas de lado, no nível do chão; nas de teto, de cima. O último trecho (cerca de meia célula) é sempre reto;
+  - **abertura:** a cor do túnel entra na câmara e se desfaz em degradê, e o chão da câmara continua um pouco para fora da porta;
+  - **batente de terra batida:** num tom entre o solo e o túnel, com um fio de luz. Nas portas de lado tem lintel em cima e soleira no chão; na porta de teto, dois postes. Aparece também no zoom médio;
+  - **formigas:** passam por cima da abertura, sem sumir na parede. A fila espera do lado de fora da porta.
+- **Alternativas:** como estava (túnel mirando o meio da parede, coberto pela cúpula); só a sombra em degradê, sem batente; boca em funil.
+- **Motivo:** escolha do usuário. O batente é o único em que a porta se nota no zoom médio, o que ajuda a ler filas e trânsito.
+- **Consequência para o 02:** para o túnel chegar reto, a porta precisa de espaço livre na frente (cerca de 1 célula). Com o nó colado na câmara, a curva faz um gancho. A regra exata de construção fica para o protótipo.
+
+### D115. Rodada 7 do catálogo: formigas animadas dentro das câmaras
+- **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** D107 (zoom perto mostra o formigueiro vivo), D113 (ciclo com pausa)
+- **Decisão:**
+  - **ciclo de trabalho, "vai e volta" (B):** cada formiga do posto faz a receita inteira. Leva o produto pronto à pilha de saída, busca um ingrediente na pilha de entrada, põe no posto e trabalha até a barra encher. Na pausa de 0,8 s ela para. Com 2 vagas, as viagens são divididas entre as duas;
+  - **no posto, o ingrediente vira produto (C no perto, B no médio):** enquanto a barra enche, os ingredientes encolhem e o produto cresce no lugar deles. No zoom perto, farelinhos da cor do ingrediente pulam do posto; no médio, não;
+  - **carregadoras entram pela frente (A):** a carregadora entra pela porta, passa na frente das pilhas, deixa o ingrediente na pilha de entrada e, quando há pedido, atravessa até a pilha de saída, pega o produto e sai. As formigas genéricas do túnel não somem mais na porta;
+  - **câmara parada, "esperam pelo que falta" (C):** sem ingrediente, as formigas do posto vão para a pilha vazia e esperam viradas para a porta. Com a saída cheia, ficam na pilha de saída segurando o produto;
+  - **câmaras da base, a proposta:** a rainha respira, põe o ovo na ponta do abdômen e uma operária traz fungo até a boca dela. No berçário, as cuidadoras levam fungo a cada larva, que se mexe ao comer. No depósito, a carregadora desce pela parede da cúpula até a pilha. No posto de guarda, um soldado vai até a porta olhar e volta, e os outros viram a cabeça;
+  - **meia-volta:** quando a formiga dá meia-volta no chão, ela vira "de lado", como a moedinha, em vez de girar pela vertical (que parecia subir na parede);
+  - **zoom:** a animação vale no perto e no médio. No longe e no geral, a câmara fica como antes.
+- **Alternativas:**
+  - ciclo: como estava (paradas balançando a cabeça), posto fixo (só os itens pulam), divisão de tarefas;
+  - posto: só o gesto (vira produto de uma vez no fim);
+  - carregadoras: somem na porta, sobem por cima das pilhas;
+  - parada: como estava, congelam, andam à toa;
+  - base: como estava.
+- **Motivo:** escolha do usuário. O "vai e volta" deixa seguir uma formiga só (D107), e a posição das formigas paradas já mostra o problema junto com o selo (D103). Os farelos ficam só no perto para não poluir quando há várias câmaras na tela.
+- **Para o protótipo:**
+  - os tempos são do catálogo (4 s por item, 0,8 s de pausa; 7,2 s na câmara real). No jogo valem os da receita (Q03, Q18);
+  - no catálogo, as carregadoras seguem um roteiro fixo (2 por ingrediente a cada 2 ciclos). No jogo elas vêm dos pedidos de transporte (02 §2), 1 unidade por viagem;
+  - ficam de fora por enquanto, com o desenho antigo: o nível 2 (3 vagas), as extratoras e as defesas sem soldado.
+
+### D116. Rodada 8 do catálogo: combate
+- **Status:** Decidida (rodadas 8 e 8b) · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** 02 §6 (combate), 03 §5 (animação), D103 (câmara sob ataque)
+- **Decisão:**
+  - **luta corpo a corpo, "investida com tranco" (B):** cada lutador avança e recua em golpes curtos, um a cada 0,6 s, com um risquinho claro no contato. Quem apanha fica branco por um instante (0,09 s) e é empurrado um pouco para trás;
+  - **vida, "só em quem está ferido":** a barrinha aparece enquanto a formiga leva dano ou está com menos de 100% de vida. Quando a cura a deixa cheia, a barrinha some. É vermelha nos inimigos e verde nas suas. Formiga inteira não tem barrinha. O usuário corrigiu a resposta da rodada 8, que tinha sido a B ("barrinha em todo inimigo"). Na faixa de baixo do túnel, a barrinha fica embaixo da formiga, para não cobrir a de cima;
+  - **morte, "tomba" (A):** a formiga tomba de lado, perde a cor e, em menos de 1 s, vira presa no chão. As suas formigas tombam e somem, sem deixar presa;
+  - **efeitos das castas, "vivo" (B):** o ácido respinga no alvo, e o alvo lento solta bolhinhas por 2 s. A curandeira tem um anel verde pulsando devagar e cruzinhas subindo de quem é curado. A explosiva incha e explode num anel com estilhaços;
+  - **cola da explosiva, "teia de terra" (rodada 8b):** a explosão deixa por 4 s cinco fios finos, quase da cor da terra, esticados do teto ao chão do túnel. Os fios balançam devagar, têm gotinhas brilhando como orvalho e arrebentam no fim. Não há poça. Os inimigos que passam por ali ficam lentos;
+  - **rastro do ácido, "fio" (rodada 8b, B):** um fio fino desenha o arco inteiro da atiradora até o alvo e se apaga 0,3 s depois do impacto, como um traçante. A gota tem um brilho branco na cabeça;
+  - **câmara atacada, "entram" (B):** os inimigos entram na câmara e mordem o posto e a pilha de entrada, soltando lascas da cor do recurso. As formigas de dentro largam o trabalho e se encolhem no fundo, tremendo. A borda vermelha e a barra de vida da câmara continuam (D103).
+- **Alternativas:**
+  - luta: parados frente a frente, só a investida, bolo de poeira;
+  - vida: nenhuma, barrinha só em quem luta (some 1 s depois do último golpe), barrinha em todo inimigo o tempo todo, escurecer com o dano;
+  - morte: troca direta pela presa, esfarelar, fumacinha;
+  - efeitos: nenhum, sóbrio;
+  - rastro do ácido: três bolinhas atrás da gota (rodada 8), gota com cauda, pingos no chão, sem rastro;
+  - cola: mancha oval com riscos (rodada 8), poça com pingos, respingos, fios cremes, violetas (com e sem poça) ou cor de resina. O branco pegajoso pareceu esquisito;
+  - câmara: como estava, inimigos mordendo a porta.
+- **Motivo:** escolha do usuário. O tranco mostra quem bate em quem mesmo com várias lutas na tela. A barrinha só em quem está ferido mostra quem está perdendo sem encher a tela de barras cheias. Os efeitos vivos mostram o que cada casta faz, inclusive a lentidão e a cola, que antes eram invisíveis. O fio liga a atiradora ao alvo, então dá para ver quem atirou em quem. A teia de terra é a cola mais discreta e combina com o túnel. Com os inimigos dentro da câmara, o ataque fica claro: a câmara para de trabalhar.
+- **A conferir no app de exemplo:**
+  - **barrinhas no zoom longe:** numa luta longa, muitas formigas ficam feridas ao mesmo tempo. Testar se, no zoom longe e no geral, a barrinha deve sumir ou virar só um traço;
+  - **o branco do tranco:** pisca mais de uma vez por segundo, mas ocupa a área de uma formiga, abaixo do limite de área do WCAG 2.3.1. Com movimento reduzido, fica só o tranco, sem o branco;
+  - **a teia aparece no zoom médio?** Ela é discreta de propósito. Se sumir demais, as gotinhas podem ficar um pouco mais claras;
+  - **muitos fios:** com várias atiradoras, os fios podem se cruzar e encher a tela. Cada um dura só 0,65 s, mas vale conferir numa onda grande;
+  - **inimigos dentro da câmara:** é só visual. O dano continua sendo na estrutura (02 §6), e a animação da D115 para enquanto houver inimigo dentro.
+
+### D117. Rodada 9 do catálogo: eventos dentro do formigueiro
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Detalha:** 02 §4.2 (escavação e obra), 02 §6 (ondas e expedição), 03 §5 (animação), D25 (aviso das ondas)
+- **Decisão:**
+  - **escavação de túnel, "terra vira argila" (B):** a ponta do túnel fica irregular e a cavadora joga farelos claros de terra para trás. Duas operárias vão e voltam entre a ponta e o nó: vão vazias, pegam uma bolinha de argila e voltam com ela. Mostra que escavar rende argila (1 a cada 5 pt, 02 §4.2);
+  - **obra de câmara, "da porta, com contorno" (C):** a câmara abre da porta para o fundo, com a frente irregular, e duas cavadoras trabalham nela. O contorno tracejado da cúpula vai enchendo como uma barra, para ler o progresso no zoom médio. O custo que falta aparece no meio. As argileiras da escavação também vão e voltam aqui. No fim, a câmara escura recebe o conteúdo aos poucos, sem piscar;
+  - **nascimento, "pulo" (B):** a larva cresce, se encolhe e estoura num anel da cor da casta. A formiga sai pulando, como a moedinha dos itens (D113), e anda até a porta;
+  - **onda chegando, "prévia tracejada com terra voando" (C + A):** uma linha vermelha tracejada liga a ponta do túnel rival à câmara que vai ser atacada, com um anel pulsando devagar no ponto de impacto. A ponta do túnel rival fica irregular e joga farelos para trás, como a escavação das suas formigas. A rival da frente cava e as outras seguem;
+  - **expedição saindo, "rastro violeta" (B):** os soldados saem das vagas do posto, um atrás do outro, e deixam no túnel um rastro pontilhado de feromônio violeta (cor de ataque) que some em 5 s. As vagas que ficaram vazias aparecem tracejadas.
+- **Alternativas:**
+  - escavação: como estava (só a cavadora na ponta), terra voando sem as argileiras, frente fofa com poeira;
+  - obra: como estava (bloco de terra correndo por dentro), da porta sem o contorno, escurecer por igual com o contorno enchendo;
+  - nascimento: troca direta da larva pela formiga, casulo que abre ao meio, casulo com o ícone da casta pulando;
+  - onda: como estava, só a terra voando, só a prévia, rachaduras na terra à frente da ponta;
+  - expedição: como estava, bandeirinha na primeira da coluna, halo com o número de formigas.
+- **Motivo:** escolha do usuário. As argileiras ligam a escavação à argila que ela rende, sem precisar de número. O contorno enchendo lê o progresso da obra de longe, e a frente cavada mostra de onde ela começa. O pulo repete a moedinha que o jogador já conhece e é mais rápido que o casulo. A prévia diz onde a onda vai bater, e os farelos dizem que o túnel ainda está sendo cavado. O rastro mostra o caminho da expedição mesmo no zoom longe.
+- **A conferir no app de exemplo:**
+  - **as argileiras no jogo:** no modelo, elas vão e voltam entre a ponta e o nó. No jogo, a argila sai da ponta com carregadoras de verdade e vai para o depósito pela rota normal (02 §4.2). Conferir se, com muitas obras ao mesmo tempo, elas não lotam os túneis;
+  - **a prévia e o aviso da onda:** a linha tracejada só aparece depois do aviso da D25. Conferir se ela não briga com as setas de borda (D93) quando a câmara alvo está fora da tela;
+  - **o anel do nascimento:** tem a cor da casta. Nas castas de cor parecida (D111), conferir se o anel diz qual nasceu, ou se vale juntar o ícone da casta;
+  - **os estados parados do catálogo:** o túnel e a câmara "escavando" da seção de estados ainda usam o desenho antigo. Trocar pelo quadro do meio da animação.
+
 ---
 
 ## Questões em aberto
@@ -880,7 +1323,7 @@
 | ~~Q06~~ | ~~Envelhecimento e manutenção?~~ **Resolvida por D24.** | — |
 | ~~Q07~~ | ~~Ritmo e aviso das ondas?~~ **Resolvida por D25.** | — |
 | ~~Q08~~ | ~~Limite de câmaras?~~ **Resolvida por D32** (sem limite; mapa finito com scroll e zoom). | — |
-| Q09 | Eventos ambientais (chuva alagando câmaras rasas): entram em algum momento? | Depois do lançamento (`05` §1.2) |
+| ~~Q09~~ | ~~Eventos ambientais?~~ **Resolvida por D96:** a água alaga túneis na primavera, já no lançamento. | — |
 | Q10 | Preço final do desbloqueio. Fases grátis já definidas (arco 1, D82); preço proposto por volta de R$ 9,90 no Brasil e US$ 2,99 a 3,99 fora. Confirmar perto do lançamento, com o teste fechado e, se possível, experimento de preço no Play Console | Lançamento |
 | ~~Q11~~ | ~~Engine?~~ **Resolvida por D81** (TypeScript + PixiJS + Capacitor). | — |
 | ~~Q12~~ | ~~Vitória alternativa por destruir o rival?~~ **Resolvida por D71.** | — |
@@ -896,12 +1339,13 @@
 | Q22 | Mudar o sentido de um túnel com formigas dentro: elas terminam a travessia (proposta) ou voltam? | Protótipo |
 | Q23 | As 11 silhuetas de casta se leem a 8 dp, ou é preciso um ícone flutuante? (`03` §3.5) | Protótipo |
 | ~~Q24~~ | ~~Celular de referência?~~ **Resolvida por D80** (modelo de entrada exato a escolher). | — |
-| Q25 | Traçado dos túneis: retos, curvos ou orgânicos? A lógica continua em segmentos de até 3 células com nós (`02` §4.1) | Etapa (c2) |
-| Q26 | Rever as cores do mundo, principalmente o azul repetido (defesa e túnel livre), sem perder o contraste da D54 | Etapa (c2) |
-| Q27 | Mapa grande (D74) e zoom mínimo de 12 dp por célula: é preciso uma visão geral ou um minimapa? | Etapa (c2) e protótipo |
+| ~~Q25~~ | ~~Traçado dos túneis?~~ **Resolvida por D87** (curvas bem suaves). | — |
+| ~~Q26~~ | ~~Cores do mundo e o azul repetido?~~ **Resolvida por D91** (túnel mais claro, pulso na borda, força de 40%). | — |
+| ~~Q27~~ | ~~Visão geral ou minimapa?~~ **Resolvida por D92 e D93** (zoom mínimo mostra o mapa inteiro; setas na borda). | — |
 | ~~Q28~~ | ~~Arco 2 sem N3?~~ **Resolvida por D77:** o N3 entra no lançamento. | — |
 | Q29 | Steam: Electron ou Tauri para a versão de PC (D83) | Porta para a Steam |
 | Q30 | China: quando traduzir para chinês simplificado e quem traduz (D84) | Porta para a Steam |
 | Q31 | Som e música: estilo, quantidade, e se é feito, licenciado ou encomendado. Nenhum documento cobria áudio | Durante o protótipo 2 (antes do M3, `05` §8) |
 | Q32 | Modelo exato do celular de entrada (D80, D85) | Antes do portão de desempenho |
 | Q33 | Métricas anônimas no lançamento: sim ou não, e qual ferramenta (D86) | Antes do teste fechado |
+| ~~Q34~~ | ~~Visual das estruturas e câmaras?~~ **Resolvida por D101 a D105** (cúpula de chão plano, conteúdo real, tinta sem borda, indicadores na cena, tamanho por tipo). | — |

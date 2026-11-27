@@ -42,9 +42,9 @@ Sandbox: tudo liberado, configurável
 
 | Arco | Bioma | O que o bioma favorece | Rival inicial | Traços ativos | Duração da fase |
 |---|---|---|---|---|---|
-| 1 | Solo de floresta | Muitas plantas e raízes, pouca argila | Colônia vizinha (enxame) | 0 | 12 a 13 min |
-| 2 | Barranco de argila | Muita argila, poucas plantas, bolsões fundos | Colônia de soldados (blindado) | 1 | 15 a 17 min |
-| 3 | Campo aberto | Poucos abrigos, dois vizinhos, rochas e seca | Dois rivais, um de cada lado | 2 | 18 a 20 min |
+| 1 | Solo de floresta | Muitas plantas e raízes, pouca argila; percalços: rocha e toca de predador | Colônia vizinha (enxame) | 0 | 12 a 13 min |
+| 2 | Barranco de argila | Muita argila, poucas plantas, bolsões fundos; percalços: argila dura e água | Colônia de soldados (blindado) | 1 | 15 a 17 min |
+| 3 | Campo aberto | Poucos abrigos, dois vizinhos, rochas e seca; percalços: areia solta e tocas | Dois rivais, um de cada lado | 2 | 18 a 20 min |
 
 - **Duração total estimada:** cerca de 15 fases × 15 min, ou seja, perto de 4 horas na linha principal, sem contar repetições e desafios.
 - **Sessão no celular:** o jogo salva entre fases e também ao sair do app (`03` §7). Um arco pode ser jogado em várias sessões.
@@ -63,14 +63,14 @@ Sandbox: tudo liberado, configurável
 
 ### 2.1 Arco 1 · Solo de floresta: "Fundação"
 
-Começa com: rainha, 8 operárias, câmara real e um olheiro aberto.
+Começa com: rainha, 8 operárias, câmara real e um cortadouro aberto.
 
 | Fase | Ideia | Novidades | Região nova | Ameaças | Objetivo | ★2 | ★3 | Força |
 |---|---|---|---|---|---|---|---|---|
-| **F1 · Primeira câmara** | Comer e crescer | Túnel em segmentos e nós; olheiro; folha → jardim → fungo; berçário; operária; papéis Carregar, Escavar e Cuidar; depósito; lixeira e refugo; estações (inverno sem folha) | Centro e superfície | Nenhuma | Chegar a 20 operárias | Entrar no inverno com 30 fungos ou mais no estoque | Nenhum túnel vermelho por mais de 30 s | 0 |
+| **F1 · Primeira câmara** | Comer e crescer | Túnel em segmentos e nós; cortadouro; folha → jardim → fungo; berçário; operária; papéis Carregar, Escavar e Cuidar; depósito; lixeira e refugo; estações (inverno sem folha) | Centro e superfície | Nenhuma | Chegar a 20 operárias | Entrar no inverno com 30 fungos ou mais no estoque | Nenhum túnel vermelho por mais de 30 s | 0 |
 | **F2 · Vizinhos** | Defender a casa | Formigas rivais pelo lado; túnel do rival (D27); posto de guarda; papel Guardar; a Reserva defende a rainha; ondas na linha do ano; frente de combate (D53) | Leste (território do rival) | Enxame | Sobreviver com 30 operárias | A rainha nunca abaixo de 50% da vida | Perder no máximo 5 operárias | 1,0 |
 | **F3 · Doce da terra** | Uma segunda cadeia | Seiva; bolsão de raízes; coletor de seiva; destilaria; néctar; upgrade de estrutura (jardim nv2 pede néctar, D47); sentido dos túneis (D52) | Oeste profundo (bolsão) | Enxame maior | Sobreviver e ter o jardim no nv2 | Produzir 80 néctares | Montar um circuito (um túnel só de ida e um só de volta) | 1,3 |
-| **F4 · Caçadas** | Inimigo vira comida | Presa dos corpos; câmara de presas; proteína e quitina; cozinha; pasta; soldado; cortadeira; aranha pelo olheiro | Segunda planta e segundo olheiro | Enxame + aranha | Sobreviver com 6 soldados vivos | Criar 4 cortadeiras | Nenhuma câmara danificada no ano | 1,7 |
+| **F4 · Caçadas** | Inimigo vira comida | Presa dos corpos; câmara de presas; proteína e quitina; cozinha; pasta; soldado; cortadeira; aranha pelo cortadouro; **percalço: toca de aranha** | Segunda planta e segundo cortadouro | Enxame + aranha | Sobreviver com 6 soldados vivos | Criar 4 cortadeiras | Nenhuma câmara danificada no ano | 1,7 |
 | **F5 · O primeiro voo** | Reproduzir | Câmara de geleia; geleia real; alada; câmara nupcial; lacraia (chefe do verão); voo nupcial; escolha de traço | Fundo (lugar protegido para a câmara nupcial) | Enxame + aranha + lacraia | **Voo: 6 aladas vivas às 12:00** | 9 aladas | A lacraia morre antes de chegar à câmara nupcial | 2,2 |
 
 **Aranha na F4:** as respostas ideais contra a aranha (armadilha de cola, barricada, tanque; `07` §9) só chegam no arco 2. Na F4 ela precisa ser vencível com soldados em número, e por isso vem uma por onda.
@@ -85,9 +85,9 @@ Começa com: rainha, 6 operárias, câmara real, **1 traço** e mais operárias 
 
 | Fase | Ideia | Novidades | Região nova | Ameaças | Objetivo | ★2 | ★3 | Força |
 |---|---|---|---|---|---|---|---|---|
-| **F6 · Ninho novo** | A terra como material | Argila; poço de argila; olaria; barro; barricada; cavadora; túnel nv2 | Centro, superfície e veios de argila | Enxame leve | Chegar a 30 operárias | 2 barricadas antes do inverno | 40 operárias | 1,2 |
+| **F6 · Ninho novo** | A terra como material | Argila; poço de argila; olaria; barro; barricada; cavadora; túnel nv2; **percalço: argila dura** | Centro, superfície e veios de argila | Enxame leve | Chegar a 30 operárias | 2 barricadas antes do inverno | 40 operárias | 1,2 |
 | **F7 · Blindados** | Atravessar e atrasar | Ácido; câmara ácida; atiradora; cola; câmara de cola; armadilha de cola; túnel nv3 | Leste (rival blindado) | Soldados rivais + enxame | Sobreviver | Ter 6 atiradoras ao mesmo tempo | Armadilhas de cola desaceleram 20 inimigos | 1,8 |
-| **F8 · Segurar a porta** | Bloquear | Carapaça; câmara de carapaça; tanque; torre ácida; túnel nv4; upgrade do posto de guarda | Superfície leste (mais olheiros, mais portas) | Aranhas em bando + blindados | Nenhum inimigo chega à câmara real | Nenhum inimigo passa do primeiro posto | Usar um túnel nv4 | 2,4 |
+| **F8 · Segurar a porta** | Bloquear | Carapaça; câmara de carapaça; tanque; torre ácida; túnel nv4; upgrade do posto de guarda; **percalço: água que alaga na primavera** (dique de barro) | Superfície leste (mais cortadouros, mais portas) | Aranhas em bando + blindados | Nenhum inimigo chega à câmara real | Nenhum inimigo passa do primeiro posto | Usar um túnel nv4 | 2,4 |
 | **F9 · Contra-ataque** (**fase de assalto**, D71) | Atacar | Curandeira; galeria de assalto; feromônio; câmara de feromônio; saqueadora; posto de guerra | Túnel até o ninho rival | Blindados + defesas do rival | **Destruir o ninho rival** | Destruir com no máximo 2 expedições | Nenhuma curandeira morta | 2,0 |
 | **F10 · Química e voo** | Sacrifício em área | Gosma; câmara tóxica; explosiva; mina de gosma | Fundo (bolsão rico) | Nova colônia vizinha (D76) com enxame grande + lacraia | **Voo: 8 aladas** | 12 aladas | Uma explosão atinge 5 inimigos | 3,0 |
 
@@ -105,7 +105,7 @@ Começa com: rainha, 6 operárias, câmara real, **2 traços** e o bônus de ala
 
 | Fase | Ideia | Regra especial (D66) | Região nova | Ameaças | Objetivo | ★2 | ★3 | Força |
 |---|---|---|---|---|---|---|---|---|
-| **F11 · Dois vizinhos** | Defender dois lados | — | Centro, superfície e os dois lados | 2 rivais (enxame e blindado) | Chegar a 50 operárias | Uma expedição bem-sucedida | Nenhum túnel vermelho no verão | 2,2 |
+| **F11 · Dois vizinhos** | Defender dois lados | **Percalço: areia solta** (reforço de barro) | Centro, superfície e os dois lados | 2 rivais (enxame e blindado) | Chegar a 50 operárias | Uma expedição bem-sucedida | Nenhum túnel vermelho no verão | 2,2 |
 | **F12 · Ano seco** | Economia apertada | Primavera curta, plantas com −40% de folha | Bolsões fundos e ricos | 2 rivais | Sobreviver sem o fungo zerar | Manter 50 néctares no fim do inverno | Nenhuma operária morta de fome | 2,6 |
 | **F13 · Assalto duplo** (**fase de assalto**) | Guerra em duas frentes | Os rivais se ajudam (um ataca quando o outro é atacado) | Túneis até os dois ninhos | 2 rivais fortes | **Destruir os dois ninhos** | Destruir os dois no mesmo ano, antes do verão | Usar o posto de guerra em todas as expedições | 2,8 |
 | **F14 · Pedra e túnel** | Rotas estreitas | Muita rocha, passagens de 1 célula | Labirinto de rocha | Novos vizinhos (D76) + aranhas e lacraia | Sobreviver | Nenhum túnel do arco acima do nv2 | Perder no máximo 10 formigas de combate | 3,4 |
@@ -138,13 +138,14 @@ No fim de cada ano, menos no último do arco, aparece a tela "Inverno de transi�
 
 ### 3.2 Mapa do arco (D74)
 
-- **Tamanho:** cerca de **40 × 80 células**, 2,5 vezes mais largo e quase 3 vezes mais fundo que o exemplo do `02`. O tamanho exato vem do protótipo.
+- **Tamanho:** cerca de **80 × 80 células** (D94). O tamanho exato vem do protótipo.
 - **Regiões:**
-  - são cerca de 5, desenhadas à mão, uma liberada por fase;
-  - as regiões fechadas aparecem escurecidas, com os ícones do que há nelas (fonte, rocha, rival), para o jogador planejar a expansão;
+  - são cerca de 5, desenhadas à mão, uma liberada por fase, **do centro para os lados** (D95): centro superior, um lado, o outro lado, centro fundo e lados fundos;
+  - as regiões fechadas aparecem escurecidas, com os ícones das fontes e dos rivais. Os percalços só aparecem perto da colônia; mais longe, viram "?" (D98);
+- **Percalços (D96, D97):** rocha em todos os arcos; cada arco enfatiza outros (tabela do §1). Eles obrigam a dividir o fluxo em rotas diferentes;
   - não é possível escavar nelas antes da hora.
 - **Liberdade:** dentro do que está aberto, o jogador escolhe onde e como crescer. As regiões são grandes, com várias fontes e vários caminhos possíveis.
-- **Zoom:** com o zoom mínimo de 12 dp por célula (D55), o mapa de 40 de largura ocupa 480 dp e não cabe na tela. Será preciso baixar o zoom mínimo ou ter uma visão geral (Q27).
+- **Zoom:** afastando ao máximo, o mapa inteiro cabe na tela, numa visão geral (D92). Problemas fora da vista aparecem como setas na borda da tela (D93).
 
 ### 3.3 Voo nupcial e novo ninho (D73, D75)
 
@@ -238,7 +239,7 @@ São 12 traços, todos hipóteses a calibrar. Os comuns são **trocas**; os raro
 
 | Gatilho | Dica (texto de trabalho) |
 |---|---|
-| Estrutura parada por falta de ingrediente por mais de 20 s | "O jardim está sem folha. Ponha mais operárias em Carregar ou abra outro olheiro." |
+| Estrutura parada por falta de ingrediente por mais de 20 s | "O jardim está sem folha. Ponha mais operárias em Carregar ou abra outro cortadouro." |
 | Fila com mais de 5 formigas por mais de 15 s | "Túnel congestionado. Faça um upgrade, mude o sentido ou abra outro caminho." |
 | Pedidos sem carregadora por mais de 20 s | "Há coisas para levar e ninguém em Carregar." |
 | Saldo de fungo negativo por mais de 30 s | "A colônia come mais do que produz. Mais jardins ou menos castas caras." |
@@ -310,7 +311,7 @@ São 12 traços, todos hipóteses a calibrar. Os comuns são **trocas**; os raro
 |---|---|---|
 | Fases 7 e 9 com muitas novidades | Sobrecarga | Agrupamento por ideia; mover a cola para a F6 se o teste pedir |
 | Piso e teto mal calibrados | Bola de neve volta, ou o jogador sente que "o jogo tirou" o que ele ganhou | Mostrar com clareza na tela de transição o que foi ajustado e por quê; calibrar no protótipo |
-| Mapa grande demais no celular | Jogador se perde | Regiões liberadas aos poucos; visão geral (Q27) |
+| Mapa grande demais no celular | Jogador se perde | Regiões liberadas aos poucos; visão geral (D92) e setas na borda (D93) |
 | Traços desequilibrados | Uma escolha domina | Testes com pior e melhor traço por fase (§5) |
 | Arco longo (cerca de 1 h 15 min) | Cansaço | Salvar entre fases; cada fase é uma sessão completa |
 | N3 fora do MVP | Arco 2 incompleto | Q28 na etapa (e) |
@@ -318,7 +319,7 @@ São 12 traços, todos hipóteses a calibrar. Os comuns são **trocas**; os raro
 
 ## 12. Questões em aberto desta etapa
 
-- **Q27:** visão geral ou minimapa para o mapa grande. Vai para a (c2) e o protótipo.
+- ~~**Q27:** visão geral ou minimapa?~~ Resolvida por D92 e D93.
 - **Q28:** o que fazer com o arco 2 se o N3 ficar fora do MVP. Vai para a etapa (e).
 - **D69:** quando o Difícil é liberado.
 - **Q10:** preço. A proposta de arco 1 grátis está na §10.

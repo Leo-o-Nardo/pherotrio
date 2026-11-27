@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Pherotrio · c2 · câmaras em cúpula</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#15110E;font-family:system-ui,sans-serif;color:#EFE7DC;overscroll-behavior:none}
+canvas{position:fixed;left:0;top:0;touch-action:none}
+#top{position:fixed;left:0;right:0;top:0;height:56px;background:#211B17;border-bottom:1px solid #5A4B3F;display:flex;align-items:center;justify-content:space-between;padding:0 12px;box-sizing:border-box;font-size:13px;gap:8px}
+#top button{min-height:40px;background:#15110E;color:#EFE7DC;border:1px solid #5A4B3F;border-radius:8px;font-size:13px;padding:0 10px}
+#top button.on{border-color:#EFE7DC;background:#2B231D}
+#bot{position:fixed;left:0;right:0;bottom:0;height:112px;background:#211B17;border-top:1px solid #5A4B3F;box-sizing:border-box;padding:8px 12px;font-size:12px;color:#B3A697}
+#lod{color:#EFE7DC;font-size:13px;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#btns{display:flex;gap:6px}
+#btns button{flex:1;min-height:44px;background:#15110E;color:#EFE7DC;border:1px solid #5A4B3F;border-radius:8px;font-size:13px;padding:0 4px}
+#hint{margin-top:5px;line-height:1.25;font-size:11px}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="top"><b>Câmaras · D101 a D105</b><button id="labels" class="on">Rótulos</button></div>
+<div id="bot">
+  <div id="lod"></div>
+  <div id="btns"><button id="zout">− zoom</button><button id="all">Ver tudo</button><button id="zin">+ zoom</button></div>
+  <div id="hint">Toque numa câmara para trocar o estado. Pinça para zoom, arraste para mover.</div>
+</div>
+<script>
+const MW = 18, MH = 18, SKY = 3, Z_MAX = 72, TOP = 56, BOT = 112, INTEN = 0.4;
+const C = { solo: '#15110E', base: '#43362B', txt: '#EFE7DC', txt2: '#B3A697', veg: '#7FD16B', acu: '#F5B841', ani: '#F06E9A', min: '#BFA88A', ref: '#857A6E', def: '#6FB3E8', atk: '#9A6BFF', perigo: '#FF4F5E', ceu: '#1C2530', painel: '#211B17' };
+const T1 = 0.25, T2 = 0.34, ANT = 0.36 / 14 * 0.8, ITEM = 0.27;
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+let VW, VH, DPR, showLabels = true;
+function resize() { VW = innerWidth; VH = innerHeight; DPR = devicePixelRatio || 1; cv.width = VW * DPR; cv.height = VH * DPR; cv.style.width = VW + 'px'; cv.style.height = VH + 'px'; clampCam(); }
+const useH = () => VH - TOP - BOT;
+const zMin = () => Math.min(Math.min(VW / MW, useH() / (MH + SKY)) * 0.98, 9);
+const ux = () => VW / 2, uy = () => TOP + useH() / 2;
+const cam = { x: 9, y: 7, z: 26, anim: null };
+function clampCam() {
+  if (!VW) return;
+  cam.z = Math.max(zMin(), Math.min(Z_MAX, cam.z));
+  const hw = VW / 2 / cam.z, hh = useH() / 2 / cam.z;
+  cam.x = hw * 2 >= MW ? MW / 2 : Math.max(hw, Math.min(MW - hw, cam.x));
+  cam.y = hh * 2 >= MH + SKY ? (MH - SKY) / 2 : Math.max(-SKY + hh, Math.min(MH - hh, cam.y));
+}
+const w2s = (x, y) => ({ x: (x - cam.x) * cam.z + ux(), y: (y - cam.y) * cam.z + uy() });
+const s2w = (x, y) => ({ x: (x - ux()) / cam.z + cam.x, y: (y - uy()) / cam.z + cam.y });
+const lodOf = z => z >= 36 ? 'perto' : z >= 18 ? 'medio' : z >= 12 ? 'longe' : 'geral';
+const LOD_NOME = { perto: 'Perto', medio: 'Médio', longe: 'Longe', geral: 'Visão geral' };
+function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const R = rng(7);
+function hex(c) { return [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); }
+function lerpCol(a, b, k) { const A = hex(a), B = hex(b); return 'rgb(' + A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',') + ')'; }
+function curve(a, b, bend) {
+  const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = b.x - a.x, dy = b.y - a.y, c = { x: mx - dy * bend, y: my + dx * bend };
+  const pts = []; for (let i = 0; i <= 12; i++) { const t = i / 12, u = 1 - t; pts.push({ x: u * u * a.x + 2 * u * t * c.x + t * t * b.x, y: u * u * a.y + 2 * u * t * c.y + t * t * b.y }); }
+  const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  return { pts, cum, len: cum[cum.length - 1] };
+}
+function at(p, s) {
+  s = Math.max(0, Math.min(p.len, s)); let i = 1; while (i < p.cum.length - 1 && p.cum[i] < s) i++;
+  const a = p.pts[i - 1], b = p.pts[i], seg = (p.cum[i] - p.cum[i - 1]) || 1, t = (s - p.cum[i - 1]) / seg;
+  return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, ang: Math.atan2(b.y - a.y, b.x - a.x) };
+}
+const pulseK = (hz, amp) => amp * (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(T * 6.2832 * hz)));
+
+// ---------- recursos (07 §11) ----------
+const RES = {
+  folha: { f: 'losango', c: [C.veg] }, seiva: { f: 'gota', c: [C.acu] }, presa: { f: 'tri', c: [C.ani] }, argila: { f: 'quad', c: [C.min] },
+  fungo: { f: 'circ', c: [C.veg] }, nectar: { f: 'hex', c: [C.acu] }, proteina: { f: 'caps', c: [C.ani] }, quitina: { f: 'pent', c: [C.ani] },
+  barro: { f: 'ret', c: [C.min] }, acido: { f: 'triInv', c: [C.acu, C.ani] }, refugo: { f: 'cruz', c: [C.ref] }, ovo: { f: 'ovo', c: [C.txt] },
+};
+function shapePath(f, x, y, s) {
+  const r = s / 2; ctx.beginPath();
+  const poly = (n, rot, rr = r) => { for (let i = 0; i < n; i++) { const a = rot + i / n * 6.2832; i ? ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr) : ctx.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } ctx.closePath(); };
+  if (f === 'losango') { ctx.moveTo(x, y - r); ctx.lineTo(x + r * 0.75, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r * 0.75, y); ctx.closePath(); }
+  else if (f === 'gota') { ctx.moveTo(x, y - r); ctx.quadraticCurveTo(x + r * 0.95, y + r * 0.1, x + r * 0.62, y + r * 0.55); ctx.arc(x, y + r * 0.3, r * 0.68, 0.38, Math.PI - 0.38); ctx.quadraticCurveTo(x - r * 0.95, y + r * 0.1, x, y - r); ctx.closePath(); }
+  else if (f === 'tri') poly(3, -Math.PI / 2);
+  else if (f === 'triInv') poly(3, Math.PI / 2);
+  else if (f === 'quad') ctx.rect(x - r * 0.8, y - r * 0.8, r * 1.6, r * 1.6);
+  else if (f === 'circ') ctx.arc(x, y, r * 0.88, 0, 6.2832);
+  else if (f === 'hex') poly(6, 0);
+  else if (f === 'pent') poly(5, -Math.PI / 2);
+  else if (f === 'ret') ctx.rect(x - r, y - r * 0.5, r * 2, r);
+  else if (f === 'caps') { const h = r * 0.55; ctx.moveTo(x - r + h, y - h); ctx.lineTo(x + r - h, y - h); ctx.arc(x + r - h, y, h, -Math.PI / 2, Math.PI / 2); ctx.lineTo(x - r + h, y + h); ctx.arc(x - r + h, y, h, Math.PI / 2, Math.PI * 1.5); ctx.closePath(); }
+  else if (f === 'cruz') { const w = r * 0.38; ctx.rect(x - r * 0.8, y - w, r * 1.6, w * 2); ctx.rect(x - w, y - r * 0.8, w * 2, r * 1.6); }
+  else if (f === 'ovo') ctx.ellipse(x, y, r * 0.55, r * 0.75, 0, 0, 6.2832);
+}
+function item(kind, x, y, s, gray) {
+  const d = RES[kind]; shapePath(d.f, x, y, s);
+  if (gray) { ctx.fillStyle = '#857A6E'; ctx.fill(); return; }
+  if (d.c.length === 1) { ctx.fillStyle = d.c[0]; ctx.fill(); return; }
+  ctx.save(); ctx.clip(); ctx.fillStyle = d.c[0]; ctx.fillRect(x - s, y - s, s, s * 2); ctx.fillStyle = d.c[1]; ctx.fillRect(x, y - s, s, s * 2); ctx.restore();
+}
+
+// ---------- formigas ----------
+function ant(x, y, ang, lod, z, col, opt = {}) {
+  const sc = ANT * (opt.scale || 1);
+  if (lod === 'longe' || lod === 'geral') { ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, Math.max(1.1 / z, 0.06 * (opt.scale || 1)), 0, 6.2832); ctx.fill(); return; }
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(sc, sc);
+  if (opt.dashed) { ctx.strokeStyle = C.txt2; ctx.lineWidth = 0.7; ctx.setLineDash([1.2, 1.2]); }
+  else ctx.fillStyle = col;
+  const head = opt.bigHead ? 2.4 : 1.7;
+  const parts = [[-4.2, 0, 3.6, 2.6], [1.6, 0, 1.9, 1.3], [4.6, 0, head + 0.2, head]];
+  parts.forEach(([px, py, rx, ry]) => { ctx.beginPath(); ctx.ellipse(px, py, rx, ry, 0, 0, 6.2832); opt.dashed ? ctx.stroke() : ctx.fill(); });
+  if (!opt.dashed) { ctx.beginPath(); ctx.arc(-0.4, 0, 0.8, 0, 6.2832); ctx.fill(); }
+  if (lod === 'perto' && !opt.dashed) { ctx.strokeStyle = col; ctx.lineWidth = 0.7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(5.8, -0.8); ctx.quadraticCurveTo(7.2, -3, 8.8, -2.8 + (opt.nod || 0)); ctx.moveTo(5.8, 0.8); ctx.quadraticCurveTo(7.2, 3, 8.8, 2.8 + (opt.nod || 0)); ctx.stroke(); }
+  ctx.setLineDash([]); ctx.restore();
+  if (opt.carry && lod !== 'longe') item(opt.carry, x + Math.cos(ang) * 0.1, y - 0.13, 0.17);
+}
+
+// ---------- câmaras ----------
+// tam: P 2x1, M 3x1, G 3x2 (D105). porta: lado por onde o túnel entra (D101)
+const CH = [
+  { id: 'jardim', nome: 'Jardim de fungo · nv2', tam: 'M', x: 1.0, y: 4, porta: 'R', cat: 'prod', fam: [C.veg], ins: ['folha'], out: 'fungo', vagas: 3, nivel: 2, estado: 'produzindo' },
+  { id: 'destilaria', nome: 'Destilaria', tam: 'M', x: 14.0, y: 4, porta: 'L', cat: 'prod', fam: [C.acu], ins: ['seiva'], out: 'nectar', vagas: 1, estado: 'falta_ing' },
+  { id: 'acida', nome: 'Câmara ácida', tam: 'M', x: 1.6, y: 8, porta: 'R', cat: 'prod', fam: [C.acu, C.ani], ins: ['nectar', 'proteina'], out: 'acido', vagas: 2, estado: 'falta_cuid' },
+  { id: 'presas', nome: 'Câmara de presas', tam: 'M', x: 13.4, y: 8, porta: 'L', cat: 'prod', fam: [C.ani], ins: ['presa'], out: 'proteina', out2: 'quitina', vagas: 1, estado: 'saida_cheia' },
+  { id: 'real', nome: 'Câmara real', tam: 'G', x: 10.4, y: 11, porta: 'L', cat: 'base', fam: [], ins: ['fungo'], out: 'ovo', vagas: 0, estado: 'produzindo' },
+  { id: 'bercario', nome: 'Berçário · dieta fungo', tam: 'G', x: 4.6, y: 11, porta: 'R', cat: 'base', fam: [], ins: ['fungo'], vagas: 2, estado: 'produzindo' },
+  { id: 'deposito', nome: 'Depósito', tam: 'G', x: 7.5, y: 15.2, porta: 'T', cat: 'base', fam: [], estado: 'normal' },
+  { id: 'lixeira', nome: 'Lixeira', tam: 'M', x: 1.2, y: 14.2, porta: 'T', cat: 'base', fam: [], estado: 'normal' },
+  { id: 'posto', nome: 'Posto de guarda', tam: 'P', x: 10.3, y: 1.4, porta: 'L', cat: 'def', fam: [C.def], vagas: 4, estado: 'ataque' },
+  { id: 'coletor', nome: 'Coletor de seiva', tam: 'P', x: 14.8, y: 13.6, porta: 'L', cat: 'ext', fam: [C.acu], out: 'seiva', vagas: 2, estado: 'produzindo' },
+];
+const DIM = { P: [2, 1], M: [3, 1], G: [3, 2] };
+const ESTADOS = {
+  prod: ['produzindo', 'falta_ing', 'falta_cuid', 'saida_cheia', 'pausada', 'ataque', 'vazia'],
+  base: ['produzindo', 'falta_ing', 'pausada', 'ataque'],
+  armazem: ['normal', 'cheio', 'ataque'],
+  def: ['normal', 'falta_cuid', 'ataque'],
+  ext: ['produzindo', 'falta_cuid', 'saida_cheia', 'ataque'],
+};
+const NOME_ESTADO = { produzindo: 'produzindo', falta_ing: 'falta ingrediente', falta_cuid: 'falta cuidadora', saida_cheia: 'saída cheia', pausada: 'pausada', ataque: 'sob ataque', vazia: 'vazia', normal: 'normal', cheio: 'cheio' };
+CH.forEach((ch, i) => {
+  [ch.w, ch.h] = DIM[ch.tam];
+  ch.lista = ch.id === 'deposito' || ch.id === 'lixeira' ? ESTADOS.armazem : ch.id === 'posto' ? ESTADOS.def : ch.cat === 'ext' ? ESTADOS.ext : ch.cat === 'base' ? ESTADOS.base : ESTADOS.prod;
+  const m = 0.05; ch.x0 = ch.x + m; ch.x1 = ch.x + ch.w - m; ch.yb = ch.y + ch.h - m;
+  const alt = ch.cat === 'def' || ch.cat === 'ext' ? 0.82 : ch.h > 1 ? 0.8 : 1;
+  ch.yt = ch.yb - (ch.h - 2 * m) * alt;
+  const wall = ch.cat === 'base' ? 0.42 : ch.cat === 'def' ? 0.22 : 0.32;
+  ch.yw = ch.yb - (ch.yb - ch.yt) * wall;
+  const r = rng(300 + i * 17), p1 = r() * 6.28, p2 = r() * 6.28, a1 = 0.05 + r() * 0.03, a2 = 0.02 + r() * 0.02;
+  const cx = (ch.x0 + ch.x1) / 2, rx = (ch.x1 - ch.x0) / 2, ry = ch.yw - ch.yt;
+  ch.roof = []; for (let k = 0; k <= 40; k++) { const th = Math.PI + k / 40 * Math.PI; const v = 1 + (a1 * Math.sin(3 * th + p1) + a2 * Math.sin(5 * th + p2)) * Math.sin(k / 40 * Math.PI); ch.roof.push({ x: cx + rx * Math.cos(th), y: ch.yw + ry * v * Math.sin(th) }); }
+  const doorY = ch.yb - 0.32;
+  ch.door = ch.porta === 'L' ? { x: ch.x0 + 0.05, y: doorY } : ch.porta === 'R' ? { x: ch.x1 - 0.05, y: doorY } : { x: cx, y: ch.yt + 0.05 };
+  ch.bob = r() * 6.28;
+});
+function domePath(ch) { ctx.beginPath(); ctx.moveTo(ch.x0, ch.yb); ctx.lineTo(ch.x0, ch.yw); ch.roof.forEach(q => ctx.lineTo(q.x, q.y)); ctx.lineTo(ch.x1, ch.yb); ctx.closePath(); }
+
+// ---------- rede ----------
+const nodes = { E: [9, 0], P: [9, 2.3], A: [9, 3.2], B: [5, 4.4], Cn: [13, 4.4], D: [9, 6.6], Ee: [5.6, 8.4], F: [12.3, 8.4], G: [9, 12.1], L: [3.2, 11.6], S: [13.9, 10.8] };
+const N = k => ({ x: nodes[k][0], y: nodes[k][1] });
+const doorOf = id => CH.find(c => c.id === id).door;
+const lines = [
+  [[N('E'), N('P'), N('A')], 2, 'quase'], [[N('A'), N('B')], 1], [[N('A'), N('Cn')], 1], [[N('A'), N('D')], 2],
+  [[N('B'), doorOf('jardim')], 1], [[N('Cn'), doorOf('destilaria')], 1], [[N('P'), doorOf('posto')], 1],
+  [[N('D'), N('Ee')], 1], [[N('D'), N('F')], 1], [[N('D'), N('G')], 2], [[N('Ee'), doorOf('acida')], 1], [[N('F'), doorOf('presas')], 1],
+  [[N('G'), doorOf('real')], 1], [[N('G'), doorOf('bercario')], 1], [[N('G'), doorOf('deposito')], 1],
+  [[N('Ee'), N('L'), doorOf('lixeira')], 1], [[N('F'), N('S'), doorOf('coletor')], 1],
+];
+const segs = [];
+lines.forEach(([pts, lvl, st]) => { for (let i = 1; i < pts.length; i++) segs.push({ p: curve(pts[i - 1], pts[i], (R() < .5 ? -1 : 1) * (0.03 + R() * 0.04)), w: lvl === 2 ? T2 : T1, lvl, state: st || 'livre' }); });
+const nodeList = Object.keys(nodes).map(N);
+
+// ---------- rotas: cada formiga tem destino (D102: entra, entrega, pega e sai) ----------
+const key = p => p.x.toFixed(3) + ',' + p.y.toFixed(3);
+const adj = new Map();
+segs.forEach(s => {
+  const a = key(s.p.pts[0]), b = key(s.p.pts[s.p.pts.length - 1]);
+  [[a, b, true], [b, a, false]].forEach(([u, v, fwd]) => { if (!adj.has(u)) adj.set(u, []); adj.get(u).push({ to: v, seg: s, fwd }); });
+});
+function route(fromP, toP) {
+  const A = key(fromP), B = key(toP), prev = new Map([[A, null]]), q = [A];
+  while (q.length) { const u = q.shift(); if (u === B) break; (adj.get(u) || []).forEach(e => { if (!prev.has(e.to)) { prev.set(e.to, { u, e }); q.push(e.to); } }); }
+  if (!prev.has(B)) return null;
+  const steps = []; let c = B; while (prev.get(c)) { const { u, e } = prev.get(c); steps.unshift(e); c = u; }
+  return steps;
+}
+function stepsToPts(steps) {
+  const pts = [];
+  steps.forEach(({ seg, fwd }) => {
+    const src = fwd ? seg.p.pts : seg.p.pts.slice().reverse(), lane = seg.lvl === 2 ? (fwd ? 1 : -1) * seg.w * 0.2 : 0;
+    src.forEach((q, i) => { if (pts.length && i === 0) return; pts.push({ x: q.x, y: q.y, lane }); });
+  });
+  return pts;
+}
+function mkWalk(pts, speed) { const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)); return { type: 'walk', pts, cum, len: cum[cum.length - 1], s: 0, speed }; }
+function walkPos(a) {
+  const s = Math.min(a.s, a.len); let i = 1; while (i < a.cum.length - 1 && a.cum[i] < s) i++;
+  const p = a.pts[i - 1], q = a.pts[i] || p, seg = (a.cum[i] - a.cum[i - 1]) || 1, t = Math.max(0, Math.min(1, (s - a.cum[i - 1]) / seg));
+  const ang = Math.atan2(q.y - p.y, q.x - p.x), lane = (p.lane || 0) + ((q.lane || 0) - (p.lane || 0)) * t;
+  return { x: p.x + (q.x - p.x) * t - Math.sin(ang) * lane, y: p.y + (q.y - p.y) * t + Math.cos(ang) * lane, ang };
+}
+const byId = id => CH.find(c => c.id === id);
+const floorY = ch => ch.yb - 0.035 - 0.07;
+// da porta até o chão: pela lateral desce direto; pelo teto, a formiga anda pelo teto e pela parede
+function insideIn(ch) {
+  const fy = floorY(ch);
+  if (ch.porta === 'T') {
+    const mid = Math.floor(ch.roof.length / 2), cx = (ch.x0 + ch.x1) / 2, pts = [{ x: ch.door.x, y: ch.door.y }];
+    for (let k = mid; k >= 0; k -= 2) { const q = ch.roof[k]; pts.push({ x: q.x + (cx - q.x) * 0.05, y: q.y + 0.08 }); }
+    pts.push({ x: ch.x0 + 0.09, y: ch.yw + 0.05 }, { x: ch.x0 + 0.15, y: fy });
+    return pts;
+  }
+  const inward = ch.porta === 'L' ? 1 : -1;
+  return [{ x: ch.door.x, y: ch.door.y }, { x: ch.door.x + inward * 0.25, y: fy }];
+}
+function accepts(ch, item) {
+  const st = ch.estado;
+  if (ch.cat === 'prod') {
+    const i = ch.ins.indexOf(item); if (i < 0 || ch.inN[i] >= 8) return false;
+    if (st === 'falta_ing') return i !== 0;
+    return ['produzindo', 'falta_cuid', 'saida_cheia'].includes(st);
+  }
+  if (ch.id === 'real' || ch.id === 'bercario') return item === 'fungo' && st === 'produzindo';
+  if (ch.id === 'deposito') return st === 'normal' && item !== 'refugo';
+  if (ch.id === 'lixeira') return st === 'normal' && item === 'refugo';
+  return false;
+}
+const canPick = ch => (ch.cat === 'prod' || ch.cat === 'ext') && ch.outN > 0 && ['produzindo', 'falta_ing', 'falta_cuid'].includes(ch.estado);
+function drop(a, ch) { if (ch.cat === 'prod') { const i = ch.ins.indexOf(a.carry); if (i >= 0) ch.inN[i] = Math.min(8, ch.inN[i] + 1); } a.carry = null; }
+function pick(a, ch) { if (!canPick(ch)) return; if (ch.id === 'jardim' && Math.random() < 0.25) { a.carry = 'refugo'; return; } ch.outN--; a.carry = ch.out; }
+function consumer(item, from) {
+  const all = CH.filter(c => c !== from && accepts(c, item)), best = all.filter(c => c.id !== 'deposito');
+  const list = best.length ? best : all; return list.length ? list[Math.floor(Math.random() * list.length)] : null;
+}
+function enter(a, ch) {
+  const inPts = insideIn(ch), fy = floorY(ch);
+  a.acts.push(mkWalk(inPts, 0.7));
+  let cur = inPts[inPts.length - 1];
+  if (a.carry) { const p = { x: ch.dropX, y: fy }; a.acts.push(mkWalk([cur, p], 0.6)); a.acts.push({ type: 'wait', t: 0.5, done: () => drop(a, ch) }); cur = p; }
+  a.acts.push({ type: 'call', fn: () => {
+    if (canPick(ch)) { const p = { x: ch.pickX, y: fy }; a.acts.push(mkWalk([cur, p], 0.6)); a.acts.push({ type: 'wait', t: 0.5, done: () => pick(a, ch) }); cur = p; }
+    a.acts.push({ type: 'call', fn: () => { a.acts.push(mkWalk([cur, ...inPts.slice().reverse()], 0.7)); a.acts.push({ type: 'call', fn: () => leave(a, ch) }); } });
+  } });
+}
+function leave(a, from) {
+  const dest = a.carry ? consumer(a.carry, from) : null;
+  const st = route(from.door, dest ? dest.door : N('E'));
+  if (!st) { a.carry = null; return; }
+  a.acts.push(mkWalk(stepsToPts(st), 1));
+  a.acts.push({ type: 'call', fn: () => dest ? enter(a, dest) : goSurface(a) });
+}
+function chooseTrip() {
+  const opts = [];
+  if (accepts(byId('jardim'), 'folha')) opts.push({ ch: byId('jardim'), item: 'folha' }, { ch: byId('jardim'), item: 'folha' });
+  if (accepts(byId('presas'), 'presa')) opts.push({ ch: byId('presas'), item: 'presa' });
+  CH.forEach(c => { if (canPick(c)) opts.push({ ch: c, item: null }); });
+  return opts.length ? opts[Math.floor(Math.random() * opts.length)] : { ch: null };
+}
+const SURF = -0.06;
+function goSurface(a) {
+  a.carry = null; const sx = 1.5 + Math.random() * 15;
+  a.acts.push(mkWalk([N('E'), { x: N('E').x, y: SURF }, { x: sx, y: SURF }], 1));
+  a.acts.push({ type: 'wait', t: 0.6 + Math.random() * 2 });
+  a.acts.push({ type: 'call', fn: () => fromSurface(a, sx) });
+}
+function fromSurface(a, sx, startFrac) {
+  const trip = chooseTrip(); a.carry = trip.item || null;
+  if (!trip.ch) { a.acts.push({ type: 'wait', t: 1.5 }, { type: 'call', fn: () => fromSurface(a, sx) }); return; }
+  const w = mkWalk([{ x: sx, y: SURF }, { x: N('E').x, y: SURF }, ...stepsToPts(route(N('E'), trip.ch.door))], 1);
+  if (startFrac) w.s = w.len * startFrac;
+  a.acts.push(w, { type: 'call', fn: () => enter(a, trip.ch) });
+}
+function updateAnt(a, dt) {
+  for (let guard = 0; guard < 30; guard++) {
+    if (!a.acts.length) { goSurface(a); continue; }
+    const act = a.acts[0];
+    if (act.type === 'call') { a.acts.shift(); act.fn(); continue; }
+    if (act.type === 'wait') { act.t -= dt; if (act.t <= 0) { a.acts.shift(); act.done && act.done(); } break; }
+    if (act.len <= 0) { a.acts.shift(); continue; }
+    act.s += act.speed * dt; const p = walkPos(act); a.x = p.x; a.y = p.y; a.ang = p.ang;
+    if (act.s >= act.len) { a.acts.shift(); act.done && act.done(); }
+    break;
+  }
+}
+// produção com contagem viva
+const NEED = { jardim: 2, destilaria: 2 }, DUR = { jardim: 4, destilaria: 5, acida: 6, presas: 5, coletor: 4, real: 6, bercario: 8 };
+function resetCounts(ch) {
+  const st = ch.estado;
+  if (ch.cat === 'prod') { ch.inN = ch.ins.map((k, i) => st === 'vazia' ? 0 : st === 'falta_ing' && i === 0 ? 0 : 3); ch.outN = st === 'saida_cheia' ? 9 : st === 'vazia' ? 0 : 1; }
+  if (ch.cat === 'ext') ch.outN = st === 'saida_cheia' ? 8 : 1;
+  ch.prog = st === 'saida_cheia' ? 1 : 0.2;
+}
+function updateChambers(dt) {
+  CH.forEach(ch => {
+    const st = ch.estado;
+    if (ch.cat === 'prod') {
+      const rate = st === 'produzindo' || st === 'falta_ing' ? 1 : st === 'falta_cuid' ? (ch.vagas - 1) / ch.vagas : 0, need = NEED[ch.id] || 1;
+      if (rate > 0 && ch.inN.every(n => n >= need) && ch.outN < 9) { ch.prog += dt * rate / DUR[ch.id]; if (ch.prog >= 1) { ch.prog = 0; ch.inN = ch.inN.map(n => n - need); ch.outN++; } }
+    } else if (ch.cat === 'ext') {
+      const rate = st === 'produzindo' ? 1 : st === 'falta_cuid' ? 0.5 : 0;
+      if (rate > 0 && ch.outN < 8) { ch.prog += dt * rate / DUR.coletor; if (ch.prog >= 1) { ch.prog = 0; ch.outN++; } }
+    } else if ((ch.id === 'real' || ch.id === 'bercario') && st === 'produzindo') ch.prog = (ch.prog + dt / DUR[ch.id]) % 1;
+  });
+}
+CH.forEach(ch => {
+  const inL = ch.x0 + 0.1, inR = ch.x1 - 0.1, dIn = ch.porta === 'R' ? -1 : 1;
+  ch.dropX = (dIn > 0 ? inL : inR) + dIn * 0.3; ch.pickX = (dIn > 0 ? inR : inL) - dIn * 0.3;
+  if (ch.id === 'real') ch.dropX = inL + 0.3;
+  if (ch.id === 'bercario') ch.dropX = inR - 0.3;
+  if (ch.id === 'deposito') ch.dropX = (ch.x0 + ch.x1) / 2;
+  if (ch.id === 'lixeira') ch.dropX = ch.x0 + 0.6;
+  if (ch.id === 'coletor') ch.pickX = ch.x0 + 0.3;
+  resetCounts(ch);
+});
+const ants = [];
+for (let i = 0; i < 18; i++) {
+  const a = { x: 9, y: SURF, ang: 0, carry: null, acts: [] };
+  if (i < 10) fromSurface(a, 1.5 + R() * 15, 0.25 + R() * 0.7);
+  else { a.x = 1.5 + R() * 15; a.acts.push({ type: 'wait', t: R() * 5 }, { type: 'call', fn: () => fromSurface(a, a.x) }); }
+  ants.push(a);
+}
+
+const source = { x: 15.8, y: 14.1, r: 2.0, frac: 0.5 };
+
+// ---------- solo ----------
+const pebbles = []; for (let i = 0; i < 200; i++) pebbles.push({ x: R() * MW, y: 0.4 + R() * (MH - 0.4), rx: 0.04 + R() * 0.09, ry: 0.03 + R() * 0.07, a: R() * 3.14, c: R() < .5 ? '#30271F' : '#382E25' });
+const roots = []; for (let i = 0; i < 10; i++) { const x = R() * MW; const pts = [[x, 0]]; let px = x, py = 0; const n = 3 + Math.floor(R() * 3); for (let k = 0; k < n; k++) { px += (R() - .5) * 0.8; py += 0.4 + R() * 0.7; pts.push([px, py]); } roots.push(pts); }
+const plants = []; for (let i = 0; i < 7; i++) plants.push({ x: 1 + R() * 16, h: 0.6 + R() * 1.4 });
+
+// ---------- conteúdo das câmaras ----------
+function pile(kind, n, xs, dir, floor, cols, lod, z) {
+  const cap = cols + (cols - 1), shown = Math.min(n, cap), S = ITEM, g = 0.03;
+  if (n <= 0) return { x: xs, w: 0 };
+  const w = cols * S + (cols - 1) * g, x0 = dir > 0 ? xs : xs - w;
+  if (lod === 'longe' || lod === 'geral') { ctx.fillStyle = RES[kind].c[0]; ctx.beginPath(); ctx.arc(x0 + w / 2, floor - S / 2, Math.max(2 / z, S * 0.4), 0, 6.2832); ctx.fill(); return { x: x0, w }; }
+  let k = 0;
+  for (let i = 0; i < Math.min(shown, cols); i++, k++) item(kind, x0 + S / 2 + i * (S + g), floor - S / 2, S);
+  for (let i = 0; k < shown; i++, k++) item(kind, x0 + S + g / 2 + i * (S + g), floor - S * 1.45, S);
+  if (n > cap && lod === 'perto') numTag('×' + n, x0 + w / 2, floor - S * 2.25);
+  return { x: x0, w };
+}
+const tags = [];
+function numTag(txt, x, y) { tags.push({ txt, x, y }); }
+function drawContents(ch, lod, z) {
+  const st = ch.estado, floor = ch.yb - 0.035, inL = ch.x0 + 0.1, inR = ch.x1 - 0.1;
+  const dIn = ch.porta === 'R' ? -1 : 1;
+  const inStart = dIn > 0 ? inL : inR, outStart = dIn > 0 ? inR : inL;
+  const working = st === 'produzindo' || st === 'normal';
+  const nod = working ? Math.sin(T * 7 + ch.bob) * 0.8 : 0;
+  if (ch.cat === 'prod') {
+    let x = inStart;
+    ch.ins.forEach((k, i) => {
+      const n = ch.inN[i];
+      const p = pile(k, n, x, dIn, floor, ch.ins.length > 1 ? 2 : 3, lod, z); x = dIn > 0 ? p.x + p.w + 0.06 : p.x - 0.06;
+    });
+    const nOut = ch.outN;
+    const po = pile(ch.out, nOut, outStart, -dIn, floor, ch.out2 ? 2 : 3, lod, z);
+    if (ch.out2 && nOut) pile(ch.out2, st === 'saida_cheia' ? 3 : 1, dIn > 0 ? po.x - 0.06 : po.x + po.w + 0.06, -dIn, floor, 1, lod, z);
+    // cuidadoras no meio
+    const midL = dIn > 0 ? x : (ch.out2 ? po.x - 0.4 : po.x + po.w), midR = dIn > 0 ? (ch.out2 ? po.x - 0.4 : po.x) : x;
+    const mid = (Math.min(midL, midR) + Math.max(midL, midR)) / 2;
+    const filled = st === 'falta_cuid' ? ch.vagas - 1 : ch.vagas;
+    for (let i = 0; i < ch.vagas; i++) {
+      const ax = mid + (i - (ch.vagas - 1) / 2) * 0.2, ay = floor - 0.07 - (i % 2) * 0.02;
+      const face = (-dIn > 0 ? Math.PI : 0);
+      ant(ax, ay, face + (working ? Math.sin(T * 6 + i + ch.bob) * 0.08 : 0), lod, z, C.txt, { dashed: i >= filled, nod });
+    }
+    if (st === 'vazia' && lod !== 'geral') { ctx.globalAlpha = 0.85; item(ch.out, (ch.x0 + ch.x1) / 2, ch.yt + 0.26, 0.2); ctx.globalAlpha = 1; }
+    progressLine(ch, ch.prog, RES[ch.out].c[0], lod);
+  } else if (ch.id === 'real') {
+    const cx = (ch.x0 + ch.x1) / 2 + 0.15;
+    ant(cx, floor - 0.27, Math.PI, lod, z, C.txt, { scale: 3.6, nod: nod * 0.5 });
+    const eggs = st === 'falta_ing' ? 1 : 4;
+    for (let i = 0; i < eggs; i++) { if (lod === 'longe' || lod === 'geral') break; item('ovo', ch.x1 - 0.32 - (i % 2) * 0.2, floor - 0.13 - Math.floor(i / 2) * 0.24, 0.26); }
+    pile('fungo', st === 'falta_ing' ? 0 : 3, inL + 0.05, 1, floor, 2, lod, z);
+    ant(inL + 0.75, floor - 0.07, Math.PI, lod, z, C.txt, { nod });
+    progressLine(ch, ch.prog, C.txt, lod);
+  } else if (ch.id === 'bercario') {
+    if (lod !== 'longe' && lod !== 'geral') for (let i = 0; i < 3; i++) {
+      const lx = ch.x0 + 0.7 + i * 0.55, ly = floor - 0.1, wig = working ? Math.sin(T * 2 + i) * 0.03 : 0;
+      ctx.fillStyle = '#E8DDCB'; ctx.beginPath(); ctx.ellipse(lx, ly - wig - 0.03, 0.23, 0.13, 0.1, 0, 6.2832); ctx.fill();
+      ctx.strokeStyle = '#B9AC98'; ctx.lineWidth = 0.015; for (let s = -1; s <= 1; s++) { ctx.beginPath(); ctx.moveTo(lx + s * 0.09, ly - 0.15 - wig); ctx.lineTo(lx + s * 0.09, ly + 0.08 - wig); ctx.stroke(); }
+    }
+    pile('fungo', st === 'falta_ing' ? 0 : 2, inR, -1, floor, 2, lod, z);
+    for (let i = 0; i < ch.vagas; i++) ant(ch.x0 + 0.95 + i * 0.55, floor - 0.32, 0.3, lod, z, C.txt, { nod });
+    if (lod !== 'geral') { ctx.globalAlpha = 0.85; item('fungo', (ch.x0 + ch.x1) / 2, ch.yt + 0.28, 0.2); ctx.globalAlpha = 1; }
+    progressLine(ch, ch.prog, C.veg, lod);
+  } else if (ch.id === 'deposito') {
+    const full = st === 'cheio', fams = [['fungo', 3], ['nectar', 2], ['barro', 4], ['proteina', 2]];
+    let x = ch.x0 + 0.12; fams.forEach(([k, n]) => { const p = pile(k, full ? 8 : n, x, 1, floor, 2, lod, z); x = p.x + p.w + 0.1; });
+    if (lod === 'perto') numTag(full ? '200/200' : '11/200', (ch.x0 + ch.x1) / 2, ch.yt + 0.35);
+  } else if (ch.id === 'lixeira') {
+    pile('refugo', st === 'cheio' ? 40 : 6, ch.x0 + 0.15, 1, floor, 3, lod, z);
+    pile('refugo', st === 'cheio' ? 9 : 2, ch.x0 + 1.15, 1, floor, 2, lod, z);
+    if (lod === 'perto') numTag(st === 'cheio' ? '200/200' : '58/200', (ch.x0 + ch.x1) / 2 + 0.4, ch.yt + 0.3);
+  } else if (ch.id === 'posto') {
+    const filled = st === 'falta_cuid' ? 1 : 4;
+    for (let i = 0; i < 4; i++) ant(ch.x0 + 0.35 + i * 0.4, floor - 0.08, Math.PI, lod, z, C.txt, { dashed: i >= filled, bigHead: true, nod: st === 'ataque' ? Math.sin(T * 12 + i) : 0 });
+  } else if (ch.id === 'coletor') {
+    const filled = st === 'falta_cuid' ? 1 : 2;
+    for (let i = 0; i < 2; i++) ant(ch.x0 + 0.95 + i * 0.32, floor - 0.07, 0, lod, z, C.txt, { dashed: i >= filled, nod });
+    pile('seiva', ch.outN, ch.x0 + 0.12, 1, floor, 2, lod, z);
+    progressLine(ch, ch.prog, C.acu, lod);
+  }
+  if (st === 'pausada' && lod !== 'geral') { ctx.fillStyle = C.txt; const cx = (ch.x0 + ch.x1) / 2, y = ch.yt + 0.14; ctx.fillRect(cx - 0.09, y, 0.06, 0.22); ctx.fillRect(cx + 0.03, y, 0.06, 0.22); }
+}
+function progressLine(ch, k, col, lod) {
+  if (lod === 'geral') return;
+  const x0 = ch.x0 + 0.12, x1 = ch.x1 - 0.12, y = ch.yb - 0.02;
+  ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.fillRect(x0, y - 0.025, x1 - x0, 0.045);
+  ctx.fillStyle = col; ctx.fillRect(x0, y - 0.025, (x1 - x0) * k, 0.045);
+}
+function alertOf(ch) { return ch.estado === 'ataque' ? 'red' : ['falta_ing', 'falta_cuid', 'saida_cheia', 'cheio'].includes(ch.estado) ? 'yellow' : null; }
+
+// ---------- desenho ----------
+function trace(p) { ctx.beginPath(); p.pts.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); }
+let T = 0;
+function draw() {
+  const z = cam.z, lod = lodOf(z), px = 1 / z; tags.length = 0;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = C.solo; ctx.fillRect(0, 0, VW, VH);
+  ctx.setTransform(DPR * z, 0, 0, DPR * z, DPR * (ux() - cam.x * z), DPR * (uy() - cam.y * z));
+  ctx.fillStyle = C.ceu; ctx.fillRect(-20, -SKY - 20, MW + 40, SKY + 20);
+  const g = ctx.createLinearGradient(0, 0, 0, 40); g.addColorStop(0, '#2C231B'); g.addColorStop(0.5, '#1E1813'); g.addColorStop(1, '#120E0B');
+  ctx.fillStyle = g; ctx.fillRect(-20, 0, MW + 40, MH + 20);
+  if (lod !== 'geral') pebbles.forEach(p => { ctx.fillStyle = p.c; ctx.beginPath(); ctx.ellipse(p.x, p.y, p.rx, p.ry, p.a, 0, 6.2832); ctx.fill(); });
+  ctx.strokeStyle = '#3A3026'; ctx.lineWidth = Math.max(1.2 * px, 0.05); ctx.lineCap = 'round';
+  roots.forEach(r => { ctx.beginPath(); ctx.moveTo(r[0][0], r[0][1]); for (let k = 1; k < r.length; k++) { const a = r[k - 1], b = r[k]; ctx.quadraticCurveTo(a[0], (a[1] + b[1]) / 2, b[0], b[1]); } ctx.stroke(); });
+  ctx.strokeStyle = C.veg; ctx.lineWidth = Math.max(1.4 * px, 0.06);
+  plants.forEach(p => { ctx.beginPath(); ctx.moveTo(p.x, 0); ctx.lineTo(p.x, -p.h); ctx.stroke(); ctx.fillStyle = C.veg; ctx.beginPath(); ctx.moveTo(p.x, -p.h); ctx.lineTo(p.x + .25, -p.h - .2); ctx.lineTo(p.x + .5, -p.h); ctx.lineTo(p.x + .25, -p.h + .2); ctx.closePath(); ctx.fill(); });
+  // fonte de seiva (anel tracejado + arco da reserva)
+  ctx.strokeStyle = C.acu; ctx.globalAlpha = 0.6; ctx.lineWidth = 1.4 * px; ctx.setLineDash([4 * px, 4 * px]);
+  ctx.beginPath(); ctx.arc(source.x, source.y, source.r, 0, 6.2832); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+  ctx.lineWidth = 3 * px; ctx.beginPath(); ctx.arc(source.x, source.y, source.r, -Math.PI / 2, -Math.PI / 2 + 6.2832 * source.frac); ctx.stroke();
+
+  const minW = { perto: 2, medio: 2, longe: 2.5, geral: 3 }[lod] * px, extra = { perto: 2.5, medio: 2.5, longe: 3, geral: 3.5 }[lod] * px;
+  const tw = s => Math.max(s.w, minW);
+  // pulsos (túneis e câmaras) por baixo
+  segs.forEach(s => { if (s.state === 'livre') return; const k = pulseK(0.5, 0.75 * INTEN); trace(s.p); ctx.lineCap = 'round'; ctx.strokeStyle = lerpCol(C.base, '#E3C45C', k); ctx.lineWidth = tw(s) + 2 * extra; ctx.stroke(); });
+  CH.forEach(ch => { const a = alertOf(ch); if (!a) return; const k = a === 'red' ? pulseK(1, INTEN) : pulseK(0.5, 0.75 * INTEN); domePath(ch); ctx.lineJoin = 'round'; ctx.strokeStyle = lerpCol(C.base, a === 'red' ? '#E0605A' : '#E3C45C', k); ctx.lineWidth = 2 * extra; ctx.stroke(); });
+  segs.forEach(s => { trace(s.p); ctx.lineCap = 'round'; ctx.strokeStyle = C.base; ctx.lineWidth = tw(s); ctx.stroke(); });
+  ctx.fillStyle = C.base; nodeList.forEach(n => { ctx.beginPath(); ctx.arc(n.x, n.y, Math.max(T2 * 0.62, minW * 0.62), 0, 6.2832); ctx.fill(); });
+  // câmaras
+  CH.forEach(ch => {
+    const dark = ch.estado === 'pausada' ? 0.5 : 0;
+    const tintK = 0.13;
+    domePath(ch);
+    if (ch.fam.length === 2) {
+      ctx.save(); ctx.clip(); const mid = (ch.x0 + ch.x1) / 2;
+      ctx.fillStyle = lerpCol(toHex(lerpCol(C.base, ch.fam[0], tintK)), '#000000', dark); ctx.fillRect(ch.x0 - 1, ch.yt - 1, mid - ch.x0 + 1, 4);
+      ctx.fillStyle = lerpCol(toHex(lerpCol(C.base, ch.fam[1], tintK)), '#000000', dark); ctx.fillRect(mid, ch.yt - 1, ch.x1 - mid + 1, 4);
+      ctx.fillStyle = C.base; ctx.fillRect(mid - 0.6 * px, ch.yt - 1, 1.2 * px, 4); ctx.restore();
+    } else {
+      const baseCol = ch.fam.length ? lerpCol(C.base, ch.fam[0], tintK) : C.base;
+      ctx.fillStyle = dark ? lerpCol(toHex(baseCol), '#000000', dark) : baseCol; ctx.fill();
+    }
+    domePath(ch); const sh = ctx.createLinearGradient(0, ch.yt, 0, ch.yb); sh.addColorStop(0, 'rgba(0,0,0,0.28)'); sh.addColorStop(0.55, 'rgba(0,0,0,0.06)'); sh.addColorStop(1, 'rgba(255,240,220,0.04)'); ctx.fillStyle = sh; ctx.fill();
+    // chão reto e piso reforçado do nível 2
+    ctx.fillStyle = ch.nivel === 2 ? lerpCol(C.base, C.min, 0.45) : lerpCol(C.base, '#000000', 0.25);
+    ctx.fillRect(ch.x0, ch.yb - (ch.nivel === 2 ? 0.07 : 0.035), ch.x1 - ch.x0, ch.nivel === 2 ? 0.07 : 0.035);
+    if (lod !== 'geral') drawContents(ch, lod, z);
+    // inimigos dentro quando sob ataque
+    if (ch.estado === 'ataque' && lod !== 'geral') { for (let i = 0; i < 2; i++) { const ex = ch.door.x + (ch.porta === 'R' ? -1 : 1) * (0.25 + i * 0.3) + Math.sin(T * 3 + i) * 0.03; ant(ex, ch.yb - 0.1, ch.porta === 'R' ? Math.PI : 0, lod, z, C.perigo); } }
+  });
+  // formigas com destino (túneis, câmaras e superfície)
+  if (lod !== 'geral') ants.forEach(a => ant(a.x, a.y, a.ang, lod, z, C.txt, { carry: a.carry }));
+  ctx.strokeStyle = '#5A4B3F'; ctx.lineWidth = px; ctx.strokeRect(0, -SKY, MW, MH + SKY);
+
+  // ---------- camada de tela: selos, barras, números e rótulos ----------
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  CH.forEach(ch => {
+    const top = w2s((ch.x0 + ch.x1) / 2, ch.yt), bot = w2s((ch.x0 + ch.x1) / 2, ch.yb);
+    if (ch.estado === 'falta_ing') {
+      const k = pulseK(0.5, 1), x = top.x, y = top.y - 16;
+      ctx.fillStyle = C.painel; ctx.strokeStyle = lerpCol('#5A4B3F', '#E3C45C', k); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, 12, 0, 6.2832); ctx.fill(); ctx.stroke();
+      ctx.save(); ctx.translate(x, y); ctx.scale(1, 1); const kind = ch.ins[0]; const sv = ctx.getTransform(); ctx.setTransform(DPR * 14, 0, 0, DPR * 14, DPR * x, DPR * y); item(kind, 0, 0, 1, true); ctx.setTransform(sv); ctx.restore();
+    }
+    if (ch.estado === 'ataque') {
+      const w = Math.max(28, (ch.x1 - ch.x0) * cam.z * 0.6), x = top.x - w / 2, y = top.y - 9;
+      ctx.fillStyle = '#211B17'; ctx.fillRect(x - 1, y - 1, w + 2, 6); ctx.fillStyle = C.perigo; ctx.fillRect(x, y, w * 0.6, 4);
+    }
+    const onScreen = bot.x > -20 && bot.x < VW + 20 && top.y < VH - BOT && bot.y > TOP;
+    if (showLabels && onScreen && (lod === 'perto' || lod === 'medio')) {
+      const t1 = ch.nome, t2 = NOME_ESTADO[ch.estado]; ctx.font = '11px system-ui,sans-serif';
+      const w = Math.max(ctx.measureText(t1).width, ctx.measureText(t2).width) + 10, x = Math.max(w / 2 + 4, Math.min(VW - w / 2 - 4, bot.x)), y = bot.y + 6;
+      ctx.fillStyle = 'rgba(21,17,14,0.85)'; ctx.fillRect(x - w / 2, y, w, 29); ctx.fillStyle = C.txt2; ctx.fillText(t1, x, y + 8);
+      ctx.fillStyle = alertOf(ch) === 'red' ? '#F2A0A0' : alertOf(ch) ? '#EBD58A' : '#9FD69A'; ctx.fillText(t2, x, y + 21);
+    }
+  });
+  ctx.font = 'bold 10px system-ui,sans-serif';
+  tags.forEach(t => { const p = w2s(t.x, t.y); const w = ctx.measureText(t.txt).width + 6; ctx.fillStyle = 'rgba(21,17,14,0.8)'; ctx.fillRect(p.x - w / 2, p.y - 7, w, 14); ctx.fillStyle = C.txt; ctx.fillText(t.txt, p.x, p.y); });
+  document.getElementById('lod').textContent = LOD_NOME[lod] + ' · ' + Math.round(z) + ' dp por célula · câmara média 3 × 1 = ' + Math.round(3 * z) + ' × ' + Math.round(z) + ' dp';
+}
+function toHex(rgb) { if (rgb[0] === '#') return rgb; const m = rgb.match(/\d+/g); return '#' + m.map(v => (+v).toString(16).padStart(2, '0')).join(''); }
+
+// ---------- câmera e gestos ----------
+function goTo(x, y, z) { cam.anim = { x0: cam.x, y0: cam.y, z0: cam.z, x1: x, y1: y, z1: z, t0: performance.now(), dur: 450 }; }
+function zoomAt(sx, sy, f) { const w = s2w(sx, sy); cam.z *= f; clampCam(); cam.x = w.x - (sx - ux()) / cam.z; cam.y = w.y - (sy - uy()) / cam.z; clampCam(); }
+const ptrs = new Map(); let moved = false, lastTap = { t: 0, x: 0, y: 0 };
+cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); if (ptrs.size === 0) moved = false; ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY }); cam.anim = null; });
+cv.addEventListener('pointermove', e => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  const ox = p.x, oy = p.y; p.x = e.clientX; p.y = e.clientY;
+  if (ptrs.size === 1) {
+    if (Math.hypot(p.x - p.sx, p.y - p.sy) > 8) moved = true;
+    if (moved) { cam.x -= (p.x - ox) / cam.z; cam.y -= (p.y - oy) / cam.z; clampCam(); }
+  } else if (ptrs.size === 2) {
+    moved = true;
+    const o = [...ptrs.entries()].find(([k]) => k !== e.pointerId)[1];
+    const d0 = Math.hypot(ox - o.x, oy - o.y), d1 = Math.hypot(p.x - o.x, p.y - o.y);
+    const m0 = { x: (ox + o.x) / 2, y: (oy + o.y) / 2 }, m1 = { x: (p.x + o.x) / 2, y: (p.y + o.y) / 2 };
+    const w = s2w(m0.x, m0.y); if (d0 > 0) cam.z *= d1 / d0; clampCam();
+    cam.x = w.x - (m1.x - ux()) / cam.z; cam.y = w.y - (m1.y - uy()) / cam.z; clampCam();
+  }
+});
+function endPtr(e) {
+  if (!ptrs.has(e.pointerId)) return;
+  const single = ptrs.size === 1; ptrs.delete(e.pointerId);
+  if (!single || moved) return;
+  const w = s2w(e.clientX, e.clientY), pad = 12 / cam.z;
+  const ch = CH.find(c => w.x >= c.x - pad && w.x <= c.x + c.w + pad && w.y >= c.y - pad && w.y <= c.y + c.h + pad);
+  if (ch) { ch.estado = ch.lista[(ch.lista.indexOf(ch.estado) + 1) % ch.lista.length]; resetCounts(ch); return; }
+  const now = performance.now();
+  if (now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { goTo(w.x, w.y, lodOf(cam.z) === 'perto' ? 30 : 48); lastTap.t = 0; return; }
+  lastTap = { t: now, x: e.clientX, y: e.clientY };
+}
+cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('wheel', e => { e.preventDefault(); zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0015)); }, { passive: false });
+document.getElementById('zin').onclick = () => goTo(cam.x, cam.y, Math.min(Z_MAX, cam.z * 1.6));
+document.getElementById('zout').onclick = () => goTo(cam.x, cam.y, Math.max(zMin(), cam.z / 1.6));
+document.getElementById('all').onclick = () => goTo(MW / 2, (MH - SKY) / 2, Math.min(VW / MW, useH() / (MH + SKY)) * 0.98);
+document.getElementById('labels').onclick = e => { showLabels = !showLabels; e.target.classList.toggle('on', showLabels); };
+
+window.addEventListener('resize', resize); resize(); cam.z = Math.max(18, VW / MW * 0.98); clampCam();
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
+  updateChambers(dt); ants.forEach(a => updateAnt(a, dt));
+  if (cam.anim) { const a = cam.anim, k = Math.min(1, (now - a.t0) / a.dur), e = 1 - Math.pow(1 - k, 3); cam.z = a.z0 + (a.z1 - a.z0) * e; cam.x = a.x0 + (a.x1 - a.x0) * e; cam.y = a.y0 + (a.y1 - a.y0) * e; clampCam(); if (k >= 1) cam.anim = null; }
+  draw(); requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
