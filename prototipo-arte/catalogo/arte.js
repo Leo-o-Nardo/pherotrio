@@ -100,7 +100,7 @@
   };
   const ANT_UNIT = 0.36 / 14 * 0.8; // corpo de cerca de 0,29 célula (D99)
   function ell(ctx, x, y, rx, ry) { ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, 6.2832); }
-  // casta: chave de CASTAS ou de INIMIGOS. o: { carry, nod, dashed, combatIcon, outline }
+  // casta: chave de CASTAS ou de INIMIGOS. o: { carry, nod, dashed, combatIcon, outline, bate (asas da alada: 0 abertas, 1 fechadas para trás) }
   function ant(ctx, casta, x, y, ang, z, o = {}) {
     const hk = window.Arte && window.Arte.antHook; if (hk && hk(ctx, casta, x, y, ang, z, o)) return;
     const lod = LOD(z), inimigo = !!INIMIGOS[casta], spec = CASTAS[casta] || INIMIGOS[casta] || CASTAS.operaria;
@@ -130,7 +130,9 @@
     // pernas da aranha
     if (casta === 'aranha') {
       ctx.strokeStyle = '#120D0A'; ctx.lineCap = 'round';
-      const legs = () => { ctx.beginPath(); for (let i = 0; i < 4; i++) { const bx = 1.8 - i * 1.2, a = 0.5 + i * 0.32; [-1, 1].forEach(sd => { ctx.moveTo(bx, 0); ctx.quadraticCurveTo(bx + Math.cos(a) * 2.6, sd * 3.4, bx + Math.cos(a + 0.6) * 1.6 - i * 0.7, sd * 5.4); }); } ctx.stroke(); };
+      // andando, as pernas mexem em dois grupos alternados (como o tripé das formigas, D113); parada ("nod"), ficam quietas
+      const W = window.Arte, anda = !('nod' in o) && !o.dashed && LOD(z) === 'perto', fase = ((W && W.TEMPO) || 0) * 11 + x * 7 + y * 3;
+      const legs = () => { ctx.beginPath(); for (let i = 0; i < 4; i++) { const bx = 1.8 - i * 1.2, a = 0.5 + i * 0.32; [-1, 1].forEach(sd => { const grupo = (i % 2 === 0) === (sd > 0), sw = anda ? Math.sin(fase + (grupo ? 0 : Math.PI)) : 0, ergue = anda ? Math.max(0, Math.cos(fase + (grupo ? 0 : Math.PI))) * 0.5 : 0; ctx.moveTo(bx, 0); ctx.quadraticCurveTo(bx + Math.cos(a) * 2.6 + sw * 0.7, sd * 3.4, bx + Math.cos(a + 0.6) * 1.6 - i * 0.7 + sw * 1.3, sd * (5.4 - ergue)); }); } ctx.stroke(); };
       ctx.lineWidth = 0.9 + outlineW * 2; legs(); ctx.strokeStyle = col; ctx.lineWidth = 0.9; legs();
       ell(ctx, -2.2, 0, 2.9, 2.5); paint(); ell(ctx, 1.9, 0, 1.9, 1.7); paint();
       ctx.restore(); return;
@@ -267,6 +269,7 @@
     }
     // pulso de alerta na borda (D103)
     const H = window.Arte; if (H.preHook) H.preHook(ctx, sp, g, st, z, T);
+    if (st === 'escavando' && H.obraHook && H.obraHook(ctx, sp, g, z, T, tags)) return g; // câmara aberta da porta, com contorno (D117)
     const a = alertOf(st);
     if (a) { const k = a === 'red' ? pulse(T, 1, INTEN) : pulse(T, 0.5, 0.75 * INTEN); domePath(ctx, g); ctx.lineJoin = 'round'; ctx.strokeStyle = mix(C.base, a === 'red' ? C.cheio : C.quase, k); ctx.lineWidth = 2 * extra; ctx.stroke(); }
     if (o.stub && H.stubHook) H.stubHook(ctx, g, z, 'antes');
@@ -342,7 +345,8 @@
         pile(ctx, 'acido', st === 'sem_municao' ? 0 : 3, g.x1 - 0.12, -1, floor, 2, z, tags);
         if (st === 'combate' && Math.sin(T * 6) > 0.6) { ctx.fillStyle = C.acu; ctx.beginPath(); ctx.arc(bx + Math.cos(ang) * 0.5, by + 0.25 + Math.sin(ang) * 0.5, 0.05, 0, 6.2832); ctx.fill(); }
       }
-      if (sp.id === 'armadilha') {
+      if (sp.id === 'armadilha' && window.Arte.teiaCamara) { const empty = st === 'sem_municao'; window.Arte.teiaCamara(ctx, g, z, T, empty, st === 'combate'); pile(ctx, 'cola', empty ? 0 : 2, g.x1 - 0.12, -1, floor, 2, z, tags); }
+      else if (sp.id === 'armadilha') {
         const empty = st === 'sem_municao'; ctx.fillStyle = empty ? mix(C.base, C.ref, 0.3) : mix(C.acu, C.min, 0.5); ctx.globalAlpha = empty ? 0.5 : 0.75;
         ctx.beginPath(); ctx.ellipse(g.cx, floor - 0.03, (g.x1 - g.x0) * 0.42, 0.07, 0, 0, 6.2832); ctx.fill(); ctx.globalAlpha = 1;
         if (!empty) { ctx.strokeStyle = mix(C.acu, C.min, 0.5); ctx.lineWidth = 0.02; for (let i = 0; i < 4; i++) { const sx = g.x0 + 0.4 + i * 0.35; ctx.beginPath(); ctx.moveTo(sx, floor - 0.05); ctx.quadraticCurveTo(sx + 0.05, floor - 0.25, sx + 0.1, g.yw + 0.05); ctx.stroke(); } }
@@ -400,6 +404,7 @@
     }
     if (st === 'quase' || st === 'cheio') { const k = st === 'cheio' ? pulse(T, 1, INTEN) : pulse(T, 0.5, 0.75 * INTEN); trace(ctx, p); ctx.strokeStyle = mix(C.base, st === 'cheio' ? C.cheio : C.quase, k); ctx.lineWidth = w + 2 * extra; ctx.stroke(); }
     if (st === 'escavando') {
+      const H = window.Arte; if (H.escavaTunelHook && H.escavaTunelHook(ctx, p, lvl, z, T)) return; // ponta irregular, farelos e argileiras (D117)
       const k = 0.25 + ((T * 0.12) % 0.75); trace(ctx, p, 0, p.len * k); ctx.strokeStyle = C.base; ctx.lineWidth = w; ctx.stroke();
       trace(ctx, p, p.len * k, p.len); ctx.setLineDash([5 * px, 8 * px]); ctx.strokeStyle = C.txt2; ctx.lineWidth = Math.max(1.4 * px, 0.025); ctx.stroke(); ctx.setLineDash([]);
       if (lod !== 'geral') { const e = at(p, p.len * k); ant(ctx, 'cavadora', e.x, e.y, e.ang, z, { nod: Math.sin(T * 9) }); }
@@ -582,17 +587,19 @@
   function superficie(ctx, est, x0, w, z, T, plantas, bocas) {
     const ceu = A.ESTACOES[est].ceu, px = 1 / z, lod = LOD(z);
     // céu acima da linha do chão
-    ctx.beginPath(); ctx.moveTo(x0, -4); ctx.lineTo(x0 + w, -4);
-    for (let x = x0 + w; x >= x0 - 0.01; x -= 0.2) ctx.lineTo(x, gnd(x));
-    ctx.closePath();
+    const ceuPath = new Path2D(); ceuPath.moveTo(x0, -4); ceuPath.lineTo(x0 + w, -4);
+    for (let x = x0 + w; x >= x0 - 0.01; x -= 0.1) ceuPath.lineTo(x, gnd(x));
+    ceuPath.closePath();
     { const g = ctx.createLinearGradient(0, -3, 0, 0); g.addColorStop(0, mix(ceu, '#000000', 0.15)); g.addColorStop(1, mix(ceu, '#B8A48C', 0.16)); ctx.fillStyle = g; }
-    ctx.fill();
+    ctx.fill(ceuPath);
     if (lod !== 'geral') {
-      // morros e mato ao fundo
+      // morros e mato ao fundo, recortados no céu para não vazarem abaixo da linha do chão
+      ctx.save(); ctx.clip(ceuPath);
       ctx.fillStyle = mix(ceu, '#56604A', 0.28); ctx.beginPath(); ctx.moveTo(x0, 0.2);
       for (let x = x0; x <= x0 + w; x += 0.25) ctx.lineTo(x, -0.55 - 0.35 * Math.sin(x * 0.35 + 2) - 0.2 * Math.sin(x * 0.9)); ctx.lineTo(x0 + w, 0.2); ctx.closePath(); ctx.fill();
       const r = rng(77); ctx.fillStyle = mix(ceu, '#3F5236', 0.45);
       for (let i = 0; i < w * 1.2; i++) { const x = x0 + r() * w, hh = 0.5 + r() * 1.2; ctx.beginPath(); ctx.moveTo(x - 0.05, 0.1); ctx.quadraticCurveTo(x + (r() - 0.5) * 0.4, -hh * 0.6, x + (r() - 0.5) * 0.3, -hh); ctx.quadraticCurveTo(x + 0.05, -hh * 0.5, x + 0.06, 0.1); ctx.fill(); }
+      ctx.restore();
     }
     if (lod !== 'geral') {
       // faixa de húmus logo abaixo do chão
@@ -806,7 +813,7 @@
         E1(-0.6, 0.7, 0.7); E1(1.9, 2.6, 1.0); E1(6.0, 2.1, 1.4); hx = 8.1;
         if (!dashed) { ctx.strokeStyle = col; ctx.lineWidth = 0.55; ctx.lineCap = 'round'; ctx.beginPath(); [-1, 1].forEach(sd => { ctx.moveTo(hx - 0.4, sd * 0.6); ctx.lineTo(hx + 2.4, sd * 0.35); }); ctx.stroke(); } break;
       case 'alada':
-        if (!dashed) { ctx.globalAlpha = 0.42; ctx.fillStyle = C.txt; [-1, 1].forEach(sd => { ctx.beginPath(); ctx.ellipse(-2.8, sd * 4.0, 6.4, 2.1, sd * 0.24, 0, TAU); ctx.fill(); }); ctx.globalAlpha = 0.5; ctx.strokeStyle = C.txt; ctx.lineWidth = 0.3; ctx.beginPath(); [-1, 1].forEach(sd => { ctx.moveTo(1, sd * 1.4); ctx.quadraticCurveTo(-3, sd * 4.4, -8, sd * 5.4); }); ctx.stroke(); ctx.globalAlpha = 1; }
+        if (!dashed) { ctx.globalAlpha = 0.42; ctx.fillStyle = C.txt; [-1, 1].forEach(sd => { ctx.beginPath(); ctx.ellipse(-2.8, sd * 4.0 * (1 - (o.bate || 0) * 0.6), 6.4, 2.1, sd * (0.24 + (o.bate || 0)), 0, TAU); ctx.fill(); }); ctx.globalAlpha = 0.5; ctx.strokeStyle = C.txt; ctx.lineWidth = 0.3; ctx.beginPath(); [-1, 1].forEach(sd => { const b = 1 - (o.bate || 0) * 0.6; ctx.moveTo(1, sd * 1.4); ctx.quadraticCurveTo(-3, sd * 4.4 * b, -8, sd * 5.4 * b); }); ctx.stroke(); ctx.globalAlpha = 1; }
         E1(-4.4, 3.6, 2.6); E1(-0.5, 0.8, 0.8); E1(1.6, 2.4, 1.7); E1(4.7, 1.8, 1.6); hx = 6.5; break;
       case 'rainha':
         if (!dashed) { ctx.globalAlpha = 0.3; ctx.fillStyle = C.txt; [-1, 1].forEach(sd => { ctx.beginPath(); ctx.ellipse(-1.4, sd * 2.6, 2.6, 1.0, sd * 0.4, 0, TAU); ctx.fill(); }); ctx.globalAlpha = 1; }
@@ -1522,6 +1529,27 @@
       return true;
     };
 
+    // armadilha de cola (D116): a mesma teia de terra, do teto da cúpula ao chão, com gotinhas brilhando.
+    // Sem munição, os fios estão arrebentados e apagados. Em combate, os fios tremem.
+    const tetoY = (g, x) => { const r = g.roof; for (let i = 1; i < r.length; i++) { const a = r[i - 1], b = r[i]; if ((x - a.x) * (x - b.x) <= 0) { const k = (x - a.x) / ((b.x - a.x) || 1); return a.y + (b.y - a.y) * k; } } return g.yw; };
+    A.teiaCamara = (ctx, g, z, T, vazia, treme) => {
+      const px = 1 / z, n = 5, x0 = g.x0 + 0.35, x1 = g.x1 - 0.6, F0 = g.floor - 0.01;
+      ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = TEIA; ctx.globalAlpha = vazia ? 0.55 : 0.95;
+      for (let j = 0; j < n; j++) {
+        const x = x0 + (x1 - x0) * j / (n - 1) + 0.04 * Math.sin(j * 2.1), T0 = tetoY(g, x) + 0.03, meio = (T0 + F0) / 2;
+        const sw = (treme ? 0.02 * Math.sin(T * 23 + j * 2) : 0) + 0.035 * Math.sin(T * 1.3 + j * 1.7), dx = 0.05 * Math.sin(j * 2.3);
+        ctx.fillStyle = TEIA; raiz(ctx, x, T0, 1, 0.026, 0.07, sw * 0.15); raiz(ctx, x + dx, F0, -1, 0.026, 0.06, sw * 0.12);
+        ctx.lineWidth = Math.max(1.1 * px, 0.012) * (j % 2 ? 1 : 1.35) * 0.8;
+        if (vazia) { ctx.beginPath(); ctx.moveTo(x, T0); ctx.lineTo(x + sw * 0.5, T0 + (meio - T0) * 0.45); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x + dx, F0); ctx.lineTo(x + dx + sw * 0.5, F0 - (F0 - meio) * 0.3); ctx.stroke(); continue; }
+        ctx.beginPath(); ctx.moveTo(x, T0); ctx.quadraticCurveTo(x + sw, meio + 0.03, x + dx, F0); ctx.stroke();
+        [0.28, 0.55, 0.8].forEach((u, i) => {
+          if ((i + j) % 2 && i !== 1) return; const qx = (1 - u) * (1 - u) * x + 2 * u * (1 - u) * (x + sw) + u * u * (x + dx), qy = (1 - u) * (1 - u) * T0 + 2 * u * (1 - u) * (meio + 0.03) + u * u * F0, rr = Math.max(0.013, 1.1 * px) * (1 + 0.3 * ((i + j) % 2));
+          ctx.fillStyle = TEIA; ctx.beginPath(); ctx.arc(qx, qy, rr, 0, TAU); ctx.fill(); ctx.fillStyle = TEIA_L; ctx.beginPath(); ctx.arc(qx - rr * 0.3, qy - rr * 0.3, rr * 0.4, 0, TAU); ctx.fill();
+        });
+      }
+      ctx.restore();
+    };
+
     A.combate = { luta, cena, L1, L2 };
   })();
 
@@ -1590,6 +1618,7 @@
     function tracejado(ctx, g, px) { A.domePath(ctx, g); ctx.setLineDash([5 * px, 8 * px]); ctx.strokeStyle = C.txt2; ctx.lineWidth = Math.max(1.2 * px, 0.025); ctx.stroke(); ctx.setLineDash([]); }
     function obra(ctx, z, T, tags) {
       const t = mod(T, 10), k = clamp(t / 7.5), g = A.geom(JAR, GX, GY, 7), px = 1 / z, xf = g.x0 + (g.x1 - g.x0) * k;
+      if (A.perfil) A.perfil.registra(ctx, g); // as cavadoras dentro da obra ficam de pé (D120)
       A.tunel(ctx, A.curve({ x: -0.5, y: 0.45 }, { x: g.door.x + 0.02, y: g.door.y }, 0.05), 1, 'livre', z, { T });
       if (k < 1) {
         ctx.save(); A.domePath(ctx, g); ctx.clip();
@@ -1690,7 +1719,434 @@
       for (let i = 0; i < N; i++) { const q = pos(i); if (q.d > R.len - 0.05) continue; A.ant(ctx, 'soldado', q.x, q.y, q.ang, z, {}); }
     }
 
+    // ---------- estados parados "escavando" do catálogo: o quadro do meio da animação ----------
+    // túnel: 60% cavado, ponta irregular, cavadora e farelos; duas argileiras vão e voltam entre o nó e a ponta
+    function trecho(p, s0, s1) { const pts = [A.at(p, s0)]; for (let i = 0; i < p.pts.length; i++) if (p.cum[i] > s0 && p.cum[i] < s1) pts.push(p.pts[i]); pts.push(A.at(p, s1)); const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)); return { pts, cum, len: cum[cum.length - 1] }; }
+    A.escavaTunelHook = (ctx, p, lvl, z, T) => {
+      const k = 0.6, L = p.len * k, q = A.at(p, L), lod = LOD(z), w = Math.max(A.LARG[lvl] || 0.25, A.minW(z));
+      A.tunel(ctx, trecho(p, L, p.len), lvl, 'planejado', z, { T });
+      A.tunel(ctx, trecho(p, 0, L), lvl, 'livre', z, { T });
+      if (lod === 'geral') return true;
+      pontaIrregular(ctx, q.x, q.y, q.ang, w);
+      const Lm = Math.max(0.1, L - 0.3), per = 2 * Lm / 0.9 + 0.55;
+      if (lod !== 'longe') [0, 0.5].forEach(of => {
+        const r = vaiVem(mod(T + of * per, per), () => Lm, 0, 0.9), e = A.at(p, Math.max(0.02, r.s));
+        A.ant(ctx, 'operaria', e.x, e.y + (r.volta ? 0.03 : -0.03), e.ang + (r.volta ? PI : 0), z, r.volta ? { carry: 'argila' } : {});
+      });
+      A.ant(ctx, 'cavadora', q.x - Math.cos(q.ang) * 0.13, q.y - Math.sin(q.ang) * 0.13, q.ang, z, { nod: Math.sin(T * 9) });
+      farelos(ctx, q.x, q.y, q.ang, T, z, TERRA, 4);
+      return true;
+    };
+    // câmara: metade cavada a partir da porta; contorno tracejado com metade cheia; custo que falta no meio
+    A.obraHook = (ctx, sp, g, z, T, tags) => {
+      const k = 0.5, px = 1 / z, lod = LOD(z), porta = g.porta || 'L', Y = g.floor - 0.08;
+      const xf = porta === 'R' ? g.x1 - (g.x1 - g.x0) * k : g.x0 + (g.x1 - g.x0) * k, yf = g.yt + (g.yb - g.yt) * k;
+      // a parte cavada vai da porta até a frente irregular; o resto continua solo
+      ctx.save(); A.domePath(ctx, g); ctx.clip();
+      ctx.fillStyle = C.base; ctx.beginPath();
+      if (porta === 'T') { ctx.moveTo(g.x0 - 0.2, g.yt - 0.2); ctx.lineTo(g.x1 + 0.2, g.yt - 0.2); for (let x = g.x1 + 0.2; x >= g.x0 - 0.2; x -= 0.05) ctx.lineTo(x, yf + 0.05 * Math.sin(x * 19) + 0.03 * Math.sin(x * 7 + 1)); }
+      else { const lado = porta === 'R' ? g.x1 + 0.2 : g.x0 - 0.2; ctx.moveTo(lado, g.yt - 0.2); for (let y = g.yt - 0.2; y <= g.yb + 0.2; y += 0.05) ctx.lineTo(xf + 0.05 * Math.sin(y * 19) + 0.03 * Math.sin(y * 7 + 1), y); ctx.lineTo(lado, g.yb + 0.2); }
+      ctx.closePath(); ctx.fill(); ctx.restore();
+      tracejado(ctx, g, px);
+      const Pm = perimetro(g); A.domePath(ctx, g); ctx.setLineDash(porta === 'R' ? [0, Pm * (1 - k), Pm * k, Pm * 2] : [Pm * k, Pm * 2]); ctx.strokeStyle = C.txt; ctx.lineWidth = Math.max(2 * px, 0.035); ctx.stroke(); ctx.setLineDash([]); // a barra cresce a partir do lado da porta
+      if (lod === 'geral') return true;
+      if (porta === 'T') {
+        [-1, 1].forEach(sd => A.ant(ctx, 'cavadora', g.cx + sd * 0.22, yf - 0.12, PI / 2, z, { nod: Math.sin(T * 9 + sd) }));
+        farelos(ctx, g.cx, yf - 0.02, PI / 2, T, z, TERRA, 4);
+      } else {
+        const dir = porta === 'R' ? -1 : 1, ang = dir > 0 ? 0 : PI;
+        [0, 1].forEach(i => A.ant(ctx, 'cavadora', xf - dir * (0.14 + i * 0.05), i ? g.yw + 0.05 : Y, ang, z, { nod: Math.sin(T * 9 + i * 2) }));
+        farelos(ctx, xf, Y - 0.05, ang, T, z, TERRA, 4); farelos(ctx, xf, g.yw + 0.02, ang, T + 0.3, z, TERRA, 3);
+        if (lod !== 'longe') { const Lm = Math.abs(xf - (porta === 'R' ? g.x1 : g.x0)) - 0.45, per = 2 * Lm / 0.9 + 0.55; if (Lm > 0.1) { const r = vaiVem(mod(T, per), () => Lm, 0, 0.9), x0 = porta === 'R' ? g.x1 - 0.15 : g.x0 + 0.15; A.ant(ctx, 'operaria', x0 + dir * r.s, Y + 0.02, r.volta ? ang + PI : ang, z, r.volta ? { carry: 'argila' } : {}); } }
+      }
+      if (tags && (lod === 'perto' || lod === 'medio')) tags.push({ txt: Math.ceil((sp.tam === 'G' ? 36 : sp.tam === 'M' ? 24 : sp.cat === 'ext' ? 15 : 12) * (1 - k)) + ' pt', x: g.cx, y: g.yt + 0.32 });
+      return true;
+    };
+
     A.eventos = { escavacao, obra, nascimento, onda, expedicao, farelos, pontaIrregular, vaiVem };
+  })();
+
+  // ================= eventos da superfície (D118) =================
+  // Corte: a cortadeira sobe pelo caule, corta um pedaço (a folha fica mordida e cresce de novo) e desce com o pedaço em pé, como vela.
+  // Ataque por cima: durante o aviso, o arco do cortadouro fica vermelho e pulsa a 1 Hz; a aranha anda com as pernas mexendo.
+  // Voo nupcial: revoada. As aladas saem quase juntas e sobem em leque, girando, batendo as asas e ficando menores.
+  // Estação: troca aos poucos (1,6 s), com folhas caindo no inverno e no outono e brotos abrindo na primavera.
+  // Cada cena é um loop roteirizado para o catálogo; no jogo, os tempos vêm do 02.
+  (() => {
+    const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), suave = k => k * k * (3 - 2 * k), mod = (t, p) => ((t % p) + p) % p, lerp = (a, b, k) => a + (b - a) * k;
+    const gnd = x => A.gnd(x);
+    function rota(pts) { const cum = [0]; for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)); return { pts, cum, len: cum[cum.length - 1] }; }
+    function naRota(r, d) {
+      d = clamp(d, 0, r.len); let i = 1; while (i < r.cum.length - 1 && r.cum[i] < d) i++;
+      const a = r.pts[i - 1], b = r.pts[i], k = (d - r.cum[i - 1]) / ((r.cum[i] - r.cum[i - 1]) || 1); return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, ang: Math.atan2(b.y - a.y, b.x - a.x) };
+    }
+    // cortadouro: túnel que desce, boca e, se pedido, o arco em alerta
+    function cortadouro(ctx, xb, z, T, arco) {
+      const tun = A.curve({ x: xb, y: gnd(xb) + 0.05 }, { x: xb + 0.9, y: 0.75 }, 0.1);
+      A.tunel(ctx, tun, 1, 'livre', z, { T });
+      ctx.save(); ctx.translate(0, gnd(xb)); A.cortadouroBoca(ctx, xb, z);
+      if (arco) { ctx.strokeStyle = arco.cor; ctx.globalAlpha = arco.a; ctx.lineWidth = Math.max(2.2 / z, 0.07); ctx.beginPath(); ctx.arc(xb, 0.05, 0.42, PI, 0); ctx.stroke(); }
+      ctx.restore(); return tun;
+    }
+    // caminho do fundo do túnel até a boca e daí pelo chão até xFim; a formiga aparece aos poucos no trecho do túnel
+    const SURGE = 0.45, alfaTunel = d => clamp((d - 0.1) / (SURGE - 0.1));
+    function saida(tun, xb, xFim, dy) {
+      const pts = []; for (let s = SURGE; s > 0; s -= 0.05) pts.push(A.at(tun, s));
+      const sg = Math.sign(xFim - xb) || 1; for (let x = xb + sg * 0.12; sg > 0 ? x <= xFim : x >= xFim; x += sg * 0.08) pts.push({ x, y: gnd(x) - dy });
+      return rota(pts);
+    }
+    // pedaço de folha em pé (a vela): base em (x, y), virado para cima
+    function vela(ctx, x, y, s, rot, cor) {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = cor; ctx.beginPath(); ctx.moveTo(-s, 0); ctx.quadraticCurveTo(-s * 0.9, -s * 1.5, s * 0.2, -s * 1.25); ctx.quadraticCurveTo(s * 1.1, -s * 0.9, s, 0); ctx.closePath(); ctx.fill();
+      ctx.strokeStyle = mix(cor, '#14200F', 0.4); ctx.lineWidth = s * 0.12; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-s * 0.1, -s * 0.6, s * 0.1, -s * 1.15); ctx.stroke(); ctx.restore();
+    }
+    // geometria da folha larga (a mesma do A.planta, na primavera): caule, ponto do corte e meio da folha
+    function folhaGeo(xp, h, T, i) {
+      const k = 1, gy = gnd(xp), sway = Math.sin(T * 1.1 + xp) * 0.03, sd = i % 2 ? -1 : 1, L = h * (0.55 + i * 0.18), ex = sd * (0.25 + i * 0.1) + sway * 4, ey = -L;
+      const rb = -sd * 0.35 + Math.sin(T * 1.3 + i) * 0.05, lw = 0.42 + 0.12 * k, lh = lw * 0.48;
+      const loc = (lx, ly) => ({ x: xp + ex + lx * Math.cos(rb) - ly * Math.sin(rb), y: gy + ey + lx * Math.sin(rb) + ly * Math.cos(rb) });
+      const caule = []; for (let j = 0; j <= 12; j++) { const t = j / 12, u = 1 - t; caule.push({ x: xp + t * t * ex, y: gy + 2 * u * t * ey * 0.7 + t * t * ey }); }
+      return { gy, sd, caule, corte: loc(sd * lw * 0.6, -lh * 0.7), meio: loc(sd * lw * 0.42, -lh * 0.25) };
+    }
+    // mordida na folha: um furo da cor do céu (refaz o degradê do A.superficie)
+    function mordida(ctx, p, r, est) {
+      if (r <= 0.004) return; const ceu = A.ESTACOES[est].ceu, g = ctx.createLinearGradient(0, -3, 0, 0);
+      g.addColorStop(0, mix(ceu, '#000000', 0.15)); g.addColorStop(1, mix(ceu, '#B8A48C', 0.16));
+      ctx.save(); ctx.fillStyle = g; ctx.beginPath(); [-1, 0, 1].forEach(j => ctx.arc(p.x + j * r * 0.55, p.y - Math.abs(j) * r * 0.1, r * (j ? 0.62 : 0.8), 0, TAU)); ctx.fill(); ctx.restore();
+    }
+
+    // ---------- corte na planta: três cortadeiras, uma por folha; 12 s (0–5 sobe, 5–6,2 corta, 6,2–11,2 desce, 11,2–12 no túnel) ----------
+    const XB1 = 0.8, XP1 = 3.0, HP1 = 1.6;
+    function corte(ctx, z, T) {
+      const est = 'primavera', cf = mix(C.veg, '#B8F0A0', 0.15);
+      A.superficie(ctx, est, -1, 7, z, T, [{ tipo: 'folhaLarga', x: XP1, h: HP1 }, { tipo: 'capim', x: 4.6, h: 0.9 }], [XB1]);
+      const tun = cortadouro(ctx, XB1, z, T), chao = saida(tun, XB1, XP1 - 0.07, 0.08);
+      for (let j = 0; j < 3; j++) { const tau = mod(T + j * 4, 12); mordida(ctx, folhaGeo(XP1, HP1, T, j).corte, 0.085 * (tau < 5.3 ? 0 : tau < 6.0 ? (tau - 5.3) / 0.7 : 1 - clamp((tau - 8) / 3.5)), est); }
+      for (let j = 0; j < 3; j++) {
+        const tau = mod(T + j * 4, 12), F = folhaGeo(XP1, HP1, T, j);
+        const pts = chao.pts.slice(); F.caule.forEach(p => pts.push({ x: p.x + 0.02 * F.sd, y: p.y })); pts.push(F.meio);
+        const R = rota(pts), cortando = tau >= 5 && tau < 6.2, volta = tau >= 6.2;
+        const d = tau < 5 ? R.len * suave(tau / 5) : cortando ? R.len : R.len * (1 - suave(clamp((tau - 6.2) / 5)));
+        if (tau >= 11.2 || d < 0.1) continue;
+        const q = naRota(R, d), ang = volta ? q.ang + PI : q.ang;
+        ctx.save(); ctx.globalAlpha = alfaTunel(d);
+        if (cortando) A.ant(ctx, 'cortadeira', q.x, q.y, Math.atan2(F.corte.y - q.y, F.corte.x - q.x), z, { nod: Math.sin(T * 12) });
+        else if (volta) {
+          // de perfil (D120), a vela vai presa na boca; vista de cima, ela vai à frente da cabeça
+          A.ant(ctx, 'cortadeira', q.x, q.y, ang, z, { vela: { cor: cf, rot: Math.sin(T * 5 + j) * 0.12 } });
+          if (!(A.perfil && A.perfil.ultimo())) vela(ctx, q.x + Math.cos(ang) * 0.17, q.y + Math.sin(ang) * 0.17, 0.1, Math.sin(T * 5 + j) * 0.12 + (Math.abs(Math.cos(ang)) < 0.5 ? 0.25 * Math.sign(Math.sin(ang)) : 0), cf);
+        } else A.ant(ctx, 'cortadeira', q.x, q.y, ang, z, {});
+        ctx.restore();
+      }
+    }
+
+    // ---------- ataque por cima: aviso de 0,5 a 9,9 s (no jogo, 45 s); a aranha entra aos 6 s, morde a cortadeira e desce. 14 s ----------
+    const XB2 = 1.0, XP2 = 2.3, XE2 = 6.9, V2 = 1.1;
+    function ataqueCima(ctx, z, T) {
+      const t = mod(T, 14), emAviso = t > 0.5 && t < 9.9;
+      A.superficie(ctx, 'outono', -1, 9, z, T, [{ tipo: 'capim', x: XP2, h: 1.0 }, { tipo: 'dente', x: 4.4, h: 0.9 }], [XB2]);
+      const tun = cortadouro(ctx, XB2, z, T, emAviso ? { cor: C.perigo, a: (0.55 + 0.45 * Math.sin(T * 2 * PI)) * clamp((t - 0.5) / 0.4) } : null);
+      // cortadeira 1: corta no pé do capim até a aranha chegar; tomba e some; volta no fim
+      const xc = XP2 - 0.1, yc = gnd(xc) - 0.08, tMord = 6 + (XE2 - (xc + 0.38)) / V2;
+      if (t < tMord + 0.1) A.ant(ctx, 'cortadeira', xc, yc, -0.25, z, { nod: Math.sin(T * 9) });
+      else if (t < tMord + 0.9) { const k = (t - tMord - 0.1) / 0.8; ctx.save(); ctx.globalAlpha = 1 - k; A.ant(ctx, 'cortadeira', xc, yc + 0.03 * k, -0.25 + suave(clamp(k * 2)) * PI / 2, z, { col: mix(C.txt, '#6B6159', k) }); ctx.restore(); }
+      else if (t > 13.3) { ctx.save(); ctx.globalAlpha = (t - 13.3) / 0.7; A.ant(ctx, 'cortadeira', xc, yc, -0.25, z, {}); ctx.restore(); }
+      // cortadeira 2: vai, volta com folha e entra aos 5,6 s; sai de novo no fim
+      const ch = saida(tun, XB2, XP2 - 0.4, 0.08); let d2 = null, v2 = false;
+      if (t < 2.2) d2 = lerp(SURGE, ch.len, suave(t / 2.2)); else if (t < 3.0) d2 = ch.len; else if (t < 5.6) { d2 = ch.len * (1 - suave((t - 3) / 2.6)); v2 = true; } else if (t > 13.2) d2 = SURGE * (t - 13.2) / 0.8;
+      if (d2 != null) { const q = naRota(ch, d2); ctx.save(); ctx.globalAlpha = alfaTunel(d2); A.ant(ctx, 'cortadeira', q.x, q.y, v2 ? q.ang + PI : q.ang, z, v2 ? { carry: 'folha' } : (t >= 2.2 && t < 3 ? { nod: Math.sin(T * 9) } : {})); ctx.restore(); }
+      // aranha: entra pela borda, para e morde (pernas quietas), segue até a boca e desce
+      if (t > 6 && t < 13) {
+        let x, y, ang = PI, a = 1, lung = 0;
+        const xm = xc + 0.38, tSai = tMord + 0.6, tBoca = tSai + (xm - (XB2 + 0.15)) / V2;
+        if (t < tMord) x = XE2 - (t - 6) * V2;
+        else if (t < tSai) { x = xm; lung = Math.max(0, Math.sin((t - tMord) / 0.6 * PI * 2)) * 0.1; }
+        else if (t < tBoca) x = xm - (t - tSai) * V2;
+        if (x != null) { y = gnd(x) - 0.13; x -= lung; }
+        else { const xb = XB2 + 0.15, R = rota([{ x: xb, y: gnd(xb) - 0.13 }, A.at(tun, 0.12), A.at(tun, 0.35), A.at(tun, 0.6)]), q = naRota(R, (t - tBoca) * V2); x = q.x; y = q.y; ang = q.ang; a = 1 - clamp((t - tBoca - 0.3) / 0.4); }
+        ctx.save(); ctx.globalAlpha = a * clamp((t - 6) / 0.3); A.ant(ctx, 'aranha', x, y, ang, z, t >= tMord && t < tSai ? { nod: 0 } : {}); ctx.restore();
+      }
+    }
+
+    // ---------- voo nupcial: revoada de seis aladas pelo cortadouro; 12 s ----------
+    const XB3 = 1.4, N3 = 6;
+    function voo(ctx, z, T) {
+      const t = mod(T, 12);
+      A.superficie(ctx, 'verao', -1, 8, z, T, [{ tipo: 'dente', x: 3.6, h: 1.0 }, { tipo: 'capim', x: 0.1, h: 0.9 }], [XB3]);
+      const tun = cortadouro(ctx, XB3, z, T), ch = saida(tun, XB3, XB3 + 0.45, 0.08), y0 = gnd(XB3 + 0.45) - 0.1;
+      for (let k = 0; k < N3; k++) {
+        const tS = 1 + k * 0.28, sobe = 1.0, abre = 0.15, dur = 4.6, u0 = t - tS; if (u0 < 0) continue;
+        if (u0 < sobe) { const d = ch.len * suave(u0 / sobe), q = naRota(ch, d); ctx.save(); ctx.globalAlpha = alfaTunel(d); A.ant(ctx, 'alada', q.x, q.y, q.ang, z, { bate: 0.9 }); ctx.restore(); continue; }
+        if (u0 < sobe + abre) { const k2 = (u0 - sobe) / abre; A.ant(ctx, 'alada', XB3 + 0.45, y0, 0, z, { bate: 0.9 * (1 - suave(k2)) }); continue; }
+        const u = (u0 - sobe - abre) / dur; if (u >= 1) continue;
+        const pos = uu => { const a = -PI / 2 + (k - 2.5) * 0.26, dd = (2.9 + (k % 2) * 0.6) * suave(clamp(uu * 1.1)), w = 0.22 * (Math.sin(uu * 10 + k * 1.7) - Math.sin(k * 1.7)) * (0.3 + uu); // leque com espiral
+          return { x: XB3 + 0.45 + Math.cos(a) * dd - Math.sin(a) * w, y: y0 + Math.sin(a) * dd + Math.cos(a) * w }; };
+        const p = pos(u), p2 = pos(Math.min(1, u + 0.01));
+        ctx.save(); ctx.globalAlpha = 1 - clamp((u - 0.75) / 0.25); A.ant(ctx, 'alada', p.x, p.y, Math.atan2(p2.y - p.y, p2.x - p.x), z, { scale: 1 - 0.5 * u, bate: 0.5 + 0.5 * Math.sin(T * 2 * PI * 6 + k) }); ctx.restore();
+      }
+    }
+
+    // ---------- troca de estação: outono, inverno, primavera e verão, 4 s cada; a troca leva 1,6 s ----------
+    const SEQ = ['outono', 'inverno', 'primavera', 'verao'], PL4 = [{ tipo: 'capim', x: 0.5, h: 1.0 }, { tipo: 'folhaLarga', x: 1.8, h: 1.5 }, { tipo: 'dente', x: 3.2, h: 1.0 }, { tipo: 'arbusto', x: 4.5, h: 1.2 }];
+    // desenha a superfície no meio de uma troca: o tamanho das plantas é interpolado e as cores das duas estações se misturam
+    function superficieTroca(ctx, de, para, u, x0, w, z, T, plantas, bocas) {
+      const E = A.ESTACOES, k0 = E[de].planta, k1 = E[para].planta, k = lerp(k0, k1, u);
+      try {
+        E[de].planta = k; E[para].planta = k;
+        if (u < 1) A.superficie(ctx, de, x0, w, z, T, plantas, bocas);
+        if (u > 0) { ctx.save(); ctx.globalAlpha = u; A.superficie(ctx, para, x0, w, z, T, plantas, bocas); ctx.restore(); }
+      } finally { E[de].planta = k0; E[para].planta = k1; }
+    }
+    function estacao(ctx, z, T, tags) {
+      const t = mod(T, 16), i = Math.floor(t / 4), de = SEQ[(i + 3) % 4], para = SEQ[i], tt = t - i * 4;
+      superficieTroca(ctx, de, para, suave(clamp(tt / 1.6)), -1, 8, z, T, PL4, []);
+      const px = 1 / z;
+      // folhas caindo: no inverno (todas) e no começo do outono (poucas, amarelas)
+      if ((para === 'inverno' || para === 'outono') && tt < 3.6) {
+        const n = para === 'inverno' ? 18 : 7, cores = para === 'inverno' ? [mix(C.veg, '#C47A3A', 0.5), mix(C.veg, '#C9A24A', 0.45), '#A8743E'] : [mix(C.veg, '#E2B860', 0.5), mix(C.veg, '#C9A24A', 0.4)];
+        ctx.save();
+        for (let j = 0; j < n; j++) {
+          const pl = PL4[j % 4], t0 = (j / n) * 1.2, u = (tt - t0) / 2.2; if (u <= 0 || u >= 1) continue;
+          const xa = pl.x + ((j * 37) % 7 - 3) * 0.08, yTopo = gnd(pl.x) - pl.h * (0.5 + ((j * 13) % 5) * 0.08), x = xa + u * (0.9 + (j % 3) * 0.3) + 0.1 * Math.sin(u * 9 + j), y = lerp(yTopo, gnd(x) - 0.02, Math.min(1, u * 1.25));
+          ctx.globalAlpha = u > 0.8 ? (1 - u) / 0.2 : 1; ctx.fillStyle = cores[j % cores.length]; ell(ctx, x, y, 0.06, 0.025, Math.sin(u * 8 + j) * 1.2); ctx.fill();
+        }
+        ctx.restore();
+      }
+      // brotos e flores abrindo na primavera
+      if (para === 'primavera' && tt < 3.8) {
+        ctx.save();
+        for (let j = 0; j < 10; j++) {
+          const x = 0.15 + j * 0.52 + ((j * 29) % 5) * 0.04, y = gnd(x), k = suave(clamp((tt - 0.3 - j * 0.1) / 0.8)); if (k <= 0) continue;
+          ctx.globalAlpha = clamp((3.8 - tt) / 0.6); ctx.strokeStyle = mix(C.veg, '#B8F0A0', 0.2); ctx.lineWidth = Math.max(1 * px, 0.02); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - 0.16 * k); ctx.stroke();
+          ctx.fillStyle = mix(C.veg, '#B8F0A0', 0.25); [-1, 1].forEach(sd => { ell(ctx, x + sd * 0.04 * k, y - 0.12 * k, 0.045 * k, 0.02 * k, sd * 0.5); ctx.fill(); });
+          if (j % 2) { ctx.fillStyle = ['#EFE7DC', '#E8C9D6', '#F2E2A8'][j % 3]; ctx.beginPath(); ctx.arc(x, y - 0.18 * k, 0.035 * k, 0, TAU); ctx.fill(); }
+        }
+        ctx.restore();
+      }
+      if (LOD(z) !== 'geral') tags.push({ txt: A.ESTACOES[para].nome, x: 1.15, y: -1.85 });
+    }
+
+    Object.assign(A.eventos, { corte, ataqueCima, voo, estacao, superficieTroca, vela });
+  })();
+
+  // ================= formigas e aranha de perfil (D120) =================
+  // O formigueiro é um corte de lado: na superfície e dentro das câmaras, as formigas e os inimigos aparecem de perfil,
+  // "de pé", com os pés tocando o chão. Nos túneis continuam vistos de cima; a troca é na porta e na boca do cortadouro.
+  // Corpo com volume e sem olho; pernas em tripé com o corpo balançando de leve e as antenas tateando; aranha de pernas altas.
+  // Quem decide o lugar é um classificador: A.estrutura liga o da câmara (piso, parede e teto da cúpula) e as cenas da
+  // superfície ligam o do chão (A.perfil.naSup). No piso da câmara, virar no lugar encolhe a largura, como um giro.
+  (() => {
+    const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, k) => a + (b - a) * k;
+    let lugar = null, ultimo = false;
+    function comLugar(f, fn) { const p = lugar; lugar = f(p); try { return fn(); } finally { lugar = p; } }
+
+    // corpos (unidade = ANT_UNIT; frente em +x, cima em -y; eixo do corpo em y = 0, pés em y = H)
+    // gas, pec, tor, pro, cab: [x, y, rx, ry, giro]. hips: onde a perna sai do tórax; pes: x do pé parado; L: [coxa, canela]
+    const BASE = {
+      H: 3.6, gas: [-4.4, 0.1, 3.3, 2.3, -0.15], pec: [-0.6, -0.45, 0.7, 0.9, 0], tor: [1.6, -0.35, 2.0, 1.15, -0.2], pro: [2.5, -0.75, 1.05, 0.9, 0], cab: [4.7, -0.9, 1.75, 1.45, 0.35],
+      hips: [[2.6, 0.3], [1.6, 0.5], [0.7, 0.45]], pes: [5.0, 1.9, -2.6], L: [[2.5, 3.0], [2.3, 2.8], [2.8, 3.3]], mand: 'normal',
+    };
+    const VAR = {
+      cortadeira: { cab: [5.0, -1.0, 2.1, 1.8, 0.35], mand: 'grande', espinhos: true, pes: [5.4, 2.0, -2.6] },
+      cavadora: { cab: [5.0, -0.8, 2.0, 1.7, 0], caixa: true, pes: [5.6, 2.0, -2.6] },
+      soldado: { cab: [5.8, -1.2, 2.9, 2.4, 0.3], gas: [-4.2, 0.1, 3.0, 2.2, -0.15], mand: 'grande', pes: [5.8, 2.0, -2.5], kL: 1.05 },
+      tanque: { tor: [1.3, -0.6, 2.5, 1.8, -0.15], gas: [-4.8, 0.0, 3.8, 2.9, -0.1], cab: [4.6, -0.8, 1.9, 1.7, 0.2], escudo: true, pes: [5.2, 1.6, -3.0], kL: 1.1 },
+      atiradora: { gota: true, pes: [5.0, 1.9, -2.4] },
+      curandeira: { anel: true },
+      explosiva: { gas: [-5.3, -0.5, 4.6, 4.0, 0], bomba: true, pes: [5.0, 1.9, -2.2] },
+      saqueadora: { gas: [-5.8, 0.0, 4.6, 1.7, -0.08], tor: [1.9, -0.2, 2.6, 0.9, -0.1], pro: [2.9, -0.5, 1.1, 0.7, 0], cab: [6.1, -0.6, 2.0, 1.3, 0.25], pec: [-0.7, -0.3, 0.7, 0.7, 0], mand: 'longa', hips: [[2.9, 0.3], [1.9, 0.4], [0.9, 0.4]], pes: [5.8, 2.1, -3.0], kL: 1.1 },
+      alada: { tor: [1.6, -0.45, 2.4, 1.5, -0.2], asas: true },
+      rainha: { H: 4.6, gas: [-7.4, -0.5, 7.2, 4.3, -0.06], pec: [-0.2, -0.5, 0.9, 1.0, 0], tor: [1.6, -0.45, 2.4, 1.7, -0.2], pro: [2.6, -0.95, 1.2, 1.0, 0], cab: [5.1, -0.9, 2.1, 1.8, 0.35], hips: [[2.7, 0.5], [1.7, 0.8], [0.7, 0.8]], pes: [5.6, 2.0, -2.4], listras: true, toco: true, kL: 1.2 },
+      rival: { gas: [-3.6, 0.0, 2.2, 2.0, 0], pec: null, tor: [0.1, -0.3, 1.9, 1.5, 0], pro: null, cab: [3.5, -0.7, 1.9, 1.8, 0.3], hips: [[1.0, 0.6], [0.1, 0.8], [-0.8, 0.7]], pes: [3.6, 0.4, -3.4] },
+      soldadoRival: { gas: [-4.2, 0.0, 3.0, 2.3, -0.1], tor: [0.9, -0.3, 1.6, 1.2, -0.15], pro: null, cab: [4.7, -1.0, 2.9, 2.7, 0.3], faixa: true, mand: 'grande', hips: [[1.6, 0.4], [0.8, 0.6], [0.0, 0.6]], pes: [4.4, 1.0, -3.2] },
+    };
+    const corpos = {}, corpoDe = c => corpos[c] || (corpos[c] = Object.assign({}, BASE, VAR[c] || {}));
+    // aranha de pernas altas: a canela bem mais longa que a coxa faz o joelho subir acima do corpo
+    const ARANHA = { H: 2.8, cef: [1.8, -0.9, 1.9, 1.4, 0.08], abd: [-2.5, -1.5, 2.9, 2.4, 0.35], hips: [[2.7, 0.1], [2.2, 0.25], [1.6, 0.25], [1.0, 0.1]], pes: [7.5, 4.8, -1.8, -5.0], L: [[3.4, 6.0], [3.0, 5.0], [3.0, 5.0], [3.4, 6.0]], lw: 0.5 };
+
+    // perna de dois segmentos: o joelho fica sempre do lado de cima
+    function ik(hx, hy, fx, fy, L1, L2) {
+      let d = Math.hypot(fx - hx, fy - hy) || 1e-6; const ux = (fx - hx) / d, uy = (fy - hy) / d;
+      if (d > L1 + L2 - 0.02) { d = L1 + L2 - 0.02; fx = hx + ux * d; fy = hy + uy * d; }
+      d = Math.max(d, Math.abs(L1 - L2) + 0.02);
+      const a = (L1 * L1 - L2 * L2 + d * d) / (2 * d), h = Math.sqrt(Math.max(0, L1 * L1 - a * a)), px = hx + ux * a, py = hy + uy * a;
+      const k1 = { x: px - uy * h, y: py + ux * h }, k2 = { x: px + uy * h, y: py - ux * h }, k = k1.y < k2.y ? k1 : k2;
+      return { kx: k.x, ky: k.y, fx, fy };
+    }
+    // forma com volume: parte de baixo mais escura e um brilho em cima (sem olho)
+    function pinta(S, cam, cx, cy, rx, ry) {
+      const ctx = S.ctx; cam();
+      if (S.dashed) { ctx.setLineDash([1.2, 1.2]); ctx.strokeStyle = C.txt2; ctx.lineWidth = 0.7; ctx.stroke(); ctx.setLineDash([]); return; }
+      ctx.fillStyle = S.col; ctx.fill();
+      ctx.save(); cam(); ctx.clip();
+      ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.beginPath(); ctx.ellipse(cx, cy + ry * 1.05, rx * 1.4, ry * 0.85, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(255,250,240,0.17)'; ctx.beginPath(); ctx.ellipse(cx - rx * 0.12, cy - ry * 0.58, rx * 0.55, ry * 0.2, 0, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+    const E = (S, p) => { if (!p) return; const [x, y, rx, ry, r] = p; pinta(S, () => { S.ctx.beginPath(); S.ctx.ellipse(x, y, rx, ry, r || 0, 0, TAU); }, x, y, rx, ry); };
+
+    function pernas(S, perto) {
+      const ctx = S.ctx, B = S.B, kL = B.kL || 1;
+      ctx.strokeStyle = perto ? S.corPerna : S.corPernaLonge; ctx.lineWidth = S.lw; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath();
+      B.hips.forEach(([hx, hy], i) => {
+        const grupo = (i % 2 === 0) === perto, p = S.fase + (grupo ? 0 : PI), dx = perto ? 0 : 0.45, dy = perto ? 0 : -0.25;
+        const sw = S.anda ? Math.sin(p) * 0.8 : 0, ergue = S.anda ? Math.max(0, Math.cos(p)) * 0.7 : 0;
+        let fx = B.pes[i] + dx + sw, fy = B.H - ergue;
+        if (S.voa) { fx = hx + dx + [0.9, -0.3, -1.4][i] + Math.sin(S.fase * 0.4 + i) * 0.2; fy = hy + 2.6; }
+        const k = ik(hx + dx, hy + dy, fx, fy, B.L[i][0] * kL, B.L[i][1] * kL);
+        ctx.moveTo(hx + dx, hy + dy); ctx.lineTo(k.kx, k.ky); ctx.lineTo(k.fx, k.fy);
+      });
+      ctx.stroke();
+    }
+    function antenas(S) {
+      const ctx = S.ctx, [hx, hy, rx, ry] = S.B.cab, bx = hx + rx * 0.3, by = hy - ry * 0.75, w = Math.sin(S.t3) * 0.16;
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(S.lw * 0.85, 0.34);
+      [[false, 0.35], [true, 0]].forEach(([perto, off]) => {
+        const cor = perto ? S.corAnt : S.corAntLonge, a1 = -1.2 + w + (perto ? 0 : -0.14), ex = bx + off + Math.cos(a1) * 2.0, ey = by + Math.sin(a1) * 2.0;
+        const a2 = -0.3 + w * 1.6 + (perto ? 0 : 0.12) + Math.sin(S.t3 * 1.3 + (perto ? 0 : 1)) * 0.12, px = ex + Math.cos(a2) * 2.6, py = ey + Math.sin(a2) * 2.6;
+        ctx.strokeStyle = cor; ctx.beginPath(); ctx.moveTo(bx + off, by); ctx.lineTo(ex, ey); ctx.lineTo(px, py); ctx.stroke();
+        ctx.fillStyle = cor; ctx.beginPath(); ctx.arc(px, py, Math.max(ctx.lineWidth * 0.85, 0.32), 0, TAU); ctx.fill();
+      });
+    }
+    function mandibula(S, tipo) {
+      if (S.dashed) return; const ctx = S.ctx, [hx, hy, rx, ry] = S.B.cab, mx = hx + rx * 0.78, my = hy + ry * 0.45;
+      const len = tipo === 'grande' ? 2.4 : tipo === 'longa' ? 2.8 : 1.3, gr = tipo === 'grande' ? 0.9 : 0.45;
+      ctx.fillStyle = mix(S.col, C.base, 0.18); ctx.beginPath(); ctx.moveTo(mx - 0.5, my - gr); ctx.quadraticCurveTo(mx + len * 0.8, my - gr * 0.6, mx + len, my + 0.55); ctx.quadraticCurveTo(mx + len * 0.4, my + 0.15, mx - 0.4, my + gr * 0.5); ctx.closePath(); ctx.fill();
+    }
+    // asa da alada: fechada (bate 1) deitada para trás; aberta (bate 0) erguida
+    function asa(S, perto, bate) {
+      const ctx = S.ctx, [tx, ty, , tr] = S.B.tor, r = lerp(0.12, 1.25, 1 - bate) + (perto ? 0 : 0.22);
+      ctx.save(); ctx.translate(tx + 0.2, ty - tr * 0.85); ctx.rotate(r); ctx.globalAlpha *= perto ? 0.42 : 0.28; ctx.fillStyle = C.txt;
+      ctx.beginPath(); ctx.ellipse(-4.2, -0.15, 4.7, 1.3, 0, 0, TAU); ctx.fill();
+      ctx.strokeStyle = C.txt; ctx.lineWidth = 0.3; ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(-3, -0.9, -8.2, -0.5); ctx.stroke(); ctx.restore();
+    }
+
+    function corpoFormiga(S, o) {
+      const ctx = S.ctx, B = S.B;
+      if (B.asas && !S.dashed) asa(S, false, o.bate == null ? 1 : o.bate);
+      if (B.gota) { const cam = () => { ctx.beginPath(); ctx.moveTo(-11.2, -1.8); ctx.quadraticCurveTo(-8.4, -3.4, -4.6, -2.5); ctx.ellipse(-4.4, 0, 2.9, 2.5, 0, -PI / 2, PI / 2); ctx.quadraticCurveTo(-8.0, 2.4, -11.2, -1.8); ctx.closePath(); }; pinta(S, cam, -6, 0, 5, 2.5); if (!S.dashed) { ctx.fillStyle = C.acu; ctx.beginPath(); ctx.arc(-11.8, -2.1, 0.75, 0, TAU); ctx.fill(); } }
+      else if (B.anel) { const [x, y, rx, ry, r] = B.gas; ctx.beginPath(); ctx.ellipse(x, y, rx, ry, r, 0, TAU); ctx.strokeStyle = S.dashed ? C.txt2 : S.col; ctx.lineWidth = 1.4; if (S.dashed) ctx.setLineDash([1.2, 1.2]); ctx.stroke(); ctx.setLineDash([]); if (!S.dashed) { ctx.fillStyle = S.col; ctx.fillRect(x - 0.45, y - 1.3, 0.9, 2.6); ctx.fillRect(x - 1.3, y - 0.45, 2.6, 0.9); } }
+      else E(S, B.gas);
+      if (B.bomba && !S.dashed) { const [x, y, rx, ry] = B.gas; ctx.beginPath(); ctx.ellipse(x, y, rx + 1.0, ry + 1.0, 0, 0, TAU); ctx.setLineDash([1.1, 1.1]); ctx.strokeStyle = S.col; ctx.lineWidth = 0.55; ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = 'rgba(0,0,0,0.28)'; [[-6.6, -1.6], [-4.3, 1.0], [-5.8, 1.9]].forEach(([a, b]) => { ctx.beginPath(); ctx.arc(a, b, 0.6, 0, TAU); ctx.fill(); }); }
+      if (B.listras && !S.dashed) { ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 0.45; ctx.beginPath(); [-10.5, -8.0, -5.5].forEach(a => { ctx.moveTo(a, -4.0); ctx.quadraticCurveTo(a - 0.9, 0, a, 3.6); }); ctx.stroke(); }
+      if (B.toco && !S.dashed) { ctx.save(); ctx.globalAlpha *= 0.3; ctx.fillStyle = C.txt; ctx.beginPath(); ctx.ellipse(0.0, -2.4, 2.6, 0.9, 0.3, 0, TAU); ctx.fill(); ctx.restore(); }
+      E(S, B.pec); E(S, B.tor); E(S, B.pro);
+      if (B.espinhos && !S.dashed) { ctx.fillStyle = S.col; [[0.9, -1.2, 0.5, -2.5], [2.3, -1.5, 2.1, -2.7]].forEach(([a, b, c, d]) => { ctx.beginPath(); ctx.moveTo(a - 0.45, b + 0.3); ctx.lineTo(c, d); ctx.lineTo(a + 0.45, b + 0.3); ctx.closePath(); ctx.fill(); }); }
+      // cabeça: balança com o "nod" de quem trabalha
+      ctx.save();
+      if ('nod' in o && o.nod) { const [hx, hy, rx] = B.cab, nx = hx - rx * 0.8; ctx.translate(nx, hy); ctx.rotate(o.nod * 0.2); ctx.translate(-nx, -hy); }
+      if (B.caixa) { pinta(S, () => { ctx.beginPath(); ctx.roundRect(3.0, -2.6, 3.9, 3.4, 0.9); }, 5, -0.9, 2, 1.7); pinta(S, () => { ctx.beginPath(); ctx.roundRect(7.1, -2.4, 0.9, 3.3, 0.4); }, 7.5, -0.8, 0.5, 1.6); }
+      else { E(S, B.cab); mandibula(S, B.mand); }
+      if (B.faixa && !S.dashed) { const [hx, hy, rx, ry, r] = B.cab; ctx.save(); ctx.beginPath(); ctx.ellipse(hx, hy, rx, ry, r, 0, TAU); ctx.clip(); ctx.fillStyle = '#A92A35'; ctx.fillRect(hx - 1.6, hy - 3, 1.4, 6); ctx.restore(); }
+      if (B.escudo) { pinta(S, () => { ctx.beginPath(); ctx.arc(4.6, -0.9, 2.9, -PI / 2, PI / 2); ctx.closePath(); }, 5.6, -0.9, 1.5, 2.9); if (!S.dashed) { ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 0.45; ctx.beginPath(); ctx.arc(4.6, -0.9, 2.2, -PI / 2 + 0.2, PI / 2 - 0.2); ctx.stroke(); } }
+      if (S.lod === 'perto' && !S.dashed) antenas(S);
+      ctx.restore();
+    }
+    function corpoAranha(S, o) {
+      const ctx = S.ctx, B = S.B, perna = perto => {
+        const traca = () => { ctx.beginPath(); B.hips.forEach(([hx, hy], i) => {
+          const grupo = (i % 2 === 0) === perto, p = S.fase + (grupo ? 0 : PI), dx = perto ? 0 : 0.6, dy = perto ? 0 : -0.3;
+          const sw = S.anda ? Math.sin(p) * 1.0 : 0, ergue = S.anda ? Math.max(0, Math.cos(p)) * 0.9 : 0;
+          const k = ik(hx + dx, hy + dy, B.pes[i] + dx + sw, B.H - ergue, B.L[i][0], B.L[i][1]);
+          ctx.moveTo(hx + dx, hy + dy); ctx.lineTo(k.kx, k.ky); ctx.lineTo(k.fx, k.fy);
+        }); ctx.stroke(); };
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        if (S.lod === 'perto') { ctx.strokeStyle = '#120D0A'; ctx.lineWidth = B.lw + 0.35; traca(); }
+        ctx.strokeStyle = perto ? S.col : mix(S.col, '#120D0A', 0.45); ctx.lineWidth = Math.max(B.lw, S.lw); traca();
+      };
+      perna(false); E(S, B.abd); E(S, B.cef);
+      const [cx, cy, rx, ry] = B.cef;
+      if (!S.dashed) {
+        // quelíceras: abrem quando ela morde (parada, com "nod")
+        const abre = 'nod' in o ? 0.35 + 0.35 * Math.max(0, Math.sin((A.TEMPO || 0) * 14)) : 0.1;
+        ctx.fillStyle = mix(S.col, '#120D0A', 0.3); ctx.save(); ctx.translate(cx + rx * 0.85, cy + ry * 0.45); ctx.rotate(abre); ctx.beginPath(); ctx.moveTo(-0.4, -0.5); ctx.quadraticCurveTo(1.1, -0.2, 0.6, 1.5); ctx.quadraticCurveTo(0.2, 0.6, -0.5, 0.4); ctx.closePath(); ctx.fill(); ctx.restore();
+        if (S.lod === 'perto') { ctx.strokeStyle = S.col; ctx.lineWidth = 0.55; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx + rx * 0.7, cy + ry * 0.2); ctx.lineTo(cx + rx * 0.7 + 1.3, cy + ry * 0.2 + 0.6); ctx.lineTo(cx + rx * 0.7 + 1.7, cy + ry * 0.2 + 1.6); ctx.stroke(); }
+      }
+      perna(true);
+    }
+
+    // desenha de perfil. L: { pe (distância até o chão, em células), n (normal do chão), modo 'chao', voa }
+    function perfil(ctx, casta, x, y, ang, z, o, L) {
+      const lod = LOD(z), inimigo = !!A.INIMIGOS[casta], spec = A.CASTAS[casta] || A.INIMIGOS[casta] || A.CASTAS.operaria, aranha = casta === 'aranha';
+      const sc = A.ANT_UNIT * spec.esc * (o.scale || 1), B = aranha ? ARANHA : corpoDe(casta);
+      const cg = inimigo ? null : (A.corCasta ? A.corCasta(casta) : A.COR_GRUPO[A.GRUPO[casta]]);
+      const col = o.col || (inimigo ? C.perigo : cg ? mix(C.txt, cg, A.TINTA) : C.txt);
+      const ca = Math.cos(ang), sa = Math.sin(ang);
+      let rot = ang, fx = 1, fy = 1;
+      if (L.voa) { const fc = ca >= 0 ? 1 : -1, t = fc > 0 ? ang : ang - PI; rot = clamp(Math.atan2(Math.sin(t), Math.cos(t)), -0.6, 0.6); fx = fc; }
+      else if (L.modo === 'chao') { rot = L.tilt || 0; fx = (ca >= 0 ? 1 : -1) * Math.max(0.12, Math.abs(ca)); }
+      else { const n = L.n || { x: 0, y: 1 }, lx = -sa, ly = ca, d = lx * n.x + ly * n.y; if (Math.abs(d) > 0.3) fy = Math.sign(d); else { const n2 = Math.abs(n.y) > 0.5 ? { x: 1, y: 0 } : { x: 0, y: 1 }; fy = Math.sign(lx * n2.x + ly * n2.y) || 1; } }
+      const anda = !('nod' in o) && !o.dashed && !L.voa && lod === 'perto', fase = (A.TEMPO || 0) * (aranha ? 11 : 13) + x * 9 + y * 5;
+      const S = {
+        ctx, B, col, lod, dashed: o.dashed, anda, voa: L.voa, fase, t3: (A.TEMPO || 0) * 3 + x * 4,
+        lw: Math.max(1 / (z * sc), 0.42), corPerna: mix(col, C.base, 0.3), corPernaLonge: mix(col, C.base, 0.6), corAnt: mix(col, C.base, 0.4), corAntLonge: mix(col, C.base, 0.62),
+      };
+      const pe = L.voa ? null : (L.pe == null ? 0.075 : L.pe), bob = anda ? 0.16 * Math.cos(2 * fase) : 0;
+      const inv = ctx.getTransform().inverse();
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(sc * fx, sc * fy);
+      ctx.translate(0, pe == null ? 0 : pe / sc - B.H); // pés no chão
+      if (bob) { ctx.translate(0, -Math.abs(bob)); ctx.rotate(0.025 * Math.sin(fase)); }
+      if (aranha) corpoAranha(S, o);
+      else {
+        if (!o.dashed) pernas(S, false);
+        corpoFormiga(S, o);
+        if (!o.dashed) pernas(S, true);
+        if (B.asas && !o.dashed) asa(S, true, o.bate == null ? 1 : o.bate);
+      }
+      const m1 = ctx.getTransform(), W = (lx, ly) => inv.transformPoint(m1.transformPoint(new DOMPoint(lx, ly)));
+      ctx.restore();
+      if (!aranha) {
+        const [hx, hy, rx, ry] = B.cab;
+        if (o.carry) { const p = W(hx + rx * 0.9 + 0.06 / sc, hy - 0.4); A.item(ctx, o.carry, p.x, p.y, 0.15); }
+        // a vela sai da boca para o lado das costas, um pouco inclinada para trás (no caule, fica de lado)
+        if (o.vela && A.eventos && A.eventos.vela) { const b = W(hx + rx * 0.55, hy - ry * 0.55), f0 = W(0, 0), up = W(-0.3, -1); A.eventos.vela(ctx, b.x, b.y, 0.1, o.vela.rot + Math.atan2(up.x - f0.x, -(up.y - f0.y)), o.vela.cor); }
+      }
+      if (o.combatIcon && spec.combate && lod === 'perto') A.combatIcon(ctx, spec.combate, x, y - 0.3 * spec.esc, 8 / z);
+    }
+
+    // ---------- onde a formiga está ----------
+    // superfície: acima da linha do chão. No chão os pés tocam a terra; subindo na planta, os pés ficam no caule
+    const lugarSup = prev => (x, y, ang, casta, o) => {
+      const d = A.gnd(x) - y; if (d < -0.02) return prev ? prev(x, y, ang, casta, o) : null;
+      if (casta === 'alada' && o.bate != null && d > 0.16) return { tipo: 'sup', voa: true };
+      return { tipo: 'sup', n: { x: 0, y: 1 }, pe: d < 0.25 && Math.abs(Math.cos(ang)) > 0.3 ? Math.max(0, d) : 0 };
+    };
+    // câmara: dentro da cúpula. No piso, de pé; na parede e no teto, os pés vão para a terra
+    const naCamara = (g, x, y, ang) => {
+      const rx = (g.x1 - g.x0) / 2, ry = g.yw - g.yt, ux = (x - g.cx) / rx, uy = (y - g.yw) / ry;
+      if (!(x > g.x0 - 0.03 && x < g.x1 + 0.03 && y < g.yb + 0.03 && (y > g.yw || ux * ux + uy * uy < 1.2))) return null;
+      const dChao = g.floor - y; let dP, n;
+      if (y > g.yw) { const dl = x - g.x0, dr = g.x1 - x; dP = Math.min(dl, dr); n = { x: dl < dr ? -1 : 1, y: 0 }; }
+      else { const r = Math.hypot(ux, uy) || 1e-6, nx = ux / rx, ny = uy / ry, nl = Math.hypot(nx, ny) || 1; dP = Math.max(0, (1 - r) * Math.min(rx, ry)); n = { x: nx / nl, y: ny / nl }; }
+      if (dChao < 0.4 && dChao > -0.05 && dP > 0.2) return { tipo: 'cam', modo: 'chao', pe: Math.max(0, dChao) };
+      if (Math.abs(Math.cos(ang)) > 0.35 && dChao < 0.4) return { tipo: 'cam', n: { x: 0, y: 1 }, pe: Math.max(0, dChao) };
+      return { tipo: 'cam', n, pe: clamp(dP, 0, 0.25) };
+    };
+    const lugarCam = (g, prev) => (x, y, ang, casta, o) => naCamara(g, x, y, ang) || (prev ? prev(x, y, ang, casta, o) : null);
+    // câmaras já desenhadas neste quadro e neste canvas: as formigas desenhadas depois, por fora de A.estrutura, também ficam de pé
+    const vistas = new WeakMap();
+    function registra(ctx, g) { let r = vistas.get(ctx); if (!r || r.t !== A.TEMPO) { r = { t: A.TEMPO, gs: [] }; vistas.set(ctx, r); } r.gs.push(g); }
+    function lugarPadrao(ctx, x, y, ang) { const r = vistas.get(ctx); if (!r || r.t !== A.TEMPO) return null; for (const g of r.gs) { const L = naCamara(g, x, y, ang); if (L) return L; } return null; }
+
+    const antHook0 = A.antHook;
+    A.antHook = (ctx, casta, x, y, ang, z, o) => {
+      ultimo = false;
+      if (A.perfil.ligado && casta !== 'lacraia' && (LOD(z) === 'perto' || LOD(z) === 'medio')) {
+        const L = (lugar && lugar(x, y, ang, casta, o)) || lugarPadrao(ctx, x, y, ang);
+        if (L) { perfil(ctx, casta, x, y, ang, z, o, L); ultimo = true; return true; }
+      }
+      return antHook0 ? antHook0(ctx, casta, x, y, ang, z, o) : false;
+    };
+    const est0 = A.estrutura;
+    A.estrutura = function (ctx, sp, x, y, st, z, o = {}) {
+      const g = A.geom(sp, x, y, o.seed), args = arguments; registra(ctx, g);
+      return comLugar(prev => lugarCam(g, prev), () => est0.apply(this, args));
+    };
+    const naSup = fn => function (...a) { return comLugar(prev => lugarSup(prev), () => fn.apply(this, a)); };
+    // piso reto (fichas do catálogo): pés na linha y = chao
+    const piso = (chao, fn) => comLugar(() => (x, y) => ({ tipo: 'cam', modo: 'chao', pe: Math.max(0, chao - y) }), fn);
+    A.perfil = { ligado: true, naSup, piso, registra, ultimo: () => ultimo };
+    ['corte', 'ataqueCima', 'voo', 'estacao'].forEach(k => { if (A.eventos && A.eventos[k]) A.eventos[k] = naSup(A.eventos[k]); });
   })();
 
   Object.assign(A, { TINTA: 0.25, caminhoPorta, encaixe, ligacao, CICLO: 4, PAUSA: 0.8, salto, NOME_GRUPO, SOLO, solo, superficie, gnd, PLANTAS, planta, itemA, formiga, GRUPO, COR_GRUPO, ICS, icone });

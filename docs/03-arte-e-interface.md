@@ -225,6 +225,8 @@ No zoom perto (item com 9 px ou mais na tela), cada recurso vira um **objeto ilu
 
 Todas as castas usam três elipses com cintura: cabeça, tórax e abdômen (D34, D90), carregando o item pela boca (D109). No zoom perto ganham seis pernas finas, que mexem quando a formiga anda, e antenas finas abertas em V; no médio e no longe não têm pernas nem antenas (D113). O corpo é creme (Texto), **levemente tingido pela função**, com 25% de cor (D112): coleta (operária e cortadeira) fica creme, obra (cavadora) em barro, linha de frente (soldado e tanque) em azul, apoio (atiradora e curandeira) em verde-água, ataque (explosiva e saqueadora) em violeta e reprodução (alada e rainha) em dourado. A silhueta de cada casta é marcada (ver o catálogo visual); a tabela abaixo é a referência original.
 
+**De perfil (D120):** na superfície e dentro das câmaras, as formigas aparecem de lado e de pé, com volume e sem olho. As pernas andam em tripé, o corpo balança de leve e as antenas tateiam. Nos túneis continuam vistas de cima, e a troca acontece na porta.
+
 O que muda entre elas é **proporção e um detalhe**, para que se distingam pela silhueta.
 
 | Casta | Silhueta (cabeça · tórax · abdômen) | Detalhe |
@@ -247,7 +249,7 @@ O que muda entre elas é **proporção e um detalhe**, para que se distingam pel
 
 ### 3.6 Inimigos
 
-Inimigos são **vermelho de perigo, sem contorno** (D109). Cada um tem uma silhueta própria, diferente de todas as castas do jogador.
+Inimigos são **vermelho de perigo, sem contorno** (D109). Cada um tem uma silhueta própria, diferente de todas as castas do jogador. Na superfície e nas câmaras, a aranha aparece de perfil, com pernas altas e os joelhos acima do corpo (D120); a lacraia continua vista de cima.
 
 | Inimigo | Silhueta | Traço (D46) |
 |---|---|---|
@@ -266,7 +268,8 @@ Inimigos são **vermelho de perigo, sem contorno** (D109). Cada um tem uma silhu
 - **Chão vivo (D110):** linha ondulada com faixa de húmus, grama baixa, pedrinhas, folhas caídas, flores pequenas e morros e mato em silhueta ao fundo.
 - **Plantas:** capim, trevo, samambaia, folha larga, dente-de-leão e arbusto de folhinhas, todas com a mesma função e desenho diferente (D110, D111).
   - O tamanho da planta mostra a produção da estação (D23): no inverno fica só o caule.
-- **Cortadouro:** um buraco na linha do chão, com um arco Escavado.
+- **Cortadouro:** um buraco na linha do chão, com um arco Escavado. Durante o aviso de ataque por cima, o arco fica vermelho e pulsa (D118).
+- **Fundo:** os morros e o mato em silhueta ficam só no céu, sem passar da linha do chão (D118).
 - **Estação:** a cor Céu muda levemente, com no máximo 8% de diferença de luminosidade entre as estações. O nome da estação aparece sempre no topo da tela. A cor nunca é o único sinal.
 
 ## 4. Tipografia (D58)
@@ -306,9 +309,15 @@ Inimigos são **vermelho de perigo, sem contorno** (D109). Cada um tem uma silhu
 | Câmara atacada (D116) | Os inimigos entram e mordem o posto e a pilha de entrada, soltando lascas. As formigas de dentro se encolhem no fundo, tremendo |
 | Escavação de túnel (D117) | A ponta fica irregular e a cavadora joga farelos claros para trás. Duas operárias vão vazias até a ponta e voltam com uma bolinha de argila |
 | Obra de câmara (D117) | A câmara abre da porta para o fundo, com a frente irregular e duas cavadoras nela. O contorno tracejado enche como barra e o custo que falta fica no meio. No fim, o conteúdo aparece aos poucos sobre a câmara escura |
+| De perfil (D120) | Na superfície e nas câmaras, formigas e aranha ficam de pé, de lado. Na parede e no teto da cúpula, os pés ficam na terra. Ao virar no chão, a formiga encolhe de lado. A cortadeira leva a vela na boca. Nos túneis, vista de cima |
+| Estados parados do catálogo (D119) | O túnel e a câmara "escavando" mostram o quadro do meio dessas animações. A armadilha de cola tem a teia de terra da D116 do teto ao chão; sem munição, só os tocos dos fios |
 | Nascimento (D117) | A larva cresce, se encolhe e estoura num anel da cor da casta. A formiga sai pulando, como a moedinha dos itens, e anda até a porta |
 | Onda chegando (D117) | Uma linha vermelha tracejada liga a ponta do túnel rival à câmara alvo, com um anel pulsando no impacto. A ponta rival joga farelos para trás |
 | Expedição saindo (D117) | Os soldados saem das vagas um atrás do outro e deixam um rastro pontilhado violeta que some em 5 s. As vagas vazias ficam tracejadas |
+| Corte na planta (D118) | A cortadeira sobe pelo caule e corta um pedaço da folha, que fica mordida e cresce de novo. Desce com o pedaço em pé sobre a cabeça, como vela, até o cortadouro; no túnel a carga é o ícone de folha |
+| Ataque por cima (D118) | Durante o aviso, o arco do cortadouro alvo fica vermelho e pulsa a 1 Hz. A aranha anda com as pernas mexendo em dois grupos alternados e para as pernas quando morde |
+| Voo nupcial (D118) | Revoada: as aladas saem do cortadouro quase juntas e sobem em leque, girando, batendo as asas e diminuindo até sumir |
+| Troca de estação (D118) | 1,6 s: as plantas murcham ou crescem e as cores mudam. Folhas caem rodando no inverno e no começo do outono; brotos e flores abrem na primavera |
 | Tremor de tela | Não existe |
 
 - **Movimento reduzido:** uma opção nas configurações, que também segue a configuração do sistema. Com ela ligada:

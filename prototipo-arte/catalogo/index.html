@@ -98,7 +98,7 @@
   #zoom p { margin: 0; color: var(--txt2); font-weight: 700; font-size: 12px; text-align: center; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
-<script src="arte.js?v=117"></script>
+<script src="arte.js?v=124"></script>
 </head>
 <body>
 <header>
@@ -250,7 +250,7 @@ function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle
     ['cheio', 'Cheio', 'Borda vermelha pulsando 1 Hz; formigas a 20%', { formigas: 3 }],
     ['livre', 'Fila na boca', 'Até 10 formigas visíveis; o resto vira +n no zoom perto', { fila: 16, formigas: 0.6 }],
     ['planejado', 'Obra planejada', 'Tracejado em Texto 2', {}],
-    ['escavando', 'Escavando', 'Parte feita + resto tracejado; cavadora na ponta', {}],
+    ['escavando', 'Escavando', '60% cavado, resto tracejado; ponta irregular, cavadora e argileiras (D119)', {}],
     ['rival', 'Túnel rival', 'Tracejado vermelho por cima (03 §3.6)', { inimigos: 2 }],
   ];
   est.forEach(([st, n, u, o]) => { const cd = card(g, { titulo: n, sub: u }); zooms(cd.body, box, (ctx, z, T, tags) => A.tunel(ctx, P, 2, st, z, { T, tags, dir: 'duplo', ...o })); });
@@ -288,15 +288,20 @@ function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle
 
 // ================= 5. Formigas =================
 {
-  const s = section('formigas', 'Formigas e castas', 'Corpo de 3 elipses (D90), carregando pela boca (D109), com pernas e antenas só no zoom perto (D113). A silhueta marcada diz a casta; a tinta leve do corpo (25%) diz a função: coleta creme, obra barro, linha de frente azul, apoio verde-água, ataque violeta, reprodução dourado (D112). No longe vira ponto; no geral some.');
+  const s = section('formigas', 'Formigas e castas', 'Corpo de 3 elipses (D90), carregando pela boca (D109), com pernas e antenas só no zoom perto (D113). A silhueta marcada diz a casta; a tinta leve do corpo (25%) diz a função: coleta creme, obra barro, linha de frente azul, apoio verde-água, ataque violeta, reprodução dourado (D112). No longe vira ponto; no geral some. Na superfície e dentro das câmaras elas aparecem de perfil, de pé, com volume e sem olho; nos túneis, vistas de cima (D120).');
   const lu = card(grid(s, true), { titulo: 'Escala lado a lado', sub: 'No túnel de nível 2, zoom máximo (72) e perto (48)' });
   const keys = Object.keys(A.CASTAS);
   [72, 48].forEach(z => tile(lu.body, zlabel(z), [-0.1, -0.35, keys.length * 0.62 + 0.6, 0.7], z, (ctx, z, T) => { ctx.fillStyle = C.base; ctx.fillRect(-0.1, -0.2, keys.length * 0.62 + 0.6, 0.4); keys.forEach((k, i) => A.ant(ctx, k, 0.35 + i * 0.62 + (k === 'rainha' ? 0.25 : 0), 0, 0, z, { nod: Math.sin(T * 4 + i) })); }, 'solo'));
+  const lp = card(grid(s, true), { titulo: 'De perfil, lado a lado', tag: 'D120', sub: 'No piso de uma câmara, andando: pernas em tripé, corpo balançando de leve e antenas tateando' });
+  [72, 48].forEach(z => tile(lp.body, zlabel(z), [-0.1, -0.35, keys.length * 0.62 + 0.6, 0.62], z, (ctx, z, T) => { ctx.fillStyle = C.base; ctx.fillRect(-0.1, -0.35, keys.length * 0.62 + 0.6, 0.5); ctx.fillStyle = A.mix(C.base, '#000000', 0.25); ctx.fillRect(-0.1, 0.15, keys.length * 0.62 + 0.6, 0.035); A.perfil.piso(0.15, () => keys.forEach((k, i) => A.ant(ctx, k, 0.35 + i * 0.62 + (k === 'rainha' ? 0.25 : 0), 0.075, 0, z, {}))); }, 'solo'));
+  const pisoFicha = (ctx, w) => { ctx.fillStyle = A.mix(C.base, '#000000', 0.25); ctx.fillRect(-w, 0.12, 2 * w, 0.035); };
   const g = grid(s), box = [-0.45, -0.32, 0.9, 0.64];
   Object.entries(A.CASTAS).forEach(([k, d]) => {
     const cd = card(g, { titulo: d.nome, tag: '×' + d.esc, uso: d.papel });
     tile(cd.body, '<b>ampliado</b> p/ inspeção', box, 200, (ctx, z, T) => A.ant(ctx, k, 0, 0, 0, z, { nod: Math.sin(T * 4) }), 'base');
     [72, 48, 24, 14].forEach(z => tile(cd.body, zlabel(z), box, z, (ctx, z, T) => A.ant(ctx, k, 0, 0, 0, z, { nod: Math.sin(T * 4) }), 'base'));
+    tile(cd.body, '<b>de perfil</b> · ampliado', box, 200, (ctx, z, T) => { pisoFicha(ctx, 0.5); A.perfil.piso(0.12, () => A.ant(ctx, k, 0, 0.045, 0, z, {})); }, 'base');
+    [72, 48].forEach(z => tile(cd.body, 'de perfil · ' + z, box, z, (ctx, z, T) => { pisoFicha(ctx, 0.5); A.perfil.piso(0.12, () => A.ant(ctx, k, 0, 0.045, 0, z, {})); }, 'base'));
     tile(cd.body, 'carregando · 72', box, 72, (ctx, z, T) => A.ant(ctx, k, 0, 0.05, 0, z, { carry: 'folha' }), 'base');
     tile(cd.body, 'vaga vazia · 72', box, 72, (ctx, z) => A.ant(ctx, k, 0, 0, 0, z, { dashed: true }), 'base');
     if (d.combate) tile(cd.body, 'ícone de combate · 72', [-0.45, -0.6, 0.9, 0.92], 72, (ctx, z) => A.ant(ctx, k, 0, 0, 0, z, { combatIcon: true }), 'base');
@@ -308,12 +313,13 @@ function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle
 
 // ================= 6. Inimigos =================
 {
-  const s = section('inimigos', 'Inimigos', 'Vermelho perigo, sem contorno (D109). O traço de cada um aparece na silhueta.');
+  const s = section('inimigos', 'Inimigos', 'Vermelho perigo, sem contorno (D109). O traço de cada um aparece na silhueta. Na superfície e nas câmaras, de perfil; a aranha tem pernas altas, com os joelhos acima do corpo (D120).');
   const g = grid(s), box = [-0.6, -0.4, 1.2, 0.8];
   Object.entries(A.INIMIGOS).forEach(([k, d]) => {
     const cd = card(g, { titulo: d.nome, tag: k === 'lacraia' ? 'chefe' : '', uso: d.traco });
     const b = k === 'lacraia' ? [-1.6, -0.4, 2.0, 0.8] : box;
     [k === 'lacraia' ? 110 : 200, 72, 48, 24, 14].forEach(z => tile(cd.body, z > 72 ? '<b>ampliado</b> p/ inspeção' : zlabel(z), b, z, (ctx, z, T) => { A.ant(ctx, k, k === 'lacraia' ? 0.25 : 0, 0, 0, z, { T }); if (k === 'lacraia' && A.LOD(z) !== 'geral') { const px = 1 / z, w = 30 * px; ctx.fillStyle = C.painel; ctx.fillRect(0.25 - w / 2 - px, -0.22 - 7 * px, w + 2 * px, 6 * px); ctx.fillStyle = C.perigo; ctx.fillRect(0.25 - w / 2, -0.22 - 6 * px, w * 0.8, 4 * px); } }, 'base'));
+    if (k !== 'lacraia') [200, 72].forEach(z => tile(cd.body, (z > 72 ? '<b>de perfil</b> · ampliado' : 'de perfil · ' + z), box, z, (ctx, z, T) => { ctx.fillStyle = A.mix(C.base, '#000000', 0.25); ctx.fillRect(-0.6, 0.2, 1.2, 0.035); A.perfil.piso(0.2, () => A.ant(ctx, k, 0, 0.1, 0, z, {})); }, 'base'));
   });
   const nr = card(g, { titulo: 'Ninho rival', sub: 'Cúpula com borda dupla vermelha; túneis rivais tracejados' });
   zooms(nr.body, [-0.3, -0.3, 3.6, 2.5], (ctx, z, T) => A.ninhoRival(ctx, 0, 0, z, { T }));
@@ -379,13 +385,13 @@ function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle
   const s = section('superficie', 'Superfície e estações', 'Superfície viva (D110): chão ondulado com húmus, grama baixa, pedrinhas, folhas caídas, flores pequenas, morros e mato ao fundo, céu em degradê. O cortadouro é a boca com arco por onde as cortadeiras saem.');
   const g = grid(s, true), box = [0, -2.6, 9, 3.8];
   const PLS = [{ tipo: 'capim', x: 0.5, h: 1.1 }, { tipo: 'arbusto', x: 1.6, h: 1.3 }, { tipo: 'folhaLarga', x: 3.2, h: 1.6 }, { tipo: 'samambaia', x: 6.9, h: 1.5 }, { tipo: 'trevo', x: 7.9, h: 0.8 }, { tipo: 'dente', x: 8.6, h: 1.1 }];
-  const scene = est => (ctx, z, T, tags) => {
+  const scene = est => A.perfil.naSup((ctx, z, T, tags) => {
     A.solo(ctx, -1, -0.6, 11, 2, z, 5);
     const gy = A.superficie(ctx, est, -1, 11, z, T, PLS, [5.2]);
     ctx.save(); ctx.translate(0, gy(5.2)); A.cortadouroBoca(ctx, 5.2, z); ctx.restore();
-    for (let i = 0; i < 3; i++) { const t = ((T * 0.18) + i / 3) % 1, ida = t < 0.5, u = ida ? t * 2 : (1 - t) * 2, x = 5.6 + u * 1.2; A.ant(ctx, 'cortadeira', x, gy(x) - 0.08, ida ? 0 : Math.PI, z, { carry: ida ? null : 'folha' }); }
+    for (let i = 0; i < 3; i++) { const t = ((T * 0.18) + i / 3) % 1, ida = t < 0.5, u = ida ? t * 2 : (1 - t) * 2, x = 5.6 + u * 1.2; A.ant(ctx, 'cortadeira', x, gy(x) - 0.08, ida ? 0 : Math.PI, z, ida ? {} : { vela: { cor: A.mix(C.veg, '#B8F0A0', 0.15), rot: Math.sin(T * 5 + i) * 0.12 } }); }
     A.tunel(ctx, A.curve({ x: 5.2, y: 0.05 }, { x: 6.0, y: 1.2 }, 0.1), 1, 'livre', z, { T, formigas: 1.2, dir: 'duplo' });
-  };
+  });
   const cd = card(g, { titulo: 'Superfície nas 4 estações', tag: 'D110', sub: 'Zoom médio (24) e perto (48). No inverno as plantas ficam só no caule; no outono amarelam.' });
   Object.entries(A.ESTACOES).forEach(([k, e]) => tile(cd.body, e.nome + ' · 24', box, 24, scene(k)));
   tile(cd.body, 'Primavera · perto 48', [3.0, -2.2, 4.6, 3.2], 48, scene('primavera'));
@@ -394,6 +400,17 @@ function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle
     const c = card(g2, { titulo: n, sub: 'Mesma função: dá folha ao cortadouro' }), b = [-1.1, -2.5, 2.2, 2.75];
     Object.keys(A.ESTACOES).forEach(est => tile(c.body, A.ESTACOES[est].nome, b, 30, (ctx, z, T) => { ctx.fillStyle = A.ESTACOES[est].ceu; ctx.fillRect(-1.1, -2.5, 2.2, 2.5); A.solo(ctx, -1.2, 0, 2.4, 0.4, z, 3); A.planta(ctx, k, 0, 0, k === 'folhaLarga' ? 1.8 : k === 'samambaia' ? 1.6 : k === 'arbusto' ? 1.3 : 1.2, est, z, T, i * 5 + 2); }));
   });
+}
+
+// ================= 8b. Eventos da superfície =================
+{
+  const s = section('eventos-sup', 'Eventos da superfície', 'Cortadeiras sobem na planta e voltam com a folha em pé, como vela; o cortadouro atacado fica com o arco vermelho pulsando e a aranha anda com as pernas mexendo; o voo nupcial é uma revoada; a estação troca aos poucos, com folhas caindo e brotos (D118).');
+  const g = grid(s), E = A.eventos;
+  const ev = (id, titulo, sub, box, fn, zs, uso) => { const c = card(g, { id, titulo, tag: 'D118', sub, uso }); (zs || [56, 24]).forEach(z => tile(c.body, zlabel(z), box, z, (ctx, z, T, tags) => fn(ctx, z, T, tags))); };
+  ev('corte', 'Corte na planta', 'Sobe pelo caule, morde a folha e desce com o pedaço em pé; a folha cresce de novo', [0.0, -2.05, 4.6, 2.55], E.corte, null, 'No túnel, a carga volta a ser o ícone de folha.');
+  ev('ataque-cima', 'Ataque por cima', 'Arco do cortadouro vermelho pulsando no aviso; a aranha morde a primeira cortadeira e desce', [0.2, -1.5, 6.5, 2.05], E.ataqueCima, [48, 24], 'O aviso dura 6 s na cena; no jogo, cerca de 45 s (02 §6).');
+  ev('voo', 'Voo nupcial', 'Revoada: as aladas saem juntas e sobem em leque, girando', [0.2, -3.3, 4.4, 3.9], E.voo, [48, 24]);
+  ev('troca', 'Troca de estação', 'Outono, inverno, primavera e verão, 4 s cada; a troca leva 1,6 s', [0.0, -2.2, 5.4, 2.6], E.estacao, [48, 24], 'No jogo, cada estação dura 3 min (D23).');
 }
 
 // ================= 9. Ícones =================
@@ -476,9 +493,9 @@ function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle
 
 // ================= 11. Pendências =================
 {
-  const s = section('pendencias', 'Para escolher', 'Rodada 9 decidida (D117): eventos dentro do formigueiro. Próximo: eventos da superfície (rodada 10).');
+  const s = section('pendencias', 'Para escolher', 'Rodada 11 decidida (D120): formigas e aranha de perfil na superfície e nas câmaras, com volume e sem olho; nos túneis, vistas de cima. Nada em teste agora.');
   const l = el('div', 'pend-list', null, s);
-  el('a', null, '<b>Ver os modelos da rodada 9</b><span>modelos.html</span>', l).href = 'modelos.html';
+  el('a', null, '<b>Ver os modelos da rodada 11</b><span>modelos.html</span>', l).href = 'modelos.html';
 }
 
 // destaque da seção atual no índice

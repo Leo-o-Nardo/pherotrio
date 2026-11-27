@@ -28,7 +28,7 @@
 | [`03-arte-e-interface.md`](03-arte-e-interface.md) | Paleta, legibilidade, telas, gestos, feedback, acessibilidade | (c) | Interface aprovada; **o visual do mundo será refeito na etapa (c2)** (D61) |
 | [`04-conteudo-e-progressao.md`](04-conteudo-e-progressao.md) | As 15 fases, arcos, transição, traços, dificuldade, tutorial, desafios, sandbox | (d) | Aprovado |
 | [`05-escopo-e-prototipo.md`](05-escopo-e-prototipo.md) | Escopo, arquitetura, esforço, protótipos e critérios, testes, roteiro, Steam, China, receita | (e) | Aprovado |
-| [`06-decisoes.md`](06-decisoes.md) | **Fonte da verdade das decisões:** D01 a D117 e as questões em aberto | Todas | Vivo |
+| [`06-decisoes.md`](06-decisoes.md) | **Fonte da verdade das decisões:** D01 a D120 e as questões em aberto | Todas | Vivo |
 | `08-direcao-de-arte.md` | Visual do mundo: traçado dos túneis, câmaras, formigas, cores | (c2) | **A escrever** |
 | `../prototipo-arte/` | Protótipos visuais da (c2) em HTML, testados no Chrome em modo de dispositivo (D108). O catálogo visual está em `catalogo/index.html`, os modelos ainda em decisão em `catalogo/modelos.html` (com `catalogo/candidatos.js`), e a biblioteca de desenho que ele compartilha com o futuro app de exemplo, em `catalogo/arte.js`. O app de exemplo também vai ficar aqui (D106) | (c2) | Em andamento |
 | `../prototipo-visual/` | Rascunho de interação em HTML. **Não é referência de estilo** (D61) | — | Histórico |

@@ -1307,7 +1307,55 @@
   - **as argileiras no jogo:** no modelo, elas vão e voltam entre a ponta e o nó. No jogo, a argila sai da ponta com carregadoras de verdade e vai para o depósito pela rota normal (02 §4.2). Conferir se, com muitas obras ao mesmo tempo, elas não lotam os túneis;
   - **a prévia e o aviso da onda:** a linha tracejada só aparece depois do aviso da D25. Conferir se ela não briga com as setas de borda (D93) quando a câmara alvo está fora da tela;
   - **o anel do nascimento:** tem a cor da casta. Nas castas de cor parecida (D111), conferir se o anel diz qual nasceu, ou se vale juntar o ícone da casta;
-  - **os estados parados do catálogo:** o túnel e a câmara "escavando" da seção de estados ainda usam o desenho antigo. Trocar pelo quadro do meio da animação.
+  - **os estados parados do catálogo:** resolvido na D119.
+
+### D118. Rodada 10 do catálogo: eventos da superfície
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Detalha:** 02 §4.3 (folha e cortadouro), 02 §6 (ataque por cima), 04 §3.3 (voo nupcial), D23 (estações), 03 §3.7 e §5
+- **Decisão:**
+  - **corte na planta, "sobe e leva vela" (C):** a cortadeira sai do cortadouro, sobe pelo caule até uma folha e corta um pedaço. A folha fica mordida e cresce de novo aos poucos. Ela desce com o pedaço em pé sobre a cabeça, como uma vela verde, e entra no cortadouro. No túnel, a carga volta a ser o ícone de folha de sempre;
+  - **aviso de ataque por cima, "boca em alerta" (C):** durante o aviso, o arco do cortadouro que vai ser atacado fica vermelho e pulsa a 1 Hz. A aranha chega pela superfície e morde a primeira cortadeira que encontra (02 §6);
+  - **aranha andando:** as oito pernas mexem em dois grupos alternados, como o tripé das formigas (D113), e param quando ela morde. Só no zoom perto;
+  - **voo nupcial, "revoada" (A):** às 12:00, as aladas saem do cortadouro quase juntas, abrem as asas e sobem em leque, girando, batendo as asas e ficando menores até sumir no céu;
+  - **troca de estação, "aos poucos, com folhas e brotos" (B):** em 1,6 s as plantas murcham ou crescem e as cores do céu e das folhas passam de uma estação para a outra. No inverno as folhas caem rodando e o vento leva; no começo do outono caem as primeiras folhas amarelas; na primavera brotos e flores abrem no chão;
+  - **chão sem vão:** os morros e o mato do fundo ficam recortados no céu. Antes, eles vazavam abaixo da linha do chão e deixavam uma faixa escura entre a superfície e a terra.
+- **Alternativas:**
+  - corte: como estava (só até o pé da planta), subir e descer com a folha na boca, pedaços caindo da planta para as outras buscarem;
+  - aviso: nenhum na superfície, mato mexendo na borda, prévia tracejada da borda até a boca;
+  - voo: nada na superfície, uma a uma com rastro dourado, uma a uma com a contagem acima da boca;
+  - estação: troca de uma vez, aos poucos sem folhas e brotos.
+- **Motivo:** escolha do usuário. A vela é a imagem mais conhecida das cortadeiras e mostra de longe que a planta está sendo colhida. A boca em alerta marca o cortadouro que vai ser atacado sem riscar a superfície. A revoada é a mais bonita para fechar o arco. A troca aos poucos deixa a estação ser vista no mundo, não só no nome no topo da tela.
+- **A conferir no app de exemplo:**
+  - **a vela e o ícone:** a folha tem dois desenhos, a vela na superfície e o ícone no túnel. Conferir se a troca na boca do cortadouro não chama atenção;
+  - **a boca em alerta não diz de onde a aranha vem.** Se o jogador não souber de que lado defender, juntar uma seta na borda (D93) ou o mato mexendo;
+  - **o aviso de 45 s:** na cena ele dura 6 s. Conferir se o arco pulsando por 45 s cansa, ou se ele deve começar fraco e crescer;
+  - **a meta no voo:** a revoada não mostra a contagem de aladas (D31). A meta continua na interface; conferir se faz falta na hora do voo;
+  - **a mordida na folha** é um furo da cor do céu. Na frente de morro ou mato ela aparece como um buraco do céu; no jogo, recortar a folha de verdade.
+
+### D119. Pendências do catálogo: armadilha e estados parados de escavação
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Detalha:** D116 (teia de terra), D117 (escavação e obra), 03 §5
+- **Decisão:**
+  - **armadilha de cola:** a poça amarela com fios saiu. Dentro da câmara ficam cinco fios da teia de terra da D116, do teto ao chão, com gotinhas brilhando e balançando devagar. Em combate os fios tremem. Sem munição, sobram só os tocos dos fios, apagados. A pilha de cola continua no canto;
+  - **túnel "escavando":** é o quadro do meio da cena da D117. 60% do túnel está cavado e o resto continua tracejado. Na ponta há calombos de terra, a cavadora balançando a cabeça e farelos voando. Duas argileiras vão e voltam entre a ponta e o começo do túnel;
+  - **câmara "escavando":** metade da câmara está cavada a partir do lado da porta, com a frente irregular, e o resto continua solo. O contorno é tracejado e a barra branca cobre metade dele, crescendo a partir da porta. As cavadoras trabalham na frente e uma argileira leva a argila até a porta. No meio fica o custo que falta. Na porta de cima, a câmara é cavada de cima para baixo.
+- **Alternativas:** manter os desenhos antigos (o bloco de solo correndo e a poça amarela), que já não batiam com a D116 e a D117.
+- **Motivo:** acerto de consistência, sem rodada. Os estados parados agora mostram o mesmo desenho das animações escolhidas.
+
+### D120. Formigas e aranha de perfil na superfície e nas câmaras
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Detalha:** D113 (pernas e antenas), D115 (formigas na câmara), D118 (eventos da superfície), 03 §3.5 e §5
+- **Decisão (rodada 11):**
+  - **onde (B):** na superfície e dentro das câmaras, as formigas e a aranha aparecem **de perfil, de pé**. Nos túneis continuam vistas de cima. A troca acontece na porta da câmara e na boca do cortadouro;
+  - **estilo (C):** corpo com volume, com a parte de baixo mais escura e um brilho em cima, e **sem olho**;
+  - **andar (B):** pernas, corpo e antenas se mexem. As pernas andam em tripé, o corpo balança de leve e as antenas tateiam;
+  - **aranha (A):** pernas altas, com os joelhos acima do corpo;
+  - **detalhes:** a cortadeira leva a vela presa na boca. Na parede e no teto da cúpula, a formiga anda com os pés na terra. Ao virar no chão, ela encolhe de lado em vez de girar pela vertical. A lacraia continua vista de cima;
+  - vale nos zooms perto e médio. No longe e no geral nada muda.
+- **Alternativas:**
+  - onde: manter tudo visto de cima; (A) perfil só na superfície; (C) perfil em todo lugar, túneis inclusive;
+  - estilo: (A) lisa; (B) com volume e olho forte; (D) com volume e olho discreto;
+  - andar: (A) só as pernas;
+  - aranha: (B) pernas baixas e abertas.
+- **Motivo:** escolha do usuário depois do teste. Vistas de cima, as formigas na superfície e nas câmaras pareciam esquisitas, porque o chão é visto de lado. De pé, a cena fica coerente. O olho saiu porque o volume sozinho já dá vida.
+- **A conferir no protótipo:** se a troca de vista na porta fica natural; a leitura no zoom médio; as formigas do túnel perto da porta.
 
 ---
 

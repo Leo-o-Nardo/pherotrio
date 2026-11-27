@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Pherotrio · Modelos da rodada 9</title>
+<title>Pherotrio · Modelos da rodada 11</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -44,13 +44,13 @@
   #zoom canvas { border-radius: 10px; cursor: zoom-out; }
   #zoom p { margin: 0; color: var(--txt2); font-weight: 700; font-size: 12px; text-align: center; }
 </style>
-<script src="arte.js?v=117"></script>
-<script src="candidatos.js?v=9h"></script>
+<script src="arte.js?v=124"></script>
+<script src="candidatos.js?v=11e"></script>
 </head>
 <body>
 <header>
-  <h1>Modelos da rodada 9</h1>
-  <p>Eventos de dentro do formigueiro (D116 fechada). Cinco perguntas: escavação de túnel, obra de câmara, nascimento, onda lateral chegando e expedição saindo. Cada cena roda em loop curto; no jogo, os tempos vêm do 02. A barra de cima troca a opção de todas as cenas ao mesmo tempo. Toque em qualquer desenho para ampliar. <a href="index.html">Voltar ao catálogo</a>.</p>
+  <h1>Modelos da rodada 11</h1>
+  <p>Formigas e aranha de perfil, "de pé" (D119 fechada). Quatro perguntas: onde usar o perfil, o estilo do corpo, o jeito de andar e a aranha. É um teste: se não ficar bom dentro das câmaras, o perfil fica só na superfície. A barra de cima troca a opção de todas as cenas ao mesmo tempo. Toque em qualquer desenho para ampliar. <a href="index.html">Voltar ao catálogo</a>.</p>
 </header>
 <div id="sel"><div class="in" id="selIn"></div></div>
 <main id="main"></main>
@@ -58,9 +58,9 @@
 <script>
 const A = window.Arte, C = A.C, K = window.Cand;
 const DPR = A.DPR = Math.min(window.devicePixelRatio || 1, 3);
-const REC = { escava: 'B', obra: 'A', nasce: 'C', onda: 'B', expedicao: 'B' };
-const SEL = Object.assign({}, REC);
-const ROT = { escava: 'Escavação', obra: 'Obra', nasce: 'Nascimento', onda: 'Onda', expedicao: 'Expedição' };
+const REC = { onde: 'B', estilo: 'B', andar: 'B', aranha: 'A' };
+const SEL = { onde: 'B', estilo: 'C', andar: 'B', aranha: 'A' }; // respostas do usuário (2 ainda entre B, C e D)
+const ROT = { onde: 'Onde', estilo: 'Estilo', andar: 'Andar', aranha: 'Aranha' };
 const main = document.getElementById('main'), views = [], pickers = [];
 const io = new IntersectionObserver(es => es.forEach(e => { e.target._v.vis = e.isIntersecting; }), { rootMargin: '120px' });
 function el(tag, cls, html, parent) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
@@ -109,32 +109,38 @@ function abrirZoom(v) {
 zm.onclick = () => { zm.classList.remove('on'); if (zv) { views.splice(views.indexOf(zv), 1); zv = null; } };
 
 // ---------------- casos ----------------
-const BE = [-0.7, 0.05, 4.9, 1.25], BO = [-0.5, -0.25, 4.9, 1.45], BN = [-0.6, -0.5, 4.4, 2.25], BW = [-0.4, -0.25, 6.6, 1.45], BX = [-0.15, -0.1, 6.5, 1.3];
+const B1 = [0.0, -2.05, 4.6, 2.55], B2 = [0.2, -1.5, 6.5, 2.05], B3 = [0.2, -3.3, 4.4, 3.9], BESC = [-0.8, 0.2, 5.0, 0.9];
+const caixa = id => { const sp = A.ESTRUTURAS.find(e => e.id === id), [w, h] = A.DIM[sp.tam]; return [-1.0, -0.85, w + 1.3, h + 0.95]; };
+const F = (fn, forca) => K.cena(fn, forca);
 
 // ---------------- perguntas ----------------
 function pergunta(id, n, titulo, lead, dim, tiles) {
   const s = section(id, n + '. ' + titulo, lead), g = el('div', 'grid', null, s);
   Object.entries(K.OPCOES[dim]).forEach(([k, m]) => { const c = card(g, { titulo: m.nome, sub: m.desc, dim, val: k, rec: REC[dim] === k }); tiles(c.body, { [dim]: k }); });
 }
-pergunta('escava', 1, 'Escavação de túnel', 'Um túnel novo de 3 células saindo de um nó. 7 s cavando e 2 s pronto, em loop. No jogo, 4 escavadoras cavam 1 célula por segundo (02 §4.2).', 'escava', (b, ov) => {
-  tile(b, 'perto · 56', BE, 56, K.escavacao, null, ov);
-  tile(b, 'médio · 24', BE, 24, K.escavacao, null, ov);
+pergunta('onde', 1, 'Onde usar o perfil', 'O formigueiro é um corte de lado. Quem anda num chão pode aparecer de perfil, de pé, com as pernas tocando a terra. Na superfície a troca é na boca do cortadouro; nas câmaras, na porta.', 'onde', (b, ov) => {
+  tile(b, 'corte na planta · 56', B1, 56, F(K.corte), null, ov);
+  tile(b, 'aranha na superfície · 48', B2, 48, F(K.ataque), null, ov);
+  tile(b, 'voo nupcial · 48', B3, 48, F(K.voo), null, ov);
+  tile(b, 'jardim com carregadoras · 56', caixa('jardim'), 56, F(K.jardim), null, ov);
+  tile(b, 'câmara real · 56', caixa('real'), 56, F(K.real), null, ov);
+  tile(b, 'depósito (porta no teto) · 56', caixa('deposito'), 56, F(K.deposito), null, ov);
+  tile(b, 'posto em combate · 56', caixa('posto'), 56, F(K.combate), null, ov);
+  tile(b, 'escavação de túnel · 56', BESC, 56, F(K.escavacao), null, ov);
+  tile(b, 'câmara real · médio 24', caixa('real'), 24, F(K.real), null, ov);
 });
-pergunta('obra', 2, 'Obra de câmara', 'Um jardim de fungo sendo cavado: 7,5 s de obra e a câmara pronta no fim. O transporte da terra segue a resposta da pergunta 1.', 'obra', (b, ov) => {
-  tile(b, 'perto · 56', BO, 56, K.obra, null, ov);
-  tile(b, 'médio · 24', BO, 24, K.obra, null, ov);
+pergunta('estilo', 2, 'Estilo do corpo', 'As castas mantêm o que as distingue vistas de cima (cabeça grande do soldado, pá da cavadora, gota da atiradora, anel da curandeira). Se a pergunta 1 estiver em "Atual" ou "A", aqui o perfil liga também nas câmaras para comparar.', 'estilo', (b, ov) => {
+  tile(b, 'castas · 80', [0, -0.55, 3.9, 1.85], 80, F(K.castas, true), null, ov);
+  tile(b, 'inimigos · 80', [0, -0.55, 3.9, 0.66], 80, F(K.inimigos, true), null, ov);
+  tile(b, 'jardim · 56', caixa('jardim'), 56, F(K.jardim, true), null, ov);
 });
-pergunta('nasce', 3, 'Nascimento', 'No berçário, a larva da direita termina e nasce um soldado, que vai para a porta. As outras duas continuam comendo. 9 s em loop.', 'nasce', (b, ov) => {
-  tile(b, 'perto · 56', BN, 56, K.nascimento, null, ov);
-  tile(b, 'médio · 24', BN, 24, K.nascimento, null, ov);
+pergunta('andar', 3, 'Jeito de andar', 'O tripé da D113, agora visto de lado: três pés no chão, três no ar. Quem trabalha para as pernas e balança a cabeça.', 'andar', (b, ov) => {
+  tile(b, 'de perto · 108', [-0.1, -0.45, 2.9, 0.55], 108, F(K.deperto, true), null, ov);
+  tile(b, 'corte na planta · 56', B1, 56, F(K.corte, true), null, ov);
 });
-pergunta('onda', 4, 'Onda lateral chegando', 'A onda sai da boca rival, à direita fora da tela, e cava em linha reta até a câmara mais próxima (02 §6.4). Quando bate, a câmara entra em ataque. O aviso na linha do ano e a seta na borda continuam (03 §8).', 'onda', (b, ov) => {
-  tile(b, 'perto · 48', BW, 48, K.onda, null, ov);
-  tile(b, 'médio · 24', BW, 24, K.onda, null, ov);
-});
-pergunta('expedicao', 5, 'Expedição saindo', 'Três soldados saem do posto de guarda para a boca rival, à direita fora da tela. O posto fica desfalcado: as vagas vazias aparecem tracejadas.', 'expedicao', (b, ov) => {
-  tile(b, 'perto · 48', BX, 48, K.expedicao, null, ov);
-  tile(b, 'médio · 24', BX, 24, K.expedicao, null, ov);
+pergunta('aranha', 4, 'Aranha', 'A aranha anda pela superfície e para as pernas quando morde (D118). As quelíceras abrem na mordida.', 'aranha', (b, ov) => {
+  tile(b, 'andando · 80', [0, -0.9, 3.9, 1.05], 80, F(K.aranhaAnda, true), null, ov);
+  tile(b, 'ataque por cima · 48', B2, 48, F(K.ataque, true), null, ov);
 });
 atualizar();
 requestAnimationFrame(loop);
