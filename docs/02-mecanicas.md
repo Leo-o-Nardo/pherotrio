@@ -85,7 +85,7 @@ Um ano em 4 estações, sempre na ordem **outono → inverno → primavera → v
   - o jogador monta a rede **parte por parte**: cava um segmento, coloca um nó, cava o próximo, e assim forma uma teia;
   - túneis não se cruzam: para cruzar, você coloca um nó;
   - o traçado visual do segmento (reto, curvo ou orgânico) fica para a etapa de direção de arte (Q25).
-- **Conexão:** uma estrutura sem caminho até a câmara real fica inativa (ícone de "desconectada").
+- **Conexão (D122):** se a estrutura fica a até 3 células de uma rota (túnel ou nó), o túnel de ligação e o nó são planejados sozinhos, com o custo somado. Mais longe, ela pode ser construída, mas fica inativa, com o ícone de "desconectada", até o jogador cavar a rota. Uma estrutura sem caminho até a câmara real também fica inativa.
 - **Extratores (D20):** o cortadouro precisa estar dentro do anel da planta (até 1 célula de distância da base). O coletor de seiva precisa estar dentro do anel do bolsão de raízes (até 1 célula). O poço de argila pode ficar em qualquer célula escavável.
 - **Sem limite de câmaras** (D32). O crescimento é limitado pela economia (manutenção, mão de obra de escavação) e pelo tamanho do mapa da fase.
 - **Demolir:** 1 toque e confirmação. Não devolve nada.

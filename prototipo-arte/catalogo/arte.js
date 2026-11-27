@@ -243,7 +243,8 @@
     g.floor = g.yb - 0.035; g.cx = cx;
     return g;
   }
-  function domePath(ctx, g) { ctx.beginPath(); ctx.moveTo(g.x0, g.yb); ctx.lineTo(g.x0, g.yw); g.roof.forEach(q => ctx.lineTo(q.x, q.y)); ctx.lineTo(g.x1, g.yb); ctx.closePath(); }
+  // formaHook troca o contorno da câmara (rodada 15); sem ele, a cúpula da D101
+  function domePath(ctx, g) { const H = window.Arte; if (H && H.formaHook) return H.formaHook(ctx, g); ctx.beginPath(); ctx.moveTo(g.x0, g.yb); ctx.lineTo(g.x0, g.yw); g.roof.forEach(q => ctx.lineTo(q.x, q.y)); ctx.lineTo(g.x1, g.yb); ctx.closePath(); }
   const ITEM = 0.27;
   function pile(ctx, kind, n, xs, dir, floor, cols, z, tags) {
     const cap = cols + (cols - 1), shown = Math.min(n, cap), g = 0.03, lod = LOD(z);
@@ -277,6 +278,8 @@
     // interior tingido (D103) e escurecido quando pausado
     const dark = st === 'pausada' ? 0.5 : 0, tint = 0.13;
     const fill = c => dark ? mix(c, '#000000', dark) : c;
+    // cascaHook desenha parede, interior e chão da câmara (rodada 15); sem ele, o interior liso da D103
+    if (H.cascaHook && H.cascaHook(ctx, sp, g, st, z, T, fill)) { /* feito pelo gancho */ } else {
     domePath(ctx, g);
     if (sp.fam.length === 2) { ctx.save(); ctx.clip(); ctx.fillStyle = fill(mix(C.base, sp.fam[0], tint)); ctx.fillRect(g.x0 - 1, g.yt - 1, g.cx - g.x0 + 1, 4); ctx.fillStyle = fill(mix(C.base, sp.fam[1], tint)); ctx.fillRect(g.cx, g.yt - 1, g.x1 - g.cx + 1, 4); ctx.restore(); }
     else { ctx.fillStyle = fill(sp.fam.length ? mix(C.base, sp.fam[0], tint) : C.base); ctx.fill(); }
@@ -284,6 +287,7 @@
     const nv2 = st === 'nivel2';
     ctx.fillStyle = nv2 ? mix(C.base, C.min, 0.45) : mix(C.base, '#000000', 0.25);
     ctx.fillRect(g.x0, g.yb - (nv2 ? 0.07 : 0.035), g.x1 - g.x0, nv2 ? 0.07 : 0.035);
+    }
     if (st === 'escavando') {
       const k = (T * 0.15) % 1; ctx.save(); domePath(ctx, g); ctx.clip(); ctx.fillStyle = C.solo; ctx.fillRect(g.x0 + (g.x1 - g.x0) * k, g.yt - 1, 9, 4); ctx.restore();
       domePath(ctx, g); ctx.setLineDash([5 * px, 8 * px]); ctx.strokeStyle = C.txt2; ctx.lineWidth = Math.max(1.2 * px, 0.025); ctx.stroke(); ctx.setLineDash([]);
@@ -402,6 +406,9 @@
       trace(ctx, p); ctx.setLineDash([5 * px, 8 * px]); ctx.strokeStyle = C.txt2; ctx.lineWidth = Math.max(1.4 * px, 0.025); ctx.stroke(); ctx.setLineDash([]);
       return;
     }
+    // faixa de terra batida em volta do túnel (rodada 15b): antes do corpo, por baixo do alerta
+    const FH = window.Arte && window.Arte.faixaTunelHook, comFaixa = FH && !o.cor && st !== 'escavando';
+    if (comFaixa) FH(ctx, p, w, z, st, 'antes');
     if (st === 'quase' || st === 'cheio') { const k = st === 'cheio' ? pulse(T, 1, INTEN) : pulse(T, 0.5, 0.75 * INTEN); trace(ctx, p); ctx.strokeStyle = mix(C.base, st === 'cheio' ? C.cheio : C.quase, k); ctx.lineWidth = w + 2 * extra; ctx.stroke(); }
     if (st === 'escavando') {
       const H = window.Arte; if (H.escavaTunelHook && H.escavaTunelHook(ctx, p, lvl, z, T)) return; // ponta irregular, farelos e argileiras (D117)
@@ -412,6 +419,7 @@
     }
     if (st === 'galeria') { trace(ctx, p); ctx.setLineDash([5 * px, 3 * px]); ctx.lineDashOffset = -T * 6 * px; ctx.strokeStyle = C.atk; ctx.lineWidth = w + 2 * 1.6 * px; ctx.lineCap = 'butt'; ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset = 0; ctx.lineCap = 'round'; }
     trace(ctx, p); ctx.strokeStyle = st === 'alagado' ? (o.aguaFill || C.agua) : (o.cor || C.base); ctx.lineWidth = w; ctx.stroke();
+    if (comFaixa) FH(ctx, p, w, z, st, 'depois');
     if (st === 'alagado' && lod !== 'geral') { ctx.strokeStyle = o.aguaLinha || '#5F8670'; ctx.lineWidth = 1 * px; ctx.setLineDash([3 * px, 4 * px]); ctx.lineDashOffset = -T * 4 * px; trace(ctx, p); ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset = 0; }
     if (st === 'rival') { trace(ctx, p); ctx.setLineDash([3 * px, 3 * px]); ctx.strokeStyle = C.perigo; ctx.lineWidth = Math.max(1.2 * px, 0.04); ctx.stroke(); ctx.setLineDash([]); }
     // setas de sentido: chevrons de Texto 2 a cada 2 células; mão dupla mostra ⇄ no meio
@@ -1009,9 +1017,12 @@
     ctx.beginPath(); const Ls = [], Rs = [];
     for (let s = a0; s <= p.len + 1e-6; s += 0.03) { const q = A.at(p, Math.min(s, p.len)), nx = -Math.sin(q.ang), ny = Math.cos(q.ang); Ls.push([q.x + nx * w / 2, q.y + ny * w / 2]); Rs.push([q.x - nx * w / 2, q.y - ny * w / 2]); }
     Ls.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); for (let i = Rs.length - 1; i >= 0; i--) ctx.lineTo(Rs[i][0], Rs[i][1]); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+    { const FH = A.faixaTunelHook; if (FH) FH(ctx, p, w, z, 'livre', 'porta', a0, sw); } // a faixa do túnel continua até a parede
     if (LOD(z) === 'geral') return sw;
     const sd = g.porta === 'R' ? 1 : -1, wx = sd > 0 ? g.x1 : g.x0, piso = mix(C.base, '#000000', 0.25);
     if (lado) { const fg = ctx.createLinearGradient(wx, 0, wx + sd * 0.55, 0); fg.addColorStop(0, piso); fg.addColorStop(1, rgbaDe(piso, 0)); ctx.fillStyle = fg; ctx.fillRect(Math.min(wx, wx + sd * 0.55), g.yb - 0.035, 0.55, 0.035); }
+    if (A.semBatente) return sw; // rodada 15b: a faixa de terra batida contínua faz o papel do batente
+    if (A.batenteHook) { A.batenteHook(ctx, p, g, sw, w, z); return sw; } // rodada 15c: outra forma de batente
     const q = A.at(p, sw), nx = -Math.sin(q.ang), ny = Math.cos(q.ang), tx = Math.cos(q.ang), ty = Math.sin(q.ang), e = Math.max(0.09, 3 * px), L = 0.22;
     const BAT = mix(C.base, SOLO.topo, 0.42), LUZ = mix(SOLO.topo, '#FFFFFF', 0.18); ctx.lineCap = 'round';
     [-1, 1].forEach(k => {
@@ -2150,4 +2161,70 @@
   })();
 
   Object.assign(A, { TINTA: 0.25, caminhoPorta, encaixe, ligacao, CICLO: 4, PAUSA: 0.8, salto, NOME_GRUPO, SOLO, solo, superficie, gnd, PLANTAS, planta, itemA, formiga, GRUPO, COR_GRUPO, ICS, icone });
+})();
+
+// ---------------- D124: câmara em arco cheio, terra batida, brilho do trabalho e ofício mais presente (rodada 15) ----------------
+(function () {
+  const A = window.Arte, C = A.C, mix = A.mix;
+  const rgba = (hex, a) => 'rgba(' + [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(',') + ',' + a + ')';
+  const semente = g => Math.abs(Math.round(g.x * 13 + g.y * 7)) + 1;
+  // forma: sem parede reta; meia superelipse de ombros cheios, com os cantos do chão redondos
+  function arcoCheio(ctx, g) {
+    const rb = 0.3, base = g.yb - rb * 0.55, rx = (g.x1 - g.x0) / 2, ry = base - g.yt, n = 2.35, r = A.rng(semente(g)), ph = r() * 6.28;
+    ctx.beginPath(); ctx.moveTo(g.x0 + rb, g.yb); ctx.quadraticCurveTo(g.x0, g.yb, g.x0, base);
+    for (let k = 0; k <= 48; k++) {
+      const th = Math.PI + k / 48 * Math.PI, c = Math.cos(th), s = Math.sin(th), v = 1 + 0.035 * Math.sin(3 * th + ph) * Math.sin(k / 48 * Math.PI);
+      ctx.lineTo(g.cx + rx * Math.sign(c) * Math.pow(Math.abs(c), 2 / n), base + ry * v * Math.sign(s) * Math.pow(Math.abs(s), 2 / n));
+    }
+    ctx.quadraticCurveTo(g.x1, g.yb, g.x1 - rb, g.yb); ctx.closePath();
+  }
+  // parede de terra batida por fora, interior tingido (D103), luz quente do chão e piso de terra
+  function terraBatida(ctx, sp, g, st, z, T, fill) {
+    const lod = A.LOD(z), fam = sp.fam[0], px = 1 / z, w = g.x1 - g.x0, h = g.yb - g.yt;
+    if (lod !== 'geral') {
+      A.domePath(ctx, g); ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(70,52,38,0.45)'; ctx.lineWidth = 0.26; ctx.stroke();
+      A.domePath(ctx, g); ctx.strokeStyle = 'rgba(52,39,29,0.6)'; ctx.lineWidth = 0.12; ctx.stroke();
+      // o alerta continua sendo o pulso na borda (D103), agora por cima da terra batida
+      const a = A.alertOf(st); if (a) { const k = a === 'red' ? A.pulse(T, 1, A.INTEN) : A.pulse(T, 0.5, 0.75 * A.INTEN); A.domePath(ctx, g); ctx.strokeStyle = mix('#3A2C20', a === 'red' ? C.cheio : C.quase, Math.min(1, k * 2.2)); ctx.lineWidth = 0.12 + 3 * px; ctx.stroke(); }
+    }
+    A.domePath(ctx, g);
+    if (sp.fam.length === 2) { ctx.save(); ctx.clip(); ctx.fillStyle = fill(mix(C.base, sp.fam[0], 0.13)); ctx.fillRect(g.x0 - 1, g.yt - 1, g.cx - g.x0 + 1, 4); ctx.fillStyle = fill(mix(C.base, sp.fam[1], 0.13)); ctx.fillRect(g.cx, g.yt - 1, g.x1 - g.cx + 1, 4); ctx.restore(); }
+    else { ctx.fillStyle = fill(fam ? mix(C.base, fam, 0.13) : C.base); ctx.fill(); }
+    if (lod === 'geral') return true;
+    ctx.save(); A.domePath(ctx, g); ctx.clip();
+    const sh = ctx.createLinearGradient(0, g.yt, 0, g.yb); sh.addColorStop(0, 'rgba(0,0,0,0.38)'); sh.addColorStop(0.6, 'rgba(0,0,0,0.08)'); sh.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = sh; ctx.fillRect(g.x0 - 1, g.yt - 1, w + 2, h + 2);
+    if (st !== 'pausada') {
+      const quente = mix('#FFCF8F', fam || '#FFCF8F', fam ? 0.35 : 0), rg = ctx.createRadialGradient(g.cx, g.floor, 0, g.cx, g.floor, Math.max(w * 0.62, h * 1.1));
+      rg.addColorStop(0, rgba(quente, 0.26)); rg.addColorStop(0.45, rgba(quente, 0.1)); rg.addColorStop(1, rgba(quente, 0)); ctx.fillStyle = rg; ctx.fillRect(g.x0 - 1, g.yt - 1, w + 2, h + 2);
+    }
+    A.domePath(ctx, g); const rl = ctx.createLinearGradient(0, g.yt, 0, g.yb); rl.addColorStop(0, 'rgba(255,232,200,0.16)'); rl.addColorStop(1, 'rgba(255,232,200,0.03)'); ctx.strokeStyle = rl; ctx.lineWidth = 0.1; ctx.stroke();
+    const nv2 = st === 'nivel2';
+    ctx.fillStyle = nv2 ? mix(C.base, C.min, 0.45) : mix(C.base, C.min, 0.16); ctx.fillRect(g.x0, g.yb - 0.08, w, 0.08);
+    ctx.fillStyle = 'rgba(255,232,200,0.10)'; ctx.fillRect(g.x0, g.yb - 0.08, w, 0.014);
+    ctx.restore();
+    return true;
+  }
+  const propsBase = A.propsHook;
+  // ofício mais presente: o mesmo cenário da D110, com mais luz e um pouco mais de cor
+  const propsVivo = (ctx, sp, g, st, z, T) => { if (!propsBase) return; ctx.save(); ctx.filter = 'brightness(1.75) saturate(1.2)'; propsBase(ctx, sp, g, st, z, T); ctx.restore(); };
+  Object.assign(A, { arcoCheio, terraBatida, propsBase, propsVivo, formaHook: arcoCheio, cascaHook: terraBatida, propsHook: propsVivo });
+})();
+
+
+// =============== TERRA BATIDA NOS TÚNEIS (D125) ===============
+// O túnel ganha a mesma terra batida da câmara (D124), mais fina: uma faixa escura em volta e o fio de luz
+// nas bordas de dentro. Fases: 'antes' (faixa, por baixo do corpo), 'depois' (fio de luz) e 'porta'
+// (o fio de luz continua até a parede da câmara, por cima do encaixe). O batente da D114 continua.
+(() => {
+  const A = window.Arte, C = A.C, H1 = 0.11, H2 = 0.05;
+  const caminho = (ctx, p) => { ctx.beginPath(); p.pts.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); };
+  function terraBatidaTunel(ctx, p, w, z, st, fase, s0, s1) {
+    if (A.LOD(z) === 'geral') return; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (fase === 'antes') { caminho(ctx, p); ctx.strokeStyle = 'rgba(70,52,38,0.45)'; ctx.lineWidth = w + H1; ctx.stroke(); caminho(ctx, p); ctx.strokeStyle = 'rgba(52,39,29,0.6)'; ctx.lineWidth = w + H2; ctx.stroke(); return; }
+    if (st === 'alagado') return;
+    if (fase === 'porta') { const pts = []; for (let t = s0; t <= s1; t += 0.03) pts.push(A.at(p, t)); p = { pts }; ctx.lineCap = 'butt'; }
+    caminho(ctx, p); ctx.strokeStyle = 'rgba(255,232,200,0.13)'; ctx.lineWidth = w; ctx.stroke();
+    caminho(ctx, p); ctx.strokeStyle = C.base; ctx.lineWidth = Math.max(w - 0.1, w * 0.55); ctx.stroke();
+  }
+  Object.assign(A, { terraBatidaTunel, faixaTunelHook: terraBatidaTunel });
 })();

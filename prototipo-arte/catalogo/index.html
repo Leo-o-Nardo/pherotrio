@@ -98,7 +98,7 @@
   #zoom p { margin: 0; color: var(--txt2); font-weight: 700; font-size: 12px; text-align: center; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
-<script src="arte.js?v=124"></script>
+<script src="arte.js?v=129"></script>
 </head>
 <body>
 <header>
@@ -241,7 +241,7 @@ function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle
 
 // ================= 3. Túneis =================
 {
-  const s = section('tuneis', 'Túneis', 'Curvos, da cor da base, sem borda; largura por nível (D99): 0,25 · 0,33 · 0,42 · 0,5 célula, com largura mínima na tela de 2 / 2 / 2,5 / 3 px. A borda só aparece em alerta (D91).');
+  const s = section('tuneis', 'Túneis', 'Curvos, da cor da base, com uma faixa fina de terra batida em volta e o fio de luz nas bordas de dentro (D125); largura por nível (D99): 0,25 · 0,33 · 0,42 · 0,5 célula, com largura mínima na tela de 2 / 2 / 2,5 / 3 px. A borda só ganha cor em alerta (D91).');
   const g = grid(s), box = [0, 0, 3.2, 1.4];
   const P = A.curve({ x: 0.25, y: 1.0 }, { x: 2.95, y: 0.55 }, 0.18);
   [1, 2, 3, 4].forEach(l => { const cd = card(g, { titulo: 'Nível ' + l, tag: A.LARG[l] + ' cél', sub: l === 1 ? 'Mão única ou dupla em fila única' : 'Duas faixas a ±20% da largura' }); zooms(cd.body, box, (ctx, z, T) => A.tunel(ctx, P, l, 'livre', z, { T, formigas: 1.4, dir: l === 1 ? 'ida' : 'duplo' })); });
@@ -493,9 +493,10 @@ function A_selo(ctx, k) { const z = 1; ctx.fillStyle = C.painel; ctx.strokeStyle
 
 // ================= 11. Pendências =================
 {
-  const s = section('pendencias', 'Para escolher', 'Rodada 11 decidida (D120): formigas e aranha de perfil na superfície e nas câmaras, com volume e sem olho; nos túneis, vistas de cima. Nada em teste agora.');
+  const s = section('pendencias', 'Para escolher', 'Rodada 11 decidida (D120): formigas e aranha de perfil na superfície e nas câmaras, com volume e sem olho; nos túneis, vistas de cima. Rodada 12 decidida (D121): som e música orgânicos, em camadas, feitos no código. Rodada 13 decidida (D122): painéis em gaveta que expande, grade perto do dedo com ligação automática a até 3 células de uma rota, cartões com ícone no disco da família e operárias com barra em cima e barrinhas. Rodada 14 decidida (D123): barra de cima em ilhas flutuantes, linha das estações com o inimigo de cada onda, fungo em destaque e rainha só como alerta. Rodada 15 decidida (D124): câmaras em arco cheio, com parede de terra batida, brilho do trabalho e ofício mais presente. Rodadas 15b e 15c decididas (D125): os túneis ganham a terra batida fina, com o fio de luz, e o batente da D114 continua.');
   const l = el('div', 'pend-list', null, s);
-  el('a', null, '<b>Ver os modelos da rodada 11</b><span>modelos.html</span>', l).href = 'modelos.html';
+  el('a', null, '<b>Ouvir o som e a música (rodada 12)</b><span>som.html</span>', l).href = 'som.html';
+  el('a', null, '<b>Ver os modelos da rodada 15c · parede do túnel e batente (D125)</b><span>modelos.html</span>', l).href = 'modelos.html';
 }
 
 // destaque da seção atual no índice

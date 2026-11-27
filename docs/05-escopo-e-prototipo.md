@@ -26,7 +26,7 @@
 - **Esforço estimado:** de **46 a 72 semanas de trabalho focado**, já com a margem (§3). Em calendário, depende de quantas horas por semana o usuário tiver.
 - **Primeira tarefa de código:** o portão de desempenho (D81, D85).
 - **Itens novos que apareceram nesta etapa:**
-  - **som e música** (Q31), que nenhum documento cobria;
+  - **som e música** (Q31), que nenhum documento cobria; resolvida na D121;
   - **layout em paisagem** para a Steam (D83), que precisa ser previsto desde já.
 
 ## 1. Escopo
@@ -41,7 +41,7 @@
 | Modos | 8 desafios, sandbox configurável, 3 dificuldades, estrelas | `04` §4, §7 e §8 |
 | Interface | As 10 telas do `03`, gestos, indicadores de trânsito, tutorial embutido | `03` §6 a §9, `04` §6 |
 | Arte | Direção de arte do mundo (etapa c2), paleta D54, 3 níveis de detalhe | `03`, `08` (a escrever) |
-| Som | Efeitos e música (escopo a definir em Q31) | — |
+| Som | Efeitos, ambiente e música em camadas, tudo sintetizado no código; volume de música e de efeitos (D121) | — |
 | Acessibilidade | Itens da D59 | `03` §11 |
 | Idiomas | PT-BR e EN, com os textos fora do código | D06, `03` §12 |
 | Plataforma | Android, retrato, offline, save local com checkpoint | D07, D72, D81 |
@@ -126,7 +126,7 @@
 | Sandbox | 1 a 2 | |
 | Interface completa, acessibilidade, idiomas | 3 a 5 | Parte acontece durante os protótipos |
 | Arte do mundo aplicada (depois da etapa c2) | 3 a 5 | |
-| Som e música (Q31) | 2 a 4 | Menos se a música for licenciada ou encomendada |
+| Som e música (D121) | 2 a 4 | Tudo no código: efeitos, ambiente e música em camadas |
 | Monetização: compras, AdMob, consentimento | 1 a 2 | D82 |
 | Ficha da loja e materiais | 1 | |
 | Teste fechado (14 dias) e correções | 3 a 4 | §7.3 |
@@ -316,7 +316,7 @@ Os critérios são de **comportamento**, para não depender só de "achei legal"
 | **M0** | Projeto base, gerar APK de teste (o repositório git já existe) | — |
 | **M1** | Portão de desempenho aprovado | — |
 | **M2** | Protótipo 1 aprovado | — |
-| **M3** | Protótipo 2 aprovado | Planilha da árvore; esboço de som (Q31) |
+| **M3** | Protótipo 2 aprovado | Planilha da árvore; esboço de som (D121) |
 | **M4** | Protótipo 3 aprovado (arco 1 completo) | Recrutar testadores; nome final (Q01) |
 | **M5** | Conteúdo completo: arcos 2 e 3, desafios, sandbox | Ficha da loja, ícone, vídeo |
 | **M6** | Monetização, consentimento, polimento, acessibilidade | Política de privacidade, Segurança dos Dados |
@@ -405,7 +405,6 @@ As hipóteses:
 | Q10 | Preço final (proposta: R$ 9,90 / US$ 2,99 a 3,99) | M7 |
 | Q29 | Steam: Electron ou Tauri | M9 |
 | Q30 | China: quando traduzir para chinês simplificado e quem traduz | M9 |
-| Q31 | Som e música: estilo, quantidade, fazer, licenciar ou encomendar | Durante o protótipo 2 (antes do M3) |
 | Q32 | Modelo exato do celular de entrada (D80) | Antes do M1 |
 | Q33 | Métricas anônimas no lançamento: sim ou não, e qual ferramenta | M6 |
 

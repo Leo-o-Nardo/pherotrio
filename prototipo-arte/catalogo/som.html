@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pherotrio · Rodada 12 · Som e música</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --solo:#15110E; --painel:#211B17; --borda:#5A4B3F; --txt:#EFE7DC; --txt2:#B3A697; --acu:#F5B841; --vg:#7FD16B; --per:#FF4F5E; }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 90px; }
+  body { margin: 0; background: var(--solo); color: var(--txt); font: 14px/1.45 'Atkinson Hyperlegible', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  header { padding: 20px 16px 8px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  header p { margin: 0 0 6px; color: var(--txt2); max-width: 72ch; }
+  header a { color: var(--acu); }
+  #sel { position: sticky; top: 0; z-index: 5; background: rgba(21,17,14,.95); backdrop-filter: blur(6px); border-bottom: 1px solid #2A221C; }
+  #sel .in { max-width: 1100px; margin: 0 auto; padding: 8px 16px; display: flex; align-items: center; gap: 6px 14px; overflow-x: auto; scrollbar-width: none; }
+  .grp { flex: none; display: flex; align-items: center; gap: 4px; }
+  .grp b { font-size: 11px; color: var(--txt2); margin-right: 2px; }
+  .chip { flex: none; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 12px; color: var(--txt2); padding: 5px 9px; border-radius: 999px; background: var(--painel); border: 1px solid #2E2620; }
+  .chip.on { color: #1B1510; background: var(--txt); border-color: var(--txt); }
+  #stop { flex: none; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 12px; color: var(--txt); padding: 6px 11px; border-radius: 999px; background: #4A2226; border: 0; }
+  #stop[disabled] { opacity: .35; cursor: default; }
+  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
+  section { padding-top: 26px; }
+  h2 { font-size: 20px; margin: 0 0 2px; }
+  .lead { color: var(--txt2); margin: 0 0 12px; max-width: 72ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .card { background: var(--painel); border: 1px solid #2E2620; border-radius: 14px; padding: 12px; min-width: 0; display: flex; flex-direction: column; }
+  .card.on { border-color: var(--txt); box-shadow: 0 0 0 1px var(--txt) inset; }
+  .card .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  h3 { font-size: 16px; margin: 0; }
+  .tag { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 6px; white-space: nowrap; color: #1B1510; background: var(--acu); }
+  .desc { margin: 4px 0 8px; }
+  ul.pc { list-style: none; padding: 0; margin: 0 0 10px; font-size: 13px; color: var(--txt2); }
+  ul.pc li { padding-left: 16px; position: relative; margin: 2px 0; }
+  ul.pc li::before { position: absolute; left: 0; font-weight: 700; }
+  ul.pc li.p::before { content: '+'; color: var(--vg); }
+  ul.pc li.c::before { content: '−'; color: var(--per); }
+  .bts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+  .bt { cursor: pointer; font-family: inherit; font-weight: 700; font-size: 13px; min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid #3A3028; background: #2B231D; color: var(--txt); display: inline-flex; align-items: center; gap: 6px; }
+  .bt.play { background: #3A3028; }
+  .bt.tocando { background: var(--acu); color: #1B1510; border-color: var(--acu); }
+  .bt.nv.on { border-color: var(--txt); }
+  .bt:active { transform: scale(.96); }
+  .bt[disabled] { opacity: .4; }
+  .nota { font-size: 12px; color: var(--txt2); margin: 6px 0 0; }
+  .sp { flex: 1; }
+  .pick { margin-top: 10px; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 13px; width: 100%; min-height: 40px; border-radius: 10px; border: 0; background: #3A3028; color: var(--txt); }
+  .card.on .pick { background: var(--txt); color: #1B1510; }
+  #vol { margin: 10px 0 4px; background: var(--painel); border: 1px solid #2E2620; border-radius: 14px; padding: 10px 12px; display: grid; gap: 6px; max-width: 520px; }
+  #vol b { font-size: 12px; color: var(--txt2); }
+  #vol label { display: grid; grid-template-columns: 130px 1fr 42px; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; }
+  #vol input { width: 100%; min-height: 32px; accent-color: var(--acu); }
+  #vol span { text-align: right; font-size: 12px; color: var(--txt2); }
+  #resumo { margin-top: 28px; background: var(--painel); border: 1px solid #2E2620; border-radius: 14px; padding: 14px; }
+  #resumo p { margin: 4px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Rodada 12 · Som e música (D121)</h1>
+  <p><b>Decidida:</b> música orgânica acústica em camadas que reagem, com combate mais forte; efeitos mistos; ambiente por lugar e estação; tudo feito no código. Toque em ▶ para ouvir; nada toca sozinho. Use fone. Estes sons ainda são rascunhos: o som final também será sintetizado no código, com cada timbre mais trabalhado.</p>
+  <div id="vol"><b>Volume, como nas configurações do jogo</b>
+    <label>Música <input type="range" min="0" max="100" value="80" data-k="mus"><span>80%</span></label>
+    <label>Efeitos e ambiente <input type="range" min="0" max="100" value="80" data-k="efe"><span>80%</span></label>
+  </div>
+  <p><a href="index.html">← Catálogo visual</a></p>
+</header>
+<div id="sel"><div class="in" id="selIn"></div></div>
+<main id="main"></main>
+<script src="som.js?v=4"></script>
+<script>
+(() => {
+  const REC = { estilo: 'A', papel: 'B', efeitos: 'C', ambiente: 'C', fazer: 'D' };
+  const SEL = { estilo: 'A', papel: 'B', efeitos: 'C', ambiente: 'C', fazer: 'A' }; // escolha do usuário (D121)
+  document.querySelectorAll('#vol input').forEach(r => r.oninput = () => { Som.setVol(r.dataset.k, r.value / 100); r.nextElementSibling.textContent = r.value + '%'; });
+  let atual = null; // demonstração tocando: { chave, parar, mus }
+  const $ = (tag, cls, html, pai) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (pai) pai.appendChild(e); return e; };
+  const estiloDemo = () => 'ABC'.includes(SEL.estilo) ? SEL.estilo : 'A';
+
+  function parar() { if (atual) { atual.parar(); atual = null; } marca(); }
+  function demo(chave, fn) {
+    Som.init(); const era = atual && atual.chave; parar(); if (era === chave) return;
+    atual = fn(); atual.chave = chave; marca();
+  }
+  function marca() {
+    document.querySelectorAll('[data-demo]').forEach(b => {
+      const on = atual && atual.chave === b.dataset.demo; b.classList.toggle('tocando', !!on);
+      if (b.dataset.rot) b.innerHTML = (on ? '■ Parar' : '▶ ' + b.dataset.rot);
+    });
+    document.getElementById('stop').disabled = !atual;
+  }
+  const play = (pai, chave, rot, fn) => { const b = $('button', 'bt play', '', pai); b.dataset.demo = chave; b.dataset.rot = rot; b.onclick = () => demo(chave, fn); return b; };
+
+  // ---------- conteúdo ----------
+  const Q = [
+    { id: 'estilo', n: 1, t: 'Estilo da música', lead: 'O timbre da trilha. Cada exemplo toca a mesma harmonia (ré maior) com a colônia "crescendo": tapete, melodia e ritmo.', ops: [
+      { k: 'A', t: 'Orgânico acústico', d: 'Kalimba, marimba de madeira, chocalho e um tapete quente.', p: ['Soa como terra e madeira: combina com o solo claro e quente (D110)', 'Calmo para partidas de 12 a 20 min (D42)', 'Casa com efeitos tonais em kalimba'], c: ['Pode ficar doce demais no combate: depende da camada de tensão'], demo: b => play(b, 'estA', 'Ouvir', () => Som.Musica('A', 2)) },
+      { k: 'B', t: 'Eletrônico ambiente', d: 'Tapetes de sintetizador, sinos com eco e pulso suave.', p: ['Limpo e moderno; aguenta horas de jogo'], c: ['Frio contra o solo quente e o formigueiro vivo', 'Lembra outros jogos de estratégia minimalistas'], demo: b => play(b, 'estB', 'Ouvir', () => Som.Musica('B', 2)) },
+      { k: 'C', t: 'Lo-fi', d: 'Batida leve com balanço, piano elétrico e chiado de disco.', p: ['Aconchegante e popular'], c: ['A batida fixa cansa e briga com a velocidade 2×', 'Soa mais "música para estudar" que formigueiro'], demo: b => play(b, 'estC', 'Ouvir', () => Som.Musica('C', 2)) },
+      { k: 'D', t: 'Sem música', d: 'Só o ambiente e os efeitos; o formigueiro é a trilha.', p: ['Imersivo; nada repete'], c: ['Partida longa fica seca', 'Perde o aviso musical de perigo'], demo: b => play(b, 'estD', 'Ouvir', () => Som.Ambiente('subsolo')) },
+    ] },
+    { id: 'papel', n: 2, t: 'Papel da música', lead: 'Como a música acompanha a partida. Os exemplos usam o estilo escolhido na pergunta 1 (o orgânico, se for "sem música").', ops: [
+      { k: 'A', t: 'Faixas fixas', d: 'As músicas tocam em sequência, iguais em qualquer momento da partida.', p: ['Simples de compor e de mixar'], c: ['Não diz nada do jogo', 'Repete numa partida de 20 min'], demo: b => play(b, 'papA', 'Ouvir', () => Som.Musica(estiloDemo(), 2)) },
+      { k: 'B', t: 'Camadas que reagem', d: 'A mesma faixa ganha camadas conforme a colônia cresce e vira tom menor, com tambor, quando a onda chega. Toque nos momentos abaixo enquanto ouve.', p: ['Avisa o perigo sem precisar olhar', 'É sinal extra, nunca o único (D59)', 'A colônia grande "soa" maior'], c: ['A música precisa ser composta em camadas'], demo: b => {
+        play(b, 'papB', 'Ouvir', () => { const m = Som.Musica(estiloDemo(), 0); return { parar: m.parar, mus: m }; });
+        const nv = $('div', 'bts', '', b.parentNode);
+        ['Começo calmo', 'Colônia crescendo', 'Colônia cheia', 'Onda e combate'].forEach((r, i) => { const x = $('button', 'bt nv' + (i ? '' : ' on'), r, nv); x.onclick = () => {
+          if (!(atual && atual.chave === 'papB')) demo('papB', () => { const m = Som.Musica(estiloDemo(), i); return { parar: m.parar, mus: m }; }); else atual.mus.nivel(i);
+          nv.querySelectorAll('.nv').forEach(y => y.classList.toggle('on', y === x));
+        }; });
+      } },
+      { k: 'C', t: 'Só nos momentos', d: 'Na partida, só ambiente e efeitos. A música entra no briefing, na onda e no fim de fase.', p: ['O silêncio dá peso aos momentos', 'Menos cansaço em partidas longas'], c: ['Longos trechos sem música', 'A entrada súbita pode assustar'], demo: b => {
+        play(b, 'papC', 'Ouvir', () => { const a = Som.Ambiente('subsolo'); let m = null, tm = 0; const o = { parar() { a.parar(); if (m) m.parar(); clearTimeout(tm); }, momento(n) { if (m) m.parar(); clearTimeout(tm); m = Som.Musica(estiloDemo(), n); tm = setTimeout(() => { if (m) m.parar(); m = null; }, 9000); } }; return o; });
+        const nv = $('div', 'bts', '', b.parentNode);
+        [['Onda chegando', 3], ['Fim de fase', 2]].forEach(([r, n]) => { $('button', 'bt', r, nv).onclick = () => { if (!(atual && atual.chave === 'papC')) b.querySelector('[data-demo]').click(); atual.momento(n); }; });
+      } },
+    ] },
+    { id: 'efeitos', n: 3, t: 'Efeitos', lead: 'Os sons das ações. Com uma música tocando (perguntas 1 e 2), as notas tonais entram na batida e no tom dela; experimente tocar os dois juntos. No jogo, as entregas só soam na área visível, no máximo umas 4 por segundo, e nada no zoom longe.', ops: [
+      { k: 'A', t: 'Naturalistas', d: 'Terra, cliques, mordidas e asas, como sons do mundo.', p: ['Corpo e realismo no que é físico'], c: ['Centenas de entregas viram chiado', 'Alertas se confundem com o ambiente'] },
+      { k: 'B', t: 'Tonais', d: 'Toda ação é uma nota na escala da música, no tempo da batida.', p: ['O formigueiro "toca" junto com a trilha', 'Nunca desafina com a música'], c: ['Escavação e combate ficam de brinquedo'] },
+      { k: 'C', t: 'Misto', d: 'O que é físico soa natural (escavar, morder, asas). O que é informação soa como nota (toque, entrega, nascimento, obra pronta, alertas).', p: ['Corpo onde é físico, música onde é informação', 'Alertas inconfundíveis'], c: ['Duas famílias de som para manter coerentes'] },
+    ] },
+    { id: 'ambiente', n: 4, t: 'Ambiente', lead: 'O fundo sonoro por baixo de tudo.', ops: [
+      { k: 'A', t: 'Silêncio', d: 'Sem ambiente: só música e efeitos.', p: ['Mix mais limpo'], c: ['O mundo parece vazio quando a música baixa'] },
+      { k: 'B', t: 'Um ambiente só', d: 'Terra abafada com gotas e terrinha caindo, em qualquer lugar.', p: ['Simples; dá a sensação de estar sob a terra'], c: ['A superfície e as estações não soam diferentes'], demo: b => play(b, 'ambB', 'Ouvir', () => Som.Ambiente('subsolo')) },
+      { k: 'C', t: 'Por lugar e estação', d: 'O som acompanha a câmera. Na superfície, o tempo da estação: chuva e pássaros na primavera, grilos e cigarra no verão, vento e folhas no outono, vento frio no inverno. No fundo, terra abafada e gotas.', p: ['Reforça as estações (D23) e a água da primavera (D96)', 'Subir a câmera "abre a janela"'], c: ['Mais material para gravar e mixar'], demo: b => {
+        [['Subsolo', 'subsolo'], ['Primavera', 'primavera'], ['Verão', 'verao'], ['Outono', 'outono'], ['Inverno', 'inverno']].forEach(([r, k]) => play(b, 'ambC' + k, r, () => Som.Ambiente(k)));
+      } },
+    ] },
+    { id: 'fazer', n: 5, t: 'Como fazer', lead: 'De onde vem cada parte do som. Aqui não tem o que ouvir: é a decisão de produção.', ops: [
+      { k: 'A', t: 'Tudo no código', d: 'Todos os sons sintetizados na hora, como nesta página.', p: ['Reage perfeitamente ao jogo', 'Pesa quase nada no app'], c: ['Teto de qualidade baixo, principalmente na música', 'Soa "de computador"'] },
+      { k: 'B', t: 'Biblioteca licenciada', d: 'Efeitos, ambientes e músicas prontos, com licença para jogo.', p: ['Qualidade de estúdio, já pronta'], c: ['Música genérica e difícil de achar em camadas', 'Outros jogos usam os mesmos sons'] },
+      { k: 'C', t: 'Encomendar tudo', d: 'Compositor e designer de som feitos para o Pherotrio.', p: ['O melhor resultado e identidade própria'], c: ['Custo em dinheiro', 'Depende de terceiros e de prazos deles'] },
+      { k: 'D', t: 'Misto', d: 'Efeitos tonais e de interface no código, presos à batida da música. Ambiente e efeitos naturais de bibliotecas com gravações reais. Música encomendada em camadas, usando esta rodada como briefing.', p: ['Cada parte do jeito que soa melhor', 'O que precisa reagir ao jogo fica no código'], c: ['Ainda tem o custo da música; o orçamento é decisão sua'] },
+    ] },
+  ];
+  const EVENTOS = [['toque', 'Toque'], ['entrega', 'Entrega'], ['escavar', 'Escavar'], ['nascimento', 'Nascimento'], ['obra', 'Obra pronta'], ['onda', 'Onda chegando'], ['combate', 'Mordida'], ['rainha', 'Rainha atacada'], ['voo', 'Voo nupcial'], ['invalido', 'Lugar inválido']];
+
+  // um "minuto de jogo" comprimido em 16 s, com música e ambiente baixos
+  function minuto(conj) {
+    const est = SEL.estilo, m = 'ABC'.includes(est) ? Som.Musica(est, 1, 0.45) : null, a = Som.Ambiente('subsolo', 0.6), tms = [];
+    const roteiro = [[0.6, 'toque'], [1.2, 'entrega'], [2, 'escavar'], [2.6, 'entrega'], [3.4, 'nascimento'], [4.1, 'entrega'], [4.8, 'toque'], [5.4, 'entrega'], [6.2, 'obra'], [7, 'entrega'], [7.6, 'entrega'], [8.4, 'onda'], [10.6, 'combate'], [11.4, 'combate'], [12.3, 'rainha'], [13.6, 'entrega'], [14.4, 'voo']];
+    roteiro.forEach(([s, ev]) => tms.push(setTimeout(() => { if (ev === 'onda' && m) m.nivel(3); if (ev === 'voo' && m) m.nivel(1); Som.efeito(conj, ev); }, s * 1000)));
+    tms.push(setTimeout(() => { if (atual && atual.chave === 'min' + conj) parar(); }, 17500));
+    return { parar() { tms.forEach(clearTimeout); a.parar(); if (m) m.parar(); } };
+  }
+
+  // ---------- montagem ----------
+  const main = document.getElementById('main'), selIn = document.getElementById('selIn');
+  const stop = $('button', null, '■ Parar tudo', selIn); stop.id = 'stop'; stop.onclick = parar;
+  Q.forEach(q => {
+    const g = $('div', 'grp', '<b>' + q.n + '. ' + q.t + '</b>', selIn);
+    q.ops.forEach(o => { const c = $('button', 'chip', o.k, g); c.dataset.q = q.id; c.dataset.k = o.k; c.onclick = () => escolhe(q.id, o.k); });
+    const s = $('section', null, '', main); s.id = q.id;
+    $('h2', null, q.n + '. ' + q.t, s); $('p', 'lead', q.lead, s);
+    const grid = $('div', 'grid', '', s);
+    q.ops.forEach(o => {
+      const c = $('div', 'card', '', grid); c.dataset.q = q.id; c.dataset.k = o.k;
+      const hd = $('div', 'hd', '', c); $('h3', null, o.k + ' · ' + o.t, hd); if (REC[q.id] === o.k) $('span', 'tag', '⭐ Recomendado', hd);
+      $('p', 'desc', o.d, c);
+      const ul = $('ul', 'pc', '', c); o.p.forEach(x => $('li', 'p', x, ul)); o.c.forEach(x => $('li', 'c', x, ul));
+      if (o.demo) { const b = $('div', 'bts', '', c); o.demo(b); }
+      if (q.id === 'efeitos') {
+        const b = $('div', 'bts', '', c); play(b, 'min' + o.k, 'Um minuto de jogo', () => minuto(o.k));
+        const ev = $('div', 'bts', '', c); EVENTOS.forEach(([e, r]) => { $('button', 'bt', r, ev).onclick = () => Som.efeito(o.k, e); });
+      }
+      if (q.id === 'ambiente' && o.k === 'A') $('p', 'nota', 'Nada para ouvir: é o silêncio por baixo da música e dos efeitos.', c);
+      $('div', 'sp', '', c);
+      $('button', 'pick', 'Escolher ' + o.k, c).onclick = () => escolhe(q.id, o.k);
+    });
+  });
+  const res = $('div', null, '', main); res.id = 'resumo';
+  function escolhe(q, k) { SEL[q] = k; pinta(); }
+  function pinta() {
+    document.querySelectorAll('.chip, .card').forEach(e => e.classList.toggle('on', SEL[e.dataset.q] === e.dataset.k));
+    res.innerHTML = '<h3>Sua escolha</h3>' + Q.map(q => { const o = q.ops.find(o => o.k === SEL[q.id]); return '<p>' + q.n + '. ' + o.k + ' · ' + o.t + (REC[q.id] === o.k ? ' ⭐' : '') + '</p>'; }).join('');
+  }
+  pinta(); marca();
+})();
+</script>
+</body>
+</html>

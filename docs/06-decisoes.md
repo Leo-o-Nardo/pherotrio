@@ -450,6 +450,7 @@
 
 ### D56. Layout da tela de jogo em retrato
 - **Status:** Provisória · **Data:** 2026-11-25 · **Etapa:** (c)
+- **Atualizada por D123 (2026-11-27):** a barra de cima virou ilhas flutuantes sobre o mapa, e a rainha só aparece como alerta.
 - **Decisão:**
   - **No topo:** a linha do ano, com as ondas e a velocidade, e a barra de estado com fungo, rainha, aladas em relação à meta e população.
   - **No centro:** o mapa.
@@ -1052,6 +1053,7 @@
 
 ### D101. Câmara em cúpula de chão plano
 - **Status:** Provisória · **Data:** 2026-11-26 · **Etapa:** (c2) · **Resolve:** Q34 (junto com D102 a D105) · **Substitui:** D88
+- **Forma atualizada por D124 (2026-11-27):** arco cheio, sem parede reta, com os cantos do chão arredondados.
 - **Decisão:**
   - **forma:** teto arredondado e chão reto, sempre na horizontal, com o chão para baixo;
   - **entrada:** o túnel entra pela lateral ou pelo teto, nunca pelo chão;
@@ -1090,6 +1092,7 @@
 
 ### D103. Câmara tingida pela família, sem borda
 - **Status:** Provisória · **Data:** 2026-11-26 · **Etapa:** (c2) · **Substitui:** a borda de 2 dp na cor da categoria do `03` §3.3
+- **Atualizada por D124 (2026-11-27):** a câmara ganha parede de terra batida (não é borda de cor), luz quente vinda do chão e piso de terra batida. O alerta continua na borda.
 - **Decisão:**
   - **interior:** a cor dos túneis (`#43362B`, D91) misturada com 10 a 15% da cor da família do produto. Defesa usa a cor Defesa, ataque usa a cor Ataque, e a base fica sem tinta;
   - **combinados (N2 e N3):** a tinta segue as metades do produto (D48), com divisão vertical;
@@ -1190,6 +1193,7 @@
 
 ### D110. Rodada 2 do catálogo: fundo, superfície, recursos, castas, estruturas, ícones e nome
 - **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** D109 · **Revê:** as cores de solo e túnel do D91 e do `03` §1, os recursos lisos do D48 no zoom perto, a cor única das formigas do D90, a cúpula lisa do D103 e o nome "olheiro" do D08 e do D20
+- **Ofício atualizado por D124 (2026-11-27):** o cenário das câmaras fica mais presente, com mais luz e cor.
 - **Decisão:**
   - **fundo em terra clara:** o solo passa a ser claro e quente, em camadas onduladas que escurecem pouco com a profundidade (#8E765C → #695441), com pedrinhas e pouco granulado. Túneis e câmaras ficam escuros (#30261F). O contraste se inverte: antes o túnel era mais claro que o solo;
   - **superfície viva:** chão ondulado com faixa de húmus, grama baixa, pedrinhas, folhas caídas, flores pequenas, morros e mato em silhueta ao fundo e céu em degradê;
@@ -1231,6 +1235,7 @@
 
 ### D114. Rodada 6 do catálogo: encaixe do túnel na porta, com batente
 - **Status:** Decidida · **Data:** 2026-11-26 · **Etapa:** (c2) · **Detalha:** D101 (o túnel entra pela lateral ou pelo teto)
+- **Confirmada por D125 (2026-11-27):** o lintel e a soleira continuam, agora junto da faixa de terra batida do túnel.
 - **Decisão:**
   - **chegada reta:** o túnel chega reto na porta da câmara. Nas portas de lado, no nível do chão; nas de teto, de cima. O último trecho (cerca de meia célula) é sempre reto;
   - **abertura:** a cor do túnel entra na câmara e se desfaz em degradê, e o chão da câmara continua um pouco para fora da porta;
@@ -1357,6 +1362,95 @@
 - **Motivo:** escolha do usuário depois do teste. Vistas de cima, as formigas na superfície e nas câmaras pareciam esquisitas, porque o chão é visto de lado. De pé, a cena fica coerente. O olho saiu porque o volume sozinho já dá vida.
 - **A conferir no protótipo:** se a troca de vista na porta fica natural; a leitura no zoom médio; as formigas do túnel perto da porta.
 
+### D121. Som e música (resolve a Q31)
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Detalha:** D59 (acessibilidade), 03 §15, 05 §3
+- **Decisão (rodada 12, ouvida em `prototipo-arte/catalogo/som.html`):**
+  - **estilo (A):** música orgânica acústica: kalimba, marimba de madeira, chocalho e um tapete quente, em ré maior;
+  - **papel (B):** camadas que reagem. A mesma faixa ganha camadas conforme a colônia cresce: tapete e baixo, depois melodia, depois ritmo. Quando a onda chega ou há combate, vira tom menor e entra a camada de tensão, que é **mais forte** que o resto: tambores graves em padrão de marcha, baixo pulsando, ataques graves e caixa;
+  - **efeitos (C):** misto. O que é físico soa natural: escavar, morder, asas. O que é informação soa como nota da escala da música, presa à batida: toque, entrega, nascimento, obra pronta, alertas. As entregas só soam na área visível, no máximo umas 4 por segundo, e nada no zoom longe;
+  - **ambiente (C):** por lugar e estação, acompanhando a câmera. Na superfície, chuva e pássaros na primavera, grilos e cigarra no verão, vento e folhas no outono, vento frio no inverno. No fundo, terra abafada, gotas e terrinha caindo;
+  - **como fazer (A):** tudo sintetizado no código, como na página de teste, com cada timbre mais trabalhado no jogo;
+  - **volume:** as configurações têm dois controles, de 0 a 100%: música, e efeitos com o ambiente. O jogo continua jogável sem som (D59).
+- **Alternativas:**
+  - estilo: (B) eletrônico ambiente; (C) lo-fi; (D) sem música;
+  - papel: (A) faixas fixas; (C) música só nos momentos;
+  - efeitos: (A) naturalistas; (B) tonais;
+  - ambiente: (A) silêncio; (B) um ambiente só;
+  - como fazer: (B) biblioteca licenciada; (C) encomendar tudo; (D) misto, com a música encomendada (a recomendação).
+- **Motivo:** escolha do usuário depois de ouvir. Madeira e terra combinam com o solo quente (D110), e as camadas avisam o perigo sem precisar olhar. Feito no código, o som reage ao jogo, pesa pouco no app e não tem custo de licença.
+- **Risco:** o som sintetizado tem teto de qualidade mais baixo, principalmente na música e nos sons de bicho, como pássaros e grilos. Se no protótipo soar "de computador", reabrir só a música (opção D) na revisão geral.
+
+### D122. Construção e painéis (rodadas 13 e 13b)
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Detalha:** D14, D36, 02 §4.1, 03 §6
+- **Decisão (rodada 13, vista em `prototipo-arte/catalogo/modelos.html`):**
+  - **painéis (C), gaveta que expande:** o painel sobe curto, só com o essencial. Arrastar para cima ou tocar abre o painel inteiro. A gaveta fica por cima do mapa, e os cantos arredondados mostram o mapa atrás, sem fundo preto. Vale para estrutura, túnel, expedição e estoques;
+  - **modo de construção (C), grade perto do dedo:** a grade aparece só em volta do dedo, num raio de umas 3 células, e não na tela toda;
+  - **regra de conexão:**
+    - se a porta da estrutura fica a até 3 células de uma rota (túnel ou nó), o jogo planeja sozinho o túnel de ligação e o nó, e o custo deles entra no preço;
+    - mais longe que isso, a estrutura pode ser construída, mas fica **desconectada**: selo âmbar e parada até o jogador cavar a rota até ela;
+    - o fantasma tem três cores: verde-água quando liga sozinho, âmbar quando não há rota perto e vermelho quando o lugar está ocupado;
+  - **cartões (A2), ícone no disco da família:** o ícone do produto fica sobre um disco na cor da família (Base, Produção, Defesa, Ataque), com o custo embaixo. A estrutura bloqueada mostra o cadeado e a fase em que chega;
+  - **operárias (B1), barra em cima e barrinhas:** no alto, uma barra mostra a divisão da colônia nas cores dos papéis. Cada linha tem uma barrinha com a parte daquele papel. Os botões + e − tiram a formiga da Reserva ou devolvem para ela, e segurar repete.
+- **Alternativas:**
+  - painéis: (A) gaveta fixa embaixo; (B) cartão flutuante;
+  - modo de construção: (A) grade inteira; (B) só onde dá;
+  - cartões: (B) miniatura da câmara; (C) cartão largo; na 13b, (A1) só ícone e custo, (A3) ícone com receita e (A4) ícone e nome;
+  - operárias: (A) linhas simples; (C) cartões em grade; na 13b, (B2) só a barra de cima, (B3) um ponto por formiga e (B4) linha preenchida (a recomendação).
+- **Motivo:** escolha do usuário depois de ver os modelos. A gaveta que expande deixa o mapa visível no uso comum e ainda cabe tudo quando aberta. A grade perto do dedo limpa a tela. O disco na cor da família separa as categorias de relance, e a barra de cima com barrinhas mostra a divisão inteira e a de cada papel. A regra de 3 células usa o segmento máximo de túnel (02 §4.1): perto de uma rota, colocar a obra já basta; longe, o jogador tem que planejar o caminho, que é a parte estratégica da rede.
+
+### D123. Barra de cima da tela de jogo (resolve a Q36)
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Atualiza:** D56 · **Detalha:** D25, D31, D73, 03 §6.1
+- **Decisão (rodada 14, vista em `prototipo-arte/catalogo/modelos.html`):**
+  - **forma (B), ilhas flutuantes:** não há faixa. O mapa vai até o topo, e por cima ficam ilhas translúcidas com cantos arredondados. A primeira, na largura toda, é a do tempo. A segunda tem a colônia à esquerda e a velocidade à direita;
+  - **ano (A), linha das estações:**
+    - à esquerda ficam o nome da estação na cor dela e, com a ★, quanto falta para o voo;
+    - a linha mostra as 4 estações em cores (outono, inverno, primavera, verão), preenchidas até o cursor de agora;
+    - cada onda é um disco com a silhueta do inimigo (rivais, soldados, aranha, lacraia). A que chega em menos de 45 s pisca em vermelho, e as que já passaram ficam apagadas;
+    - a ★ do voo fica no fim da linha;
+  - **colônia (B), fungo em destaque:** o fungo aparece grande, com o saldo por minuto, que fica vermelho quando é negativo. O objetivo da fase (aladas X/6 ou o que a fase pedir, D73) e a população ficam menores. A rainha não ocupa lugar: quando ela é atacada, aparece logo abaixo das ilhas um alerta vermelho pulsando, com a vida dela;
+  - **velocidade (B):** a pausa e um botão que alterna entre 1× e 2×, os dois de 40 dp.
+- **Alternativas:**
+  - forma: (A) faixa única opaca; (C) duas linhas leves sobre um degradê;
+  - ano: (B) relógio redondo com a próxima onda; (C) só a próxima onda;
+  - colônia: (A) quatro iguais, com a vida da rainha; (C) só fungo e objetivo;
+  - velocidade: (A) pausa, 1× e 2×; (C) só a pausa.
+- **Motivo:** escolha do usuário, igual à recomendação. As ilhas deixam o mundo à vista. A linha das estações mostra o ano inteiro, que é o que a D25 pede para dar tempo de planejar as castas. A rainha só ocupa espaço quando há algo a fazer. O modelo antigo tinha "ano 2" (a fase é um ano só), "rainha 1" (é sempre 1), ondas sem o inimigo e botões de 24 px.
+- **Risco:** a ilha translúcida precisa ter contraste com o céu de cada estação. Conferir no app de exemplo.
+
+### D124. Câmaras: arco cheio, terra batida, brilho do trabalho e ofício presente (resolve a Q35)
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Atualiza:** D101 (forma), D103 (parede e luz), D110 (ofício) · **Detalha:** 03 §3.3
+- **Decisão (rodada 15, vista em `prototipo-arte/catalogo/modelos.html`):**
+  - **forma (B), arco cheio:** não há parede reta. A câmara é um arco só, de ombros cheios, que desce até o chão com os cantos arredondados. O chão continua plano para o conteúdo (D102), e o teto mantém a leve variação por câmara (D101);
+  - **parede (B), terra batida:**
+    - em volta da câmara há uma faixa de terra mais escura, como terra socada, e um fio de luz na borda de dentro, mais forte no teto;
+    - o chão vira um piso de terra batida, e no nível 2 o piso fica mais claro (D103);
+    - não é uma borda de cor. O alerta continua sendo o pulso amarelo ou vermelho na borda (D103), agora por cima da terra batida;
+  - **luz (B), brilho do trabalho:** o teto fica no escuro, e uma luz quente sai do chão, onde está o trabalho, tingida pela família do produto (a base fica em tom neutro). Sem luz quando a câmara está pausada;
+  - **ofício (B), mais presente:** o cenário da D110 com mais luz e um pouco mais de cor. Com isso, as câmaras da base, que não têm tinta, ganham cara própria.
+- **Alternativas:**
+  - forma: (A) cúpula de parede reta (D101); (C) gruta de borda irregular;
+  - parede: (A) sem parede (D103); (C) anel fino na cor da família;
+  - luz: (A) plana; (C) sombra nas paredes;
+  - ofício: (A) apagado (D110); (C) sem cenário.
+- **Motivo:** escolha do usuário, igual à recomendação. A cúpula de parede reta parecia um forno ou uma lápide e não combinava com os túneis curvos. O interior liso parecia um adesivo recortado no solo, e o cenário do ofício quase não aparecia. Com a terra batida e a luz quente, a câmara parece cavada no solo e o olho vai direto para o trabalho.
+- **Resolvido por D125:** os túneis ganham a terra batida, mais fina, com o fio de luz, e o batente da D114 continua.
+- **Onde está:** `prototipo-arte/catalogo/arte.js` (v126), com `A.arcoCheio`, `A.terraBatida` e `A.propsVivo`.
+
+### D125. Terra batida nos túneis (resolve o "em aberto" da D124)
+- **Status:** Decidida · **Data:** 2026-11-27 · **Etapa:** (c2) · **Detalha:** D124, D114, 03 §3.2 e §3.3
+- **Decisão (rodadas 15b e 15c, vistas em `prototipo-arte/catalogo/modelos.html`):**
+  - **faixa (15b B), igual à da câmara:** o túnel ganha a terra batida da câmara: uma faixa de terra mais escura em volta e o fio de luz nas bordas de dentro. O fio de luz vai até a parede da câmara, por cima do encaixe;
+  - **espessura (15c C), fina:** a faixa do túnel tem uns 40% da largura da parede da câmara (0,055 célula de cada lado, contra 0,13 na câmara). A parede da câmara não muda;
+  - **batente (15b A e 15c A), o da D114:** o lintel e a soleira de terra batida nas portas de lado, e os dois postes na de teto, continuam iguais;
+  - como na câmara, a faixa some na visão geral, e o alerta continua sendo o pulso na borda (D91).
+- **Alternativas:**
+  - faixa: (A) sem faixa; (C) só a faixa, sem o fio de luz (era a recomendada);
+  - espessura: (A) igual à câmara; (B) média, uns dois terços (era a recomendada);
+  - batente: tirar (15b B); (15c B) arco de porta subindo pela parede (era o recomendado); (15c C) boca alargada, o túnel abrindo em funil antes da parede.
+- **Motivo:** escolha do usuário. Com a faixa, túnel e câmara parecem cavados no mesmo solo e a parede da câmara não termina de repente na porta. A faixa fina deixa a rede leve. O batente da D114 já marca bem a porta.
+- **Risco:** o nó não tem o fio de luz, então a linha de luz dos túneis se interrompe nele. Conferir no app de exemplo se incomoda.
+- **Onde está:** `prototipo-arte/catalogo/arte.js` (v129), com `A.terraBatidaTunel` como `A.faixaTunelHook`. Os ganchos `A.semBatente` e `A.batenteHook` ficam para testes.
+
 ---
 
 ## Questões em aberto
@@ -1393,7 +1487,9 @@
 | ~~Q28~~ | ~~Arco 2 sem N3?~~ **Resolvida por D77:** o N3 entra no lançamento. | — |
 | Q29 | Steam: Electron ou Tauri para a versão de PC (D83) | Porta para a Steam |
 | Q30 | China: quando traduzir para chinês simplificado e quem traduz (D84) | Porta para a Steam |
-| Q31 | Som e música: estilo, quantidade, e se é feito, licenciado ou encomendado. Nenhum documento cobria áudio | Durante o protótipo 2 (antes do M3, `05` §8) |
+| ~~Q31~~ | ~~Som e música?~~ **Resolvida por D121** (orgânico acústico em camadas, efeitos mistos, ambiente por lugar e estação, tudo no código). | — |
 | Q32 | Modelo exato do celular de entrada (D80, D85) | Antes do portão de desempenho |
 | Q33 | Métricas anônimas no lançamento: sim ou não, e qual ferramenta (D86) | Antes do teste fechado |
 | ~~Q34~~ | ~~Visual das estruturas e câmaras?~~ **Resolvida por D101 a D105** (cúpula de chão plano, conteúdo real, tinta sem borda, indicadores na cena, tamanho por tipo). | — |
+| ~~Q35~~ | ~~Rever o visual das estruturas e câmaras?~~ **Resolvida por D124** (arco cheio, terra batida, brilho do trabalho, ofício mais presente). | — |
+| ~~Q36~~ | ~~Refazer a barra de cima da tela de jogo?~~ **Resolvida por D123** (ilhas flutuantes, linha das estações com o inimigo de cada onda, fungo em destaque, rainha só como alerta). | — |

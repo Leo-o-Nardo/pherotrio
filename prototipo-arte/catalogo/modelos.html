@@ -3,145 +3,216 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Pherotrio · Modelos da rodada 11</title>
+<title>Pherotrio · Modelos da rodada 15c</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  :root { --solo:#15110E; --painel:#211B17; --borda:#5A4B3F; --txt:#EFE7DC; --txt2:#B3A697; --acu:#F5B841; }
+  :root { --solo:#15110E; --painel:#211B17; --borda:#5A4B3F; --txt:#EFE7DC; --txt2:#B3A697; --acu:#F5B841; --veg:#7FD16B; --perigo:#FF4F5E; }
   * { box-sizing: border-box; }
   html { scroll-padding-top: 90px; }
   body { margin: 0; background: var(--solo); color: var(--txt); font: 14px/1.45 'Atkinson Hyperlegible', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-  header { padding: 20px 16px 8px; max-width: 1100px; margin: 0 auto; }
+  header { padding: 20px 16px 8px; max-width: 1180px; margin: 0 auto; }
   h1 { font-size: 20px; margin: 0 0 4px; }
-  header p { margin: 0; color: var(--txt2); }
+  header p { margin: 0; color: var(--txt2); max-width: 72ch; }
   header a { color: var(--acu); }
   #sel { position: sticky; top: 0; z-index: 5; background: rgba(21,17,14,.95); backdrop-filter: blur(6px); border-bottom: 1px solid #2A221C; }
-  #sel .in { max-width: 1100px; margin: 0 auto; padding: 8px 16px; display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 6px 14px; }
-  .grp { flex: none; display: flex; align-items: center; gap: 4px; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
-  .grp b { font-size: 11px; color: var(--txt2); margin-right: 2px; flex: none; }
-  .chip { flex: none; cursor: pointer; font: 700 12px inherit; font-family: inherit; color: var(--txt2); padding: 5px 9px; border-radius: 999px; background: var(--painel); border: 1px solid #2E2620; }
+  #sel .in { max-width: 1180px; margin: 0 auto; padding: 8px 16px; display: flex; overflow-x: auto; scrollbar-width: none; gap: 6px 14px; }
+  .grp { flex: none; display: flex; align-items: center; gap: 4px; }
+  .grp b { font-size: 11px; color: var(--txt2); margin-right: 2px; }
+  .chip { flex: none; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 12px; color: var(--txt2); padding: 5px 9px; border-radius: 999px; background: var(--painel); border: 1px solid #2E2620; }
   .chip.on { color: #1B1510; background: var(--txt); border-color: var(--txt); }
-  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
-  section { padding-top: 26px; }
+  main { max-width: 1180px; margin: 0 auto; padding: 0 16px 80px; }
+  section { padding-top: 28px; }
   h2 { font-size: 20px; margin: 0 0 2px; }
   .lead { color: var(--txt2); margin: 0 0 12px; max-width: 72ch; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; align-items: start; }
   .card { background: var(--painel); border: 1px solid #2E2620; border-radius: 14px; padding: 12px; min-width: 0; }
   .card.on { border-color: var(--txt); box-shadow: 0 0 0 1px var(--txt) inset; }
   .card .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
   h3 { font-size: 16px; margin: 0; }
-  .sub { color: var(--txt2); font-size: 12px; margin: 2px 0 8px; }
+  .sub { color: var(--txt2); font-size: 13px; margin: 2px 0 10px; }
   .tag { font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 6px; white-space: nowrap; color: #1B1510; background: var(--acu); }
   .pick { margin-top: 10px; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 13px; width: 100%; min-height: 40px; border-radius: 10px; border: 0; background: #3A3028; color: var(--txt); }
   .card.on .pick { background: var(--txt); color: #1B1510; }
-  .tiles { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: flex-end; }
-  .tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; max-width: 100%; overflow-x: auto; }
-  .tile canvas { display: block; border-radius: 6px; cursor: zoom-in; }
-  .tile span { font-size: 11px; color: var(--txt2); font-weight: 700; }
-  .tile span b { color: var(--txt); }
-  #zoom { position: fixed; inset: 0; z-index: 9; background: rgba(10,8,6,.88); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 10px; padding: 16px; }
-  #zoom.on { display: flex; }
-  #zoom canvas { border-radius: 10px; cursor: zoom-out; }
-  #zoom p { margin: 0; color: var(--txt2); font-weight: 700; font-size: 12px; text-align: center; }
+  .cap { font-size: 12px; color: var(--txt2); font-weight: 700; margin: 6px 0 0; }
+  .demo { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .demo > div { flex: 1 1 300px; max-width: 360px; min-width: 0; }
+  .probs { margin: 10px 0 0; padding: 0 0 0 18px; color: var(--txt2); max-width: 72ch; }
+  .probs li { margin: 3px 0; }
+  .probs b { color: var(--txt); }
+  .quadro { width: 100%; max-width: 360px; border-radius: 14px; overflow: hidden; border: 1px solid #2E2620; background: #15110E; }
+  .quadro canvas { display: block; width: 100%; height: auto; }
+  #resumo { margin-top: 26px; background: var(--painel); border: 1px solid #2E2620; border-radius: 14px; padding: 14px; }
+  #resumo p { margin: 4px 0; }
+  @media (max-width: 420px) { main { padding: 0 8px 80px; } .card { padding: 10px 8px; } }
 </style>
-<script src="arte.js?v=124"></script>
-<script src="candidatos.js?v=11e"></script>
+<script src="arte.js?v=129"></script>
 </head>
 <body>
 <header>
-  <h1>Modelos da rodada 11</h1>
-  <p>Formigas e aranha de perfil, "de pé" (D119 fechada). Quatro perguntas: onde usar o perfil, o estilo do corpo, o jeito de andar e a aranha. É um teste: se não ficar bom dentro das câmaras, o perfil fica só na superfície. A barra de cima troca a opção de todas as cenas ao mesmo tempo. Toque em qualquer desenho para ampliar. <a href="index.html">Voltar ao catálogo</a>.</p>
+  <h1>Rodada 15c · Parede do túnel e batente (D125)</h1>
+  <p>Na rodada 15b você escolheu a faixa B, igual à da câmara, com o fio de luz, e manter o batente. Decidida (D125): a faixa fina e o lintel com a soleira da D114. As outras opções ficam para comparar. Cada modelo é a sua escolha atual com só aquela parte trocada. <a href="index.html">Voltar ao catálogo</a>.</p>
 </header>
 <div id="sel"><div class="in" id="selIn"></div></div>
 <main id="main"></main>
-<div id="zoom"><canvas></canvas><p></p></div>
 <script>
-const A = window.Arte, C = A.C, K = window.Cand;
-const DPR = A.DPR = Math.min(window.devicePixelRatio || 1, 3);
-const REC = { onde: 'B', estilo: 'B', andar: 'B', aranha: 'A' };
-const SEL = { onde: 'B', estilo: 'C', andar: 'B', aranha: 'A' }; // respostas do usuário (2 ainda entre B, C e D)
-const ROT = { onde: 'Onde', estilo: 'Estilo', andar: 'Andar', aranha: 'Aranha' };
-const main = document.getElementById('main'), views = [], pickers = [];
-const io = new IntersectionObserver(es => es.forEach(e => { e.target._v.vis = e.isIntersecting; }), { rootMargin: '120px' });
+const A = window.Arte, C = A.C;
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
+const REC = { esp: 'B', batente: 'B' };
+const SEL = { esp: 'C', batente: 'A' }; // escolha do usuário (D125)
+const OP = {
+  esp: {
+    A: { nome: 'A · Igual à câmara (15b)', desc: 'A faixa escura com a mesma largura da parede da câmara.', p: 'Túnel e câmara com a mesma parede', c: 'A rede inteira fica grossa e escura' },
+    B: { nome: 'B · Média', desc: 'A faixa com uns dois terços da largura.', p: 'Ainda lê como a mesma terra da câmara, com a rede mais leve', c: 'Um degrau pequeno na porta, onde encontra a parede da câmara' },
+    C: { nome: 'C · Fina', desc: 'Só um contorno de terra batida, perto da metade.', p: 'A rede fica leve e o túnel mais fino', c: 'Quase vira um contorno; o degrau na porta aparece mais' },
+  },
+  batente: {
+    A: { nome: 'A · Lintel e soleira (D114)', desc: 'Uma régua clara de terra batida sobre o túnel e outra no chão da porta.', p: 'Já conhecido', c: 'A régua reta não combina com o arco da câmara e some na faixa escura' },
+    B: { nome: 'B · Arco de porta', desc: 'Um arco claro de terra batida abraça a boca do túnel na parede, como a moldura de uma porta. A soleira continua.', p: 'Combina com o arco da câmara e marca bem a entrada', c: 'Mais uma curva no encontro' },
+    C: { nome: 'C · Boca alargada', desc: 'O túnel se abre um pouco antes da parede, como um funil, e a faixa acompanha. Sem peça a mais.', p: 'Orgânico, parece cavado por formigas', c: 'A porta fica marcada só pela forma' },
+  },
+};
+const ROT = { esp: 'Espessura', batente: 'Batente' };
 function el(tag, cls, html, parent) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; if (parent) parent.appendChild(e); return e; }
-function escolher(dim, val) { SEL[dim] = val; atualizar(); }
-function atualizar() {
-  document.querySelectorAll('#selIn .chip').forEach(c => c.classList.toggle('on', SEL[c.dataset.d] === c.dataset.v));
-  pickers.forEach(([card, dim, val]) => card.classList.toggle('on', SEL[dim] === val));
-}
-const selIn = document.getElementById('selIn');
-Object.keys(ROT).forEach(d => { const g = el('div', 'grp', '<b>' + ROT[d] + '</b>', selIn); Object.keys(K.OPCOES[d]).forEach(v => { const c = el('button', 'chip', v, g); c.dataset.d = d; c.dataset.v = v; c.onclick = () => escolher(d, v); }); });
 
-function section(id, titulo, lead) { const s = el('section', null, null, main); s.id = id; el('h2', null, titulo, s); if (lead) el('p', 'lead', lead, s); return s; }
-function card(parent, o) {
-  const c = el('div', 'card', null, parent);
-  const hd = el('div', 'hd', null, c); el('h3', null, o.titulo, hd); if (o.rec) el('span', 'tag', '⭐ recomendado', hd);
-  if (o.sub) el('div', 'sub', o.sub, c);
-  c.body = el('div', 'tiles', null, c);
-  if (o.dim) { const b = el('button', 'pick', 'Escolher este', c); b.onclick = () => escolher(o.dim, o.val); pickers.push([c, o.dim, o.val]); }
-  return c;
+// ---------- faixa de terra batida no túnel (B da 15b), em três espessuras ----------
+function caminho(ctx, p) { ctx.beginPath(); p.pts.forEach((q, i) => i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y)); }
+function faixaB(h1, h2) {
+  return (ctx, p, w, z, st, fase, s0, s1) => {
+    if (A.LOD(z) === 'geral') return; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (fase === 'antes') { caminho(ctx, p); ctx.strokeStyle = 'rgba(70,52,38,0.45)'; ctx.lineWidth = w + h1; ctx.stroke(); caminho(ctx, p); ctx.strokeStyle = 'rgba(52,39,29,0.6)'; ctx.lineWidth = w + h2; ctx.stroke(); return; }
+    if (st === 'alagado') return;
+    if (fase === 'porta') { const pts = []; for (let t = s0; t <= s1; t += 0.03) pts.push(A.at(p, t)); p = { pts }; ctx.lineCap = 'butt'; }
+    caminho(ctx, p); ctx.strokeStyle = 'rgba(255,232,200,0.13)'; ctx.lineWidth = w; ctx.stroke();
+    caminho(ctx, p); ctx.strokeStyle = C.base; ctx.lineWidth = Math.max(w - 0.1, w * 0.55); ctx.stroke();
+  };
 }
-function tile(parent, label, box, z, draw, bg, ov) {
-  const t = el('div', 'tile', null, parent), cv = el('canvas', null, null, t);
-  const [x0, y0, w, h] = box, W = Math.round(w * z), H = Math.round(h * z);
-  cv.width = W * DPR; cv.height = H * DPR; cv.style.width = W + 'px'; cv.style.height = H + 'px';
-  if (label) el('span', null, label, t);
-  const v = { cv, ctx: cv.getContext('2d'), x0, y0, w, h, z, draw, bg, ov: ov || {}, vis: false, label };
-  cv._v = v; views.push(v); io.observe(cv); cv.onclick = () => abrirZoom(v); return v;
+const ESP = { A: faixaB(0.26, 0.12), B: faixaB(0.17, 0.08), C: faixaB(0.11, 0.05) };
+const LARGURA = { A: 0.26, B: 0.17, C: 0.11 };
+
+// ---------- forma do batente ----------
+const TOPO = '#8E765C', BAT = A.mix(C.base, TOPO, 0.42), LUZ = A.mix(TOPO, '#FFFFFF', 0.18);
+// lado do chão nas portas de lado (vira soleira)
+const ehChao = (g, k) => g.porta !== 'T' && (g.porta === 'R' ? -k : k) > 0;
+function soleira(ctx, g, z) {
+  if (g.porta === 'T') return; const sd = g.porta === 'R' ? 1 : -1, wx = sd > 0 ? g.x1 : g.x0;
+  ctx.fillStyle = BAT; ctx.beginPath(); ctx.roundRect(Math.min(wx - sd * 0.24, wx + sd * 0.12), g.yb - 0.02, 0.36, Math.max(0.06, 2 / z), 0.02); ctx.fill();
+}
+const BATENTE = {
+  A: null,
+  // arco claro em volta da boca do túnel, com o centro dentro da câmara: lê como a moldura de uma porta
+  B(ctx, p, g, sw, w, z) {
+    if (A.LOD(z) === 'geral') return;
+    const q = A.at(p, sw), tx = Math.cos(q.ang), ty = Math.sin(q.ang), nx = -ty, ny = tx;
+    const e = Math.max(0.06, 2 / z), R = w / 2 + LARGURA[SEL_ATUAL.esp] / 2 + 0.06;
+    const t0 = Math.asin(Math.min(0.99, (w / 2 + e * 0.5) / R)), t1 = Math.min(1.5, t0 + 0.8), d = R * Math.cos(t0);
+    const cx = q.x + tx * d, cy = q.y + ty * d; // centro para dentro da câmara: o arco nasce na borda do túnel e sobe pela parede
+    ctx.lineCap = 'round';
+    [-1, 1].forEach(k => {
+      if (ehChao(g, k)) return;
+      const arco = (r, cor, lw) => { ctx.strokeStyle = cor; ctx.lineWidth = lw; ctx.beginPath(); for (let i = 0; i <= 14; i++) { const th = t0 + (t1 - t0) * i / 14, u = -Math.cos(th) * r, v = Math.sin(th) * r * k; const x = cx + tx * u + nx * v, y = cy + ty * u + ny * v; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.stroke(); };
+      arco(R, 'rgba(40,30,22,0.35)', e + 0.03); arco(R, BAT, e); arco(R - e * 0.25, LUZ, Math.max(1 / z, e * 0.25));
+    });
+    soleira(ctx, g, z);
+  },
+  // o túnel se abre como um funil antes da parede; a faixa acompanha
+  C(ctx, p, g, sw, w, z) {
+    if (A.LOD(z) === 'geral') return;
+    const L = 0.55, ab = Math.max(0.08, w * 0.35), h = LARGURA[SEL_ATUAL.esp] / 2, s0 = Math.max(0, sw - L);
+    const lados = [-1, 1].filter(k => !ehChao(g, k));
+    // a faixa do túnel é translúcida; para não somar duas vezes, pega a cor do solo ao lado e pinta opaco
+    const solo = (k) => { const q = A.at(p, s0), o = w / 2 + ab + h + 0.2, x = q.x - Math.sin(q.ang) * k * o, y = q.y + Math.cos(q.ang) * k * o, m = ctx.getTransform(), d = ctx.getImageData(Math.round(m.a * x + m.c * y + m.e), Math.round(m.b * x + m.d * y + m.f), 1, 1).data; return [d[0], d[1], d[2]]; };
+    const sobre = (b, c, a) => b.map((v, i) => Math.round(v * (1 - a) + c[i] * a)), rgb = c => 'rgb(' + c.join(',') + ')';
+    lados.forEach(k => {
+      const borda = (extra) => { const pts = []; for (let s = s0; s <= sw + 1e-6; s += 0.025) { const q = A.at(p, Math.min(s, sw)), u = (s - s0) / (sw - s0 || 1), nx = -Math.sin(q.ang) * k, ny = Math.cos(q.ang) * k, o = w / 2 + ab * u * u + extra; pts.push([q.x + nx * o, q.y + ny * o]); } return pts; };
+      const leque = (extra, cor) => { const out = borda(extra), inn = borda(-w / 2 + 0.001 - (extra > 0 ? 0 : 0)); ctx.fillStyle = cor; ctx.beginPath(); out.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); for (let i = inn.length - 1; i >= 0; i--) ctx.lineTo(inn[i][0], inn[i][1]); ctx.closePath(); ctx.fill(); };
+      const c1 = sobre(solo(k), [70, 52, 38], 0.45), c2 = sobre(c1, [52, 39, 29], 0.6);
+      leque(h, rgb(c1)); leque(h * 0.45, rgb(c2));
+      leque(0, C.base);
+      const luz = borda(-0.025); ctx.strokeStyle = 'rgba(255,232,200,0.13)'; ctx.lineWidth = 0.05; ctx.lineCap = 'butt'; ctx.beginPath(); luz.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke();
+    });
+  },
+};
+let SEL_ATUAL = SEL;
+const PADRAO = { faixa: A.faixaTunelHook || null, bat: A.batenteHook || null }; // D125: faixa fina, batente da D114
+function aplica(cfg) { SEL_ATUAL = cfg; A.faixaTunelHook = ESP[cfg.esp]; A.batenteHook = BATENTE[cfg.batente]; }
+
+// ---------- cenas ----------
+const ES = id => A.ESTRUTURAS.find(e => e.id === id);
+const DIR = id => Object.assign({}, ES(id), { porta: 'R' });
+const views = [];
+const io = new IntersectionObserver(es => es.forEach(e => { e.target._v.vis = e.isIntersecting; }), { rootMargin: '120px' });
+function quadro(parent, cfgF, H, z, cena) {
+  const q = el('div', 'quadro', null, parent), cv = el('canvas', null, null, q);
+  cv.width = 360 * DPR; cv.height = H * DPR;
+  const v = { cv, ctx: cv.getContext('2d'), z, w: 360 / z, h: H / z, cena, cfgF, vis: false }; cv._v = v; views.push(v); io.observe(cv);
+  return q;
+}
+function cenaMedia(ctx, z, T, tags) {
+  A.solo(ctx, -1, -1, 18, 12, z, 3, 40);
+  const NO = { x: 4.7, y: 2.75 };
+  A.tunel(ctx, A.curve({ x: -0.6, y: 2.9 }, NO, 0.1), 2, 'livre', z, { T, formigas: 1.2, dir: 'duplo', tags });
+  A.tunel(ctx, A.curve(NO, { x: 11.6, y: 3.4 }, -0.1), 1, 'quase', z, { T, formigas: 1, dir: 'ida', tags });
+  A.ligacao(ctx, DIR('jardim'), 0.4, 0.55, NO, 2, z, { T, tags, seed: 3, formigas: 2, dir: 'duplo' });
+  A.ligacao(ctx, Object.assign({}, ES('posto'), { porta: 'L' }), 6.3, 1.0, NO, 1, z, { T, tags, seed: 6, est: 'pronta' });
+  A.ligacao(ctx, DIR('real'), 0.6, 3.5, NO, 2, z, { T, tags, seed: 4, formigas: 1, dir: 'ida' });
+  A.ligacao(ctx, Object.assign({}, ES('olaria'), { porta: 'L' }), 6.4, 4.6, NO, 1, z, { T, tags, seed: 8, est: 'falta_ing' });
+  A.no(ctx, NO.x, NO.y, 2, z);
+}
+function cenaPerto(ctx, z, T, tags) {
+  A.solo(ctx, -1, -1, 9, 10, z, 5, 40);
+  const NO = { x: 4.85, y: 1.9 };
+  A.tunel(ctx, A.curve(NO, { x: 6.2, y: 0.2 }, 0.1), 1, 'livre', z, { T, formigas: 1, dir: 'ida', tags });
+  A.ligacao(ctx, DIR('jardim'), 0.3, 0.35, NO, 2, z, { T, tags, seed: 3, formigas: 2, dir: 'duplo' });
+  A.ligacao(ctx, DIR('bercario'), 0.3, 2.35, NO, 2, z, { T, tags, seed: 5, formigas: 1, dir: 'duplo' });
+  A.no(ctx, NO.x, NO.y, 2, z);
 }
 let T = 0;
 function render(v) {
-  const S = Object.assign({}, SEL, v.ov), ctx = v.ctx; A.TEMPO = T;
-  const k = DPR * v.z; ctx.setTransform(k, 0, 0, k, -v.x0 * k, -v.y0 * k); ctx.clearRect(v.x0, v.y0, v.w, v.h);
-  A.solo(ctx, v.x0 - 1, v.y0 - 1, v.w + 2, v.h + 2, v.z, 3);
-  const tags = []; v.draw(ctx, v.z, T, tags, S); if (tags.length) A.tagsDraw(ctx, tags, v.z);
+  const ctx = v.ctx, k = DPR * v.z; A.TEMPO = T; aplica(v.cfgF());
+  ctx.setTransform(k, 0, 0, k, 0, 0); ctx.clearRect(0, 0, v.w, v.h);
+  const tags = []; v.cena(ctx, v.z, T, tags); if (tags.length) A.tagsDraw(ctx, tags, v.z);
+  A.faixaTunelHook = PADRAO.faixa; A.batenteHook = PADRAO.bat;
 }
 let last = 0;
-function loop(now) { requestAnimationFrame(loop); if (now - last < 33) return; last = now; T = now / 1000; for (const v of views) if (v.vis) render(v); }
-const zm = document.getElementById('zoom'), zc = zm.querySelector('canvas'); let zv = null;
-function abrirZoom(v) {
-  const z = Math.min(160, (innerWidth - 32) / v.w, (innerHeight - 120) / v.h), W = Math.round(v.w * z), H = Math.round(v.h * z);
-  zc.width = W * DPR; zc.height = H * DPR; zc.style.width = W + 'px'; zc.style.height = H + 'px';
-  if (zv) views.splice(views.indexOf(zv), 1);
-  zv = { ...v, cv: zc, ctx: zc.getContext('2d'), z, vis: true }; views.push(zv); render(zv);
-  zm.querySelector('p').textContent = 'ampliado a ' + Math.round(z) + ' dp por célula'; zm.classList.add('on');
-}
-zm.onclick = () => { zm.classList.remove('on'); if (zv) { views.splice(views.indexOf(zv), 1); zv = null; } };
+function loop(now) { requestAnimationFrame(loop); if (now - last < 33) return; last = now; T = now / 1000; for (const v of views) if (v.vis && v.cv.isConnected) render(v); }
 
-// ---------------- casos ----------------
-const B1 = [0.0, -2.05, 4.6, 2.55], B2 = [0.2, -1.5, 6.5, 2.05], B3 = [0.2, -3.3, 4.4, 3.9], BESC = [-0.8, 0.2, 5.0, 0.9];
-const caixa = id => { const sp = A.ESTRUTURAS.find(e => e.id === id), [w, h] = A.DIM[sp.tam]; return [-1.0, -0.85, w + 1.3, h + 0.95]; };
-const F = (fn, forca) => K.cena(fn, forca);
-
-// ---------------- perguntas ----------------
-function pergunta(id, n, titulo, lead, dim, tiles) {
-  const s = section(id, n + '. ' + titulo, lead), g = el('div', 'grid', null, s);
-  Object.entries(K.OPCOES[dim]).forEach(([k, m]) => { const c = card(g, { titulo: m.nome, sub: m.desc, dim, val: k, rec: REC[dim] === k }); tiles(c.body, { [dim]: k }); });
+// ---------- página ----------
+const main = document.getElementById('main'), pickers = [];
+const selIn = document.getElementById('selIn');
+Object.keys(ROT).forEach(d => { const g = el('div', 'grp', '<b>' + ROT[d] + '</b>', selIn); Object.keys(OP[d]).forEach(v => { const c = el('button', 'chip', v, g); c.dataset.d = d; c.dataset.v = v; c.onclick = () => escolher(d, v); }); });
+function secao(id, titulo, lead) { const s = el('section', null, null, main); s.id = id; el('h2', null, titulo, s); el('p', 'lead', lead, s); return s; }
+const secs = {
+  esp: secao('esp', '1. Espessura da faixa no túnel', 'A faixa B da 15b, com o fio de luz. A parede da câmara não muda. De perto (64 dp por célula).'),
+  batente: secao('batente', '2. Forma do batente', 'O que marca onde o túnel entra na câmara (D114).'),
+};
+const grids = {}; Object.keys(secs).forEach(d => grids[d] = el('div', 'grid', null, secs[d]));
+const s3 = secao('todos', '3. A escolha de perto e no zoom médio', 'Muda junto com a barra de cima. No zoom médio, o túnel da direita está quase cheio: o alerta continua sendo o pulso na borda.');
+const demo3 = el('div', 'demo', null, s3);
+const res = el('div', null, null, main); res.id = 'resumo';
+function montaTudo() {
+  views.length = 0; pickers.length = 0;
+  Object.keys(OP).forEach(d => {
+    grids[d].innerHTML = '';
+    Object.keys(OP[d]).forEach(k => {
+      const o = OP[d][k], c = el('div', 'card', null, grids[d]), hd = el('div', 'hd', null, c); el('h3', null, o.nome, hd); if (REC[d] === k) el('span', 'tag', '⭐ recomendado', hd);
+      el('div', 'sub', o.desc + '<br><span style="color:var(--veg)">+</span> ' + o.p + '<br><span style="color:var(--perigo)">−</span> ' + o.c, c);
+      quadro(c, () => ({ ...SEL, [d]: k }), 300, 64, cenaPerto);
+      const b = el('button', 'pick', 'Escolher ' + k, c); b.onclick = () => escolher(d, k); pickers.push([c, d, k]);
+    });
+  });
+  demo3.innerHTML = '';
+  const d1 = el('div', null, null, demo3); quadro(d1, () => SEL, 300, 64, cenaPerto); el('p', 'cap', 'De perto · espessura ' + SEL.esp + ' · batente ' + SEL.batente, d1);
+  const d2 = el('div', null, null, demo3); quadro(d2, () => SEL, 260, 30, cenaMedia); el('p', 'cap', 'Zoom médio (30 dp por célula), com o nó e um túnel quase cheio', d2);
 }
-pergunta('onde', 1, 'Onde usar o perfil', 'O formigueiro é um corte de lado. Quem anda num chão pode aparecer de perfil, de pé, com as pernas tocando a terra. Na superfície a troca é na boca do cortadouro; nas câmaras, na porta.', 'onde', (b, ov) => {
-  tile(b, 'corte na planta · 56', B1, 56, F(K.corte), null, ov);
-  tile(b, 'aranha na superfície · 48', B2, 48, F(K.ataque), null, ov);
-  tile(b, 'voo nupcial · 48', B3, 48, F(K.voo), null, ov);
-  tile(b, 'jardim com carregadoras · 56', caixa('jardim'), 56, F(K.jardim), null, ov);
-  tile(b, 'câmara real · 56', caixa('real'), 56, F(K.real), null, ov);
-  tile(b, 'depósito (porta no teto) · 56', caixa('deposito'), 56, F(K.deposito), null, ov);
-  tile(b, 'posto em combate · 56', caixa('posto'), 56, F(K.combate), null, ov);
-  tile(b, 'escavação de túnel · 56', BESC, 56, F(K.escavacao), null, ov);
-  tile(b, 'câmara real · médio 24', caixa('real'), 24, F(K.real), null, ov);
-});
-pergunta('estilo', 2, 'Estilo do corpo', 'As castas mantêm o que as distingue vistas de cima (cabeça grande do soldado, pá da cavadora, gota da atiradora, anel da curandeira). Se a pergunta 1 estiver em "Atual" ou "A", aqui o perfil liga também nas câmaras para comparar.', 'estilo', (b, ov) => {
-  tile(b, 'castas · 80', [0, -0.55, 3.9, 1.85], 80, F(K.castas, true), null, ov);
-  tile(b, 'inimigos · 80', [0, -0.55, 3.9, 0.66], 80, F(K.inimigos, true), null, ov);
-  tile(b, 'jardim · 56', caixa('jardim'), 56, F(K.jardim, true), null, ov);
-});
-pergunta('andar', 3, 'Jeito de andar', 'O tripé da D113, agora visto de lado: três pés no chão, três no ar. Quem trabalha para as pernas e balança a cabeça.', 'andar', (b, ov) => {
-  tile(b, 'de perto · 108', [-0.1, -0.45, 2.9, 0.55], 108, F(K.deperto, true), null, ov);
-  tile(b, 'corte na planta · 56', B1, 56, F(K.corte, true), null, ov);
-});
-pergunta('aranha', 4, 'Aranha', 'A aranha anda pela superfície e para as pernas quando morde (D118). As quelíceras abrem na mordida.', 'aranha', (b, ov) => {
-  tile(b, 'andando · 80', [0, -0.9, 3.9, 1.05], 80, F(K.aranhaAnda, true), null, ov);
-  tile(b, 'ataque por cima · 48', B2, 48, F(K.ataque, true), null, ov);
-});
+let ultimo = '';
+function escolher(d, v) { SEL[d] = v; atualizar(); }
+function atualizar() {
+  const chave = JSON.stringify(SEL); if (chave !== ultimo) { ultimo = chave; montaTudo(); }
+  document.querySelectorAll('#selIn .chip').forEach(c => c.classList.toggle('on', SEL[c.dataset.d] === c.dataset.v));
+  pickers.forEach(([card, d, v]) => card.classList.toggle('on', SEL[d] === v));
+  res.innerHTML = '<h3>Sua escolha</h3>' + Object.keys(OP).map((d, i) => '<p>' + (i + 1) + '. ' + ROT[d] + ': ' + OP[d][SEL[d]].nome + (REC[d] === SEL[d] ? ' ⭐' : '') + '</p>').join('');
+}
 atualizar();
 requestAnimationFrame(loop);
 </script>

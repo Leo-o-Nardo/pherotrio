@@ -151,6 +151,7 @@ Teste feito em 2026-11-25 com simulação de Machado et al. (2009), severidade m
   - **fora da visão (D98):** só um "?" discreto.
 - **Túnel:**
   - **Interior:** cor Escavado.
+  - **Terra batida (D125):** como a câmara, o túnel tem uma faixa de terra mais escura em volta, fina (uns 40% da parede da câmara), e um fio de luz nas bordas de dentro, que segue até a parede da câmara. Some na visão geral. O nó não tem o fio de luz.
   - **Contorno de estado:** linha central na cor de ocupação (D53), com 30% da largura.
   - **Largura pelo nível (D99):** proporcional à célula. No zoom inicial de 24 dp: 6, 8, 10 e 12 dp do nível 1 ao 4. Na tela, nunca fica mais fino que 2 dp (perto e médio), 2,5 dp (longe) ou 3 dp (visão geral).
 - **Setas de sentido:** chevrons de Texto 2 a cada 2 células. Mão dupla mostra ⇄ no meio do segmento.
@@ -158,21 +159,25 @@ Teste feito em 2026-11-25 com simulação de Machado et al. (2009), severidade m
 - **Nó:** círculo Escavado com diâmetro de 1,2 vez a largura do túnel mais largo que chega nele. Com toque longo, o nó mostra os túneis ligados.
 - **Obra planejada:** contorno tracejado em Texto 2 (traço de 5 dp, vão de 8 dp; D109), com o custo em pt ao lado. O interior fica vazio até a escavação começar.
 
-### 3.3 Câmaras e estruturas (D101 a D105)
+### 3.3 Câmaras e estruturas (D101 a D105, D124)
 
 - **Tamanho (D105):** o desenho ocupa exatamente as células da estrutura.
   - pequena, 2 × 1: extratoras e defesa ou ataque com lugar fixo;
   - média, 3 × 1: as 11 de produção e a lixeira;
   - grande, 3 × 2: câmara real, berçário, depósito e câmara nupcial.
-- **Formato (D101):** cúpula com teto arredondado e chão reto, sempre na horizontal.
+- **Formato (D101, D124):** arco cheio, sem parede reta: um arco só, de ombros cheios, que desce até o chão reto com os cantos arredondados. Sempre na horizontal.
   - O túnel entra pela lateral ou pelo teto, nunca pelo chão.
-  - **Encaixe (D114):** o túnel chega reto na porta, no nível do chão nas portas de lado e de cima nas de teto. A cor do túnel entra na câmara em degradê, e um batente de terra batida marca a porta: lintel e soleira nas portas de lado, dois postes na de teto. As formigas passam por cima da abertura.
+  - **Encaixe (D114):** o túnel chega reto na porta, no nível do chão nas portas de lado e de cima nas de teto. A cor do túnel entra na câmara em degradê, e um batente de terra batida marca a porta: lintel e soleira nas portas de lado, dois postes na de teto (confirmado na D125). As formigas passam por cima da abertura.
   - O teto tem uma leve variação própria por câmara, de no máximo 10% da altura.
   - Câmaras de base são mais altas; as de defesa, mais baixas.
 - **Cor (D103):**
   - interior na cor dos túneis (`#43362B`), com 10 a 15% da cor da família do produto. Defesa usa a cor Defesa, ataque usa a cor Ataque, e a base fica sem tinta;
   - combinados (N2 e N3) com a tinta em metades, como o recurso (D48);
-  - **sem borda.** A borda só aparece em alerta, com o pulso dos túneis (D91): amarelo suave para atenção e vermelho suave para ataque.
+  - **sem borda de cor.** A borda só ganha cor em alerta, com o pulso dos túneis (D91): amarelo suave para atenção e vermelho suave para ataque.
+- **Parede e luz (D124):**
+  - **terra batida:** em volta da câmara há uma faixa de terra mais escura, como terra socada, e um fio de luz na borda de dentro, mais forte no teto. O chão é um piso de terra batida;
+  - **brilho do trabalho:** o teto fica no escuro, e uma luz quente sai do chão, tingida pela família do produto (neutra na base). Pausada, a câmara fica sem luz;
+  - os túneis têm a mesma terra batida, mais fina (D125, §3.2).
 - **Conteúdo (D102):**
   - **produção:** ingredientes empilhados no chão do lado de onde chegam, cuidadoras trabalhando no meio e produto pronto no outro canto. Um ícone pequeno do produto aparece no teto só quando a câmara está vazia;
   - **base:** a rainha e os ovos na câmara real, as larvas no berçário, pilhas por família no depósito, as aladas na câmara nupcial e o monte de refugo na lixeira;
@@ -183,7 +188,7 @@ Teste feito em 2026-11-25 com simulação de Machado et al. (2009), severidade m
   - fica dentro do anel da fonte (D20);
   - a fonte é um círculo tracejado na cor da família;
   - o anel mostra a reserva restante como arco: um bolsão de raízes com 300 de 600 de seiva mostra meio arco.
-- **Nível 2:** o chão ganha uma faixa mais clara de piso reforçado (proposta, D103).
+- **Nível 2:** o piso de terra batida fica mais claro (D103, D124).
 
 **Estados da estrutura (D104, sempre forma + cor):**
 
@@ -197,7 +202,7 @@ Teste feito em 2026-11-25 com simulação de Machado et al. (2009), severidade m
 | Sob ataque | Pulso vermelho na borda e barra de vida acima da câmara |
 
 - **Números** (estoque, vagas, tempo) só no zoom perto. O resto fica no painel, ao tocar na câmara.
-- **Ofício no fundo (D110):** cada câmara tem cenário do próprio trabalho atrás do conteúdo, em tons apagados: fungo e fios no jardim, gotas na destilaria, tachos na câmara ácida, prateleiras na olaria, almofada e nichos na câmara real, estacas e escudos na defesa, flâmulas no posto de guerra, nichos no depósito.
+- **Ofício no fundo (D110):** cada câmara tem cenário do próprio trabalho atrás do conteúdo, com luz e cor suficientes para cada câmara ter cara própria (D124): fungo e fios no jardim, gotas na destilaria, tachos na câmara ácida, prateleiras na olaria, almofada e nichos na câmara real, estacas e escudos na defesa, flâmulas no posto de guerra, nichos no depósito.
 
 ### 3.4 Recursos
 
@@ -332,27 +337,27 @@ Inimigos são **vermelho de perigo, sem contorno** (D109). Cada um tem uma silhu
 
 Os wireframes são para a tela de referência de 360 × 800 dp. A largura do desenho ASCII equivale a 360 dp.
 
-### 6.1 Tela de jogo (D56)
+### 6.1 Tela de jogo (D56, D123)
 
 ```
 ┌────────────────────────────────────┐
-│ OUTONO ▕██░░░░░░░░░░░▏ 1:40 ‖ 1× 2×│ ← 56 dp: linha do ano + velocidade
-│        ▲    ▲ ▲         ★          │   ▲ = onda prevista, ★ = voo nupcial
-├────────────────────────────────────┤
-│ ● 42 +3/min  ♛ 1  ✦ 0/6  ⚑ 38      │ ← 40 dp: fungo (estoque e saldo),
-│                                    │   rainha, aladas/meta, população
-├────────────────────────────────────┤
-│  ~~ céu ~~   ψ        ψ            │
+│╭──────────────────────────────────╮│ ← ilha do tempo (40 dp), translúcida,
+││Primavera ◉ ◉        ◉ ◉ ◉ ◉      ││   sobre o céu: estação, ★ quanto falta
+││★ 5:24  ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬|▬▬▬▬▬▬▬ ★ ││   para o voo, linha das 4 estações e
+│╰──────────────────────────────────╯│   o inimigo de cada onda (◉)
+│╭────────────────────────╮ ╭──╮╭──╮ │ ← ilha da colônia: fungo grande com o
+││● 54 +14/min  ✦ 0/6 ⚑ 30│ │‖ ││1×│ │   saldo, objetivo e população;
+│╰────────────────────────╯ ╰──╯╰──╯ │   pausa e 1×/2× (40 dp)
+│ ╭───────────╮                      │ ← alerta da rainha: só quando ela é
+│ │♛ Rainha ▬ │   ~~ céu ~~   ψ      │   atacada (vermelho, pulsando)
+│ ╰───────────╯                      │
 │ ═══◯════════════════◯═════════════ │ ← superfície e cortadouros
 │    ║                ║              │
 │    ●══════[jardim]══●              │
 │    ║                ║         ◀ !  │ ← alerta fora da tela (24 dp)
 │ [real]          [berçário]         │
-│    ║                               │
-│    ●═══[depósito]                  │       MAPA
-│                                    │   (rolagem e zoom)
-│                                    │
-│                                    │
+│    ●═══[depósito]                  │       MAPA (vai até o topo;
+│                                    │   rolagem e zoom)
 ├────────────────────────────────────┤
 │ ⇅ 8   ⛏ 4   ♥ 6   ⛨ 3   ◌ 5        │ ← 48 dp: papéis (toque abre §6.5)
 ├────────────────────────────────────┤
@@ -360,12 +365,18 @@ Os wireframes são para a tela de referência de 360 × 800 dp. A largura do des
 └────────────────────────────────────┘
 ```
 
-- **Linha do ano (topo):**
-  - mostra a estação, o relógio do ano (D25) e as ondas previstas como marcas na linha, com o ícone do traço do inimigo;
+- **Barra de cima (D123):** não há faixa. O mapa vai até o topo, e por cima ficam ilhas translúcidas com cantos arredondados.
+- **Ilha do tempo:**
+  - à esquerda ficam o nome da estação, na cor dela, e quanto falta para o voo, com a ★;
+  - a linha mostra as 4 estações em cores (outono, inverno, primavera, verão), preenchidas até o cursor de agora, e a ★ do voo no fim;
+  - cada onda prevista é um disco com a silhueta do inimigo: rivais, soldados, aranha ou lacraia. A onda que chega em menos de 45 s pisca em vermelho, e as que já passaram ficam apagadas (D25);
   - tocar numa onda abre o detalhe: de onde vem, o traço e quando chega.
-- **Barra de estado:**
-  - mostra só o que decide a partida: fungo (estoque e saldo por minuto, que fica vermelho quando é negativo), rainha, aladas em relação à meta da fase (D31) e população;
+- **Ilha da colônia:**
+  - o fungo aparece grande, com o saldo por minuto, que fica vermelho quando é negativo;
+  - o objetivo da fase (aladas X/6 ou o que a fase pedir, D73) e a população ficam menores;
   - tocar abre o painel de estoques completo, com os 17 recursos e o saldo de cada um.
+- **Velocidade:** a pausa e um botão que alterna entre 1× e 2×, os dois de 40 dp.
+- **Rainha:** não ocupa lugar fixo. Quando ela é atacada, aparece logo abaixo das ilhas um alerta vermelho pulsando, com a vida dela. Tocar no alerta leva a câmera até a câmara real.
 - **Faixa de papéis:**
   - Carregar ⇅, Escavar ⛏, Cuidar ♥, Guardar ⛨ e Reserva ◌, com o número de cada um;
   - fica sempre visível, porque é o controle mais usado (D14).
@@ -390,7 +401,8 @@ Os wireframes são para a tela de referência de 360 × 800 dp. A largura do des
 ├────────────────────────────────────┤
 │ Túnel  Base  Produção  Defesa  Ataq│ ← abas por categoria
 │ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌────┐ │
-│ │ ◇● │ │ ▲● │ │ ⬡  │ │ ▼  │ │ ⬠  │ │ ← cartões de 64 dp: ícone,
+│ │ ◇● │ │ ▲● │ │ ⬡  │ │ ▼  │ │ ⬠  │ │ ← cartões de 64 dp (D122, A2): ícone
+│ │    │ │    │ │    │ │    │ │    │ │   no disco da cor da família,
 │ │20pt│ │20pt│ │20pt│ │20pt│ │ 🔒 │ │   custo, cadeado se a fase
 │ └────┘ └────┘ └────┘ └────┘ └────┘ │   não liberou
 ├────────────────────────────────────┤
@@ -399,13 +411,17 @@ Os wireframes são para a tela de referência de 360 × 800 dp. A largura do des
 ```
 
 - **Túnel:** arrastar a partir de um nó ou câmara desenha o túnel, que se alinha à grade em segmentos retos de até 3 células (02 §4.1). Soltar cria um nó novo, ou liga a um nó existente se terminar sobre ele.
-- **Estrutura:** toque no cartão, depois toque no lugar. A estrutura aparece como fantasma, verde-água se o lugar é válido e vermelho se não é.
+- **Grade (D122):** aparece só em volta do dedo, num raio de umas 3 células.
+- **Estrutura:** toque no cartão, depois toque no lugar. A estrutura aparece como fantasma:
+  - verde-água quando há rota a até 3 células: o túnel de ligação e o nó são planejados sozinhos e somados ao custo;
+  - âmbar quando não há rota perto: dá para construir, mas a obra fica desconectada até o jogador cavar a rota;
+  - vermelho quando o lugar está ocupado.
 - **Confirmar:** manda tudo o que foi planejado para a fila de obras (D36). As escavadoras seguem a ordem em que as obras foram marcadas.
 - **Pausa automática:** opção nas configurações, desligada por padrão (D36).
 
 ### 6.3 Painel de estrutura
 
-O painel sobe de baixo e ocupa no máximo 45% da tela, para o mapa continuar visível.
+Todos os painéis são uma gaveta que expande (D122): sobem curtos, com o essencial, e abrem por inteiro ao arrastar para cima ou tocar. A gaveta fica por cima do mapa, com os cantos arredondados mostrando o mapa atrás. Curta, ocupa no máximo 45% da tela, para o mapa continuar visível.
 
 ```
 ├────────────────────────────────────┤
@@ -443,6 +459,7 @@ O painel sobe de baixo e ocupa no máximo 45% da tela, para o mapa continuar vis
 ```
 ├────────────────────────────────────┤
 │ Operárias · 26                [✕]  │
+│ ▕████▒▒▒░░░░▓▓▏ divisão da colônia │ ← barra nas cores dos papéis (D122)
 │ ⇅ Carregar  8 +3 cortad. [ − ][ + ]│
 │ ⛏ Escavar   4 +1 cavad.  [ − ][ + ]│
 │ ♥ Cuidar    6            [ − ][ + ]│
@@ -452,6 +469,7 @@ O painel sobe de baixo e ocupa no máximo 45% da tela, para o mapa continuar vis
 ├────────────────────────────────────┤
 ```
 
+- **Barras (D122, B1):** no alto, a barra mostra a divisão da colônia nas cores dos papéis. Embaixo de cada linha, uma barrinha mostra a parte daquele papel.
 - Os botões + e − têm 56 × 48 dp. Segurar repete a ação a 5 por segundo, depois de 400 ms.
 - A Reserva não tem botões. Ela é o "pote" de onde os outros papéis tiram formigas.
 - A última linha mostra o diagnóstico mais urgente daquele papel. Por exemplo, para Carregar: os pedidos sem carregadora.
@@ -590,7 +608,7 @@ Fica fora do MVP (D33). Se for feito, ele precisa de uma paleta própria de fam�
 | Motor | Alvos de 48 dp ou mais; pausa a qualquer momento; obras planejadas em pausa (D36); nenhuma ação exige gesto rápido ou preciso |
 | Fotossensibilidade | Nada pisca a mais de 1 Hz; não tem tremor de tela |
 | Movimento | Opção de movimento reduzido (§5) |
-| Audição | Todo som tem sinal visual equivalente; o jogo é jogável sem som |
+| Audição | Todo som tem sinal visual equivalente; o jogo é jogável sem som. Volume separado de música e de efeitos (D121) |
 | Cognitivo | Novidades apresentadas aos poucos (D51); árvore de consulta sempre disponível em pausa; fim de fase explica a causa da derrota |
 | Leitor de tela | Fora do MVP. Os menus usam componentes com rótulo, para não fechar essa porta |
 
@@ -617,3 +635,25 @@ Fica fora do MVP (D33). Se for feito, ele precisa de uma paleta própria de fam�
 - **Q20:** teste de leitura das 17 formas de recurso. Continua aberta e vai para o protótipo.
 - **Q23 (nova):** as 11 silhuetas de casta são suficientes a 8 dp, ou é preciso um ícone flutuante? Vai para o protótipo.
 - **Q24 (nova):** qual é o celular de referência para desempenho (modelo e ano)? Fica para a etapa (e).
+
+## 15. Som e música (D121)
+
+Tudo é sintetizado no código. O rascunho de referência está em `prototipo-arte/catalogo/som.html`.
+
+- **Música:** orgânica acústica, com kalimba, marimba de madeira, chocalho e um tapete quente, em ré maior. É uma faixa em camadas que reagem ao jogo:
+
+| Momento | Camadas |
+|---|---|
+| Começo calmo | Tapete e baixo |
+| Colônia crescendo | + melodia de kalimba |
+| Colônia cheia | + ritmo: chocalho, tambor e madeira |
+| Onda e combate | Tudo vira tom menor e entra a tensão, mais forte: tambores graves em marcha, baixo pulsando, ataques graves e caixa |
+
+- **Efeitos:**
+  - o que é físico soa natural: escavar, mordida, asas do voo;
+  - o que é informação soa como nota da escala da música, presa à batida: toque, entrega, nascimento, obra pronta, lugar inválido e alertas (onda, rainha atacada);
+  - entregas só na área visível, no máximo umas 4 por segundo, e nada no zoom longe.
+- **Ambiente:** acompanha a câmera.
+  - Na superfície, o tempo da estação: chuva e pássaros na primavera, grilos e cigarra no verão, vento e folhas no outono, vento frio no inverno.
+  - No fundo, terra abafada, gotas e terrinha caindo.
+- **Configurações:** volume da música e volume dos efeitos, que inclui o ambiente, de 0 a 100%.
